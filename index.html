@@ -4233,7 +4233,9 @@ function emgSheet(){
 /* トップを画面の高さいっぱいに：収入〜貯蓄計の段の高さを、画面の残りの高さから決める */
 /* claude.ai のスマホアプリでは、上のバーの分だけページの枠（iframe）の下が画面からはみ出す。見えている高さを画面の大きさから見積もる */
 // 2026-10-25：iPhoneのスクショから枠の上端は画面の上から約118pt。タブはさらに下へ（本人の希望で2026-10-25に3回下げた。iPhoneで見て調整）
-const visH = () => matchMedia("(pointer: coarse)").matches ? Math.min(innerHeight, (screen.height || innerHeight) - 84) : innerHeight;
+/* 2026-11-21：ホーム画面アプリ（全画面）のときは、ブラウザのバーがないので画面の高さそのまま */
+const STANDALONE = navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+const visH = () => matchMedia("(pointer: coarse)").matches && !STANDALONE ? Math.min(innerHeight, (screen.height || innerHeight) - 84) : innerHeight;
 /* スマホでは下のタブを「枠の下」ではなく「見えている範囲の下」に置く */
 function placeTabs(){ const t = document.querySelector(".tabs"); if (!t || !matchMedia("(pointer: coarse)").matches) return; const top = visH() - t.offsetHeight - Math.min(16, Math.max(8, Math.round(t.getBoundingClientRect().left)));   /* 下のすき間を横のすき間と同じに */ if (top < innerHeight - t.offsetHeight - 10){ t.style.top = `${top}px`; t.style.bottom = "auto";
   // 右下の＋ボタンと、下から出るシートも、見えている範囲に合わせる

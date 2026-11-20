@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>家計予算帳</title><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="家計予算帳"><meta name="theme-color" content="#d8efe4"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.tabs { grid-template-columns: repeat(4, 1fr) !important; }
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>家計予算帳</title><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="家計予算帳"><meta name="theme-color" content="#f6f4fa"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.tabs { grid-template-columns: repeat(4, 1fr) !important; }
 .lifehead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .lifewrap { overflow: auto; overscroll-behavior: contain; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); -webkit-overflow-scrolling: touch; }
 .lifet { border-collapse: separate; border-spacing: 0; font-size: .86rem; font-variant-numeric: tabular-nums; min-width: 100%; }
@@ -615,7 +615,7 @@ div.down { text-align: center; font-weight: 700; color: var(--muted); font-size:
 .wrap { padding-top: 10px !important; padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
 .syncrow { display: flex; justify-content: flex-end; margin-bottom: -8px; }
 .syncrow:empty, .syncrow:has(#syncState:empty) { display: none; }
-.tabs { position: fixed; z-index: 9; left: 50%; transform: translateX(-50%); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); width: calc(100% - 24px); max-width: calc(40rem - 8px); box-sizing: border-box; margin: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(98, 84, 150, .18); }
+.tabs { position: fixed; z-index: 9; left: 50%; transform: translateX(-50%); bottom: max(6px, calc(env(safe-area-inset-bottom, 0px) - 14px)); width: calc(100% - 24px); max-width: calc(40rem - 8px); box-sizing: border-box; margin: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(98, 84, 150, .18); }
 .tabs button { display: grid; justify-items: center; gap: 1px; padding: 6px 0 5px; border-radius: 999px; font-size: .68rem; font-weight: 700; line-height: 1.2; color: var(--muted); background: none; }
 .tabs button svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .tabs button[aria-current="page"] { background: var(--lav); color: var(--accent); }
@@ -1228,6 +1228,14 @@ details.ht > summary::after { content: "▸"; position: absolute; right: 12px; c
 .lifet tr.lsec.in th, .lifet tr.lsec.in td { background: color-mix(in srgb, #2f8f5b 14%, var(--surface)); color: #23704a; }
 .lifet tr.lsec.out th, .lifet tr.lsec.out td { background: color-mix(in srgb, #c0503a 13%, var(--surface)); color: #a03d2a; }
 .lifet tr.rin > th.lh { box-shadow: inset 4px 0 0 #2f8f5b; } .lifet tr.rout > th.lh { box-shadow: inset 4px 0 0 #c0503a; }
+
+/* 2026-11-21：ライフの上の部分を1行に小さく。表の下（NISAの色の説明）がタブに隠れないように */
+.lifehead { flex-wrap: nowrap !important; gap: 6px !important; margin: 2px 0 !important; } .lifehead .lhelp { font-size: .74rem; white-space: nowrap; padding: 2px 0; } .lifehead .lt { font-size: .86rem !important; white-space: nowrap; } .lifehead .lt small { font-size: .66rem; } .lifehead .sbtn { padding: 3px 9px !important; font-size: .74rem !important; white-space: nowrap; }
+html.lifewide .wrap { padding-bottom: calc(78px + max(6px, env(safe-area-inset-bottom, 0px))) !important; }
+.rlist { display: grid; gap: 0; } .spri .srow.rulerow { grid-template-columns: 1.4em minmax(0, 1fr) auto auto !important; align-items: center; position: relative; touch-action: pan-y; background: var(--surface); } .rulerow.dragging { z-index: 5; background: var(--surface); box-shadow: 0 6px 18px rgba(0,0,0,.15); border-radius: 12px; }
+.rdrag { flex: 0 0 auto; align-self: center; width: 34px; height: 34px; display: grid; place-content: center; font-size: 1.1rem; color: var(--muted); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.schart { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; align-items: end; gap: 4px; height: 150px; padding: 6px 2px 0; } .schart .sb { display: grid; justify-items: center; align-content: end; gap: 2px; height: 100%; font-size: .56rem; color: var(--muted); }
+.schart .sb i { display: block; width: 100%; border-radius: 6px 6px 2px 2px; background: color-mix(in srgb, var(--accent) 55%, transparent); } .schart .sb i.neg { background: color-mix(in srgb, var(--alert, #c0392b) 55%, transparent); } .schart .sb b { font-size: .58rem; color: var(--ink); font-weight: 600; } .schart .sb.on i { background: var(--accent); }
 </style>
 
 <script>
@@ -1250,7 +1258,7 @@ details.ht > summary::after { content: "▸"; position: absolute; right: 12px; c
   const snapC = c => ({docs: Object.entries(CACHE[c] || {}).map(([id, v]) => ({id, data: () => v}))});
   const snapD = (c, id) => { const v = (CACHE[c] || {})[id]; return {exists: !!v, data: () => v}; };
   const fire = cs => subs.slice().forEach(s => { if (!cs || cs.includes(s.c)) try { s.cb(s.id == null ? snapC(s.c) : snapD(s.c, s.id)); } catch (e) { console.error(e); } });
-  const load = () => loaded = (KEY() ? run("getAll") : new Promise(() => { const g = () => keyGate(); document.body ? g() : document.addEventListener("DOMContentLoaded", g); })).then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; });
+  const load = () => loaded = (KEY() || inGAS ? run("getAll") : new Promise(() => { const g = () => keyGate(); document.body ? g() : document.addEventListener("DOMContentLoaded", g); })).then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; });
   load();
   // 相手のスマホで記録した分：1分ごと（と、画面に戻ったとき）に変わったかを見て、変わっていれば読み直す
   const check = async () => { if (document.hidden) return; try { const st = await run("getStamp"); if (st !== STAMP){ await load(); fire(); } } catch (e) {} };
@@ -2522,7 +2530,7 @@ function goalBase(ym){ const k = "b" + ym; if (GCACHE[k]) return GCACHE[k]; cons
     r.m[g.id] = m; });
   return GCACHE[k] = r; }
 function goalEnd(ym){ const k = "e" + ym; if (GCACHE[k]) return GCACHE[k]; const gb = goalBase(ym), j = adjOf(ym), r = {};
-  const gm = (S.plans[ym]?.goalMoves || []), mvOf = id => gm.reduce((t, x) => t + (x.to === id ? num0(x.amount) : 0) - (x.from === id ? num0(x.amount) : 0), 0);   // 2026-11-21：目標どうしの移動
+  const gm = (S.plans[ym]?.goalMoves || []), ba = (S.plans[ym]?.balAdj || []), mvOf = id => gm.reduce((t, x) => t + (x.to === id ? num0(x.amount) : 0) - (x.from === id ? num0(x.amount) : 0), 0) + ba.reduce((t, x) => t + (x.goal === id ? num0(x.amount) : 0), 0);   // 2026-11-21：目標どうしの移動
   goalsOn().forEach(g => { r[g.id] = !g.start || ym < g.start ? 0 : gb.bal[g.id] + gb.m[g.id] + num0(j.gadd?.[g.id]) - catSpent(ym, g.name) + mvOf(g.id); });
   return GCACHE[k] = r; }
 /* その月のカテゴリの支出（monthAgg と同じ決まり：予算の月は予算の額、実績の月は入れた額。入れていなければ予算の額） */
@@ -2544,7 +2552,7 @@ function zanSum(zan){ const r = {}; if (!zan) return r; Object.entries(zan).forE
    月別（plans/<月>.alloc）の予算は使わない（残っていても見ない） */
 const budFrom = () => { const P = S.plan || {}, ks = Object.keys(S.plans || {}).filter(k => S.plans[k]?.alloc).sort(); return [P.fromYm, ks[0]].filter(Boolean).sort()[0] || ""; };
 function planOf(ym){ const k = "p" + ym; if (GCACHE[k]) return GCACHE[k];
-  const P = S.plan || {}, m = S.plans[ym] || {}, f = budFrom(), on = !!P.base && !!f && ym >= f, base = {move: m.move || {}, savMoves: m.savMoves || [], goalMoves: m.goalMoves || [], draw: m.draw || {}};
+  const P = S.plan || {}, m = S.plans[ym] || {}, f = budFrom(), on = !!P.base && !!f && ym >= f, base = {move: m.move || {}, savMoves: m.savMoves || [], goalMoves: m.goalMoves || [], balAdj: m.balAdj || [], draw: m.draw || {}};
   if (!on) return GCACHE[k] = {...base, alloc: null, allocMid: {}};
   // 2026-11-16：枠の予算＝その枠のカテゴリの予算の合計（カテゴリの枠が変わっても合うように、毎回カテゴリから足し直す）。目標のカテゴリは目標から計算
   const BM = P.baseMid || {}, flat = {}; Object.values(BM).forEach(o => Object.entries(o || {}).forEach(([n, v]) => { if (n !== "__rest" && v != null) flat[n] = v; }));
@@ -2575,11 +2583,11 @@ function adjOf(ym){ const ck = "a" + ym; if (GCACHE[ck]) return GCACHE[ck]; cons
     const keep = num0(p.alloc.living) * keepM(ym), pb = bucketBal(prevYmOf(ym)), pre = num0(pb.common) + num0(pb.emergency) + num0(p.alloc.living) - num0(a.g.living) + p.savMoves.reduce((t, x) => t + (["common", "emergency"].includes(x.to) ? num0(x.amount) : 0) - (["common", "emergency"].includes(x.from) ? num0(x.amount) : 0), 0);   // その月の貯蓄の間の移動も入れる
     const gb = goalBase(ym), st = {
       living: () => { const g1 = Math.max(0, Math.min(rest, Math.round(keep - pre))); if (g1){ r.add.living = num0(r.add.living) + g1; rest -= g1; } },
-      goals: () => goalsOn().forEach(g => { if (rest <= 0 || !(num0(g.target) > 0) || !g.start || ym < g.start) return;
-        const x = Math.max(0, Math.min(rest, Math.round(num0(g.target) - (gb.bal[g.id] + gb.m[g.id] - catSpent(ym, g.name))))); if (x){ const k = goalGrp(g); r.gadd[g.id] = x; r.add[k] = num0(r.add[k]) + x; rest -= x; } }),
+      goal: g => { if (rest <= 0 || !g || !(num0(g.target) > 0) || !g.start || ym < g.start) return;
+        const x = Math.max(0, Math.min(rest, Math.round(num0(g.target) - (gb.bal[g.id] + gb.m[g.id] - catSpent(ym, g.name))))); if (x){ const k = goalGrp(g); r.gadd[g.id] = x; r.add[k] = num0(r.add[k]) + x; rest -= x; } },
       pocket: () => { const each = Math.min(50000, Math.floor(rest / 2)); if (each > 0){ r.add.miho = num0(r.add.miho) + each; r.add.kazu = num0(r.add.kazu) + each; rest -= each * 2; } },
       invest: () => { if (rest > 0){ r.add.invest = num0(r.add.invest) + rest; rest = 0; } } };
-    rulePlus().forEach(k => st[k] && st[k]()); st.invest();
+    rulePlus().forEach(k => k.startsWith("g:") ? st.goal(goalsOn().find(g => g.id === k.slice(2))) : st[k] && st[k]()); st.invest();
     return GCACHE[ck] = r; }
   let rest = -d; const ko = goalOf("👬こづかい"), kg = zanGrp("👬こづかい") || "event";
   const mt = {kozShared: () => { const c1 = Math.min(num0(zanBud(ym, "👬こづかい")), rest); if (c1 > 0){ r.cut[kg] = num0(r.cut[kg]) + c1; if (ko) r.gadd[ko.id] = num0(r.gadd[ko.id]) - c1; rest -= c1; } },
@@ -2587,10 +2595,17 @@ function adjOf(ym){ const ck = "a" + ym; if (GCACHE[ck]) return GCACHE[ck]; cons
   ruleMinus().forEach(k => mt[k] && mt[k]());
   return GCACHE[ck] = r; }
 /* 2026-11-20：分配の順番（並べ替えられる）。settings/plan.rulePlus / ruleMinus */
-const RULE_P = {living: ["生活費の貯蓄", "生活費の予算3か月分になるまで"], goals: ["特別費・イベントの目標", "目標額のあるものに、一覧の上から"], pocket: ["👩🏼・🧑🏻の貯蓄", "1人 月5万まで、同じ額ずつ"], invest: ["NISA積立", "残りぜんぶ"]};
+const RULE_P = {living: ["生活費の貯蓄", "生活費の予算6か月分になるまで"], goals: ["特別費・イベントの目標", "目標額のあるものに、一覧の上から"], pocket: ["👩🏼・🧑🏻の貯蓄", "1人 月5万まで、同じ額ずつ"], invest: ["NISA積立", "残りぜんぶ"]};
 const RULE_M = {kozShared: ["👬こづかいを減らす", "予算の額まで"], kozEach: ["👩🏼・🧑🏻こづかいを減らす", "同じ額ずつ、予算の額まで"]};
 const ruleOrd = (v, def) => { const a = Array.isArray(v) ? v.filter(k => def.includes(k)) : []; return [...a, ...def.filter(k => !a.includes(k))]; };
-const rulePlus = () => ruleOrd(S.plan?.rulePlus, Object.keys(RULE_P)), ruleMinus = () => ruleOrd(S.plan?.ruleMinus, Object.keys(RULE_M));
+// 2026-11-21：目標額（上限）のある特別費・イベントの目標は、1つずつ順番を決められる（"g:目標のID"）
+const plusKeys = () => ["living", ...goalsOn().filter(g => num0(g.target) > 0).map(g => "g:" + g.id), "pocket", "invest"];
+const rulePlus = () => { const def = plusKeys(); let v = Array.isArray(S.plan?.rulePlus) ? S.plan.rulePlus.slice() : []; const gi = v.indexOf("goals");
+  if (gi >= 0) v.splice(gi, 1, ...def.filter(k => k.startsWith("g:") && !v.includes(k))); v = v.filter(k => def.includes(k));
+  def.filter(k => !v.includes(k)).forEach(k => { const at = k.startsWith("g:") && v.includes("pocket") ? v.indexOf("pocket") : v.length; v.splice(at, 0, k); }); return v; },
+  ruleMinus = () => ruleOrd(S.plan?.ruleMinus, Object.keys(RULE_M));
+const ruleLab = k => { if (!k.startsWith("g:")) return RULE_P[k] || [k, ""]; const g = goalsAll().find(x => x.id === k.slice(2)); if (!g) return [k, ""];
+  return [g.name, goalGrp(g) === "irregular" ? `特別費・上限 ${kY(g.target)}万まで` : `イベント・目標 ${kY(g.target)}万まで${g.due ? `（${ymLabel(g.due)}）` : ""}`]; };
 function allocEff(ym){ const p = planOf(ym); if (!p.alloc) return null; const al = {...p.alloc}, j = adjOf(ym);
   Object.entries(j.add).forEach(([k, v]) => al[k] = num0(al[k]) + v); Object.entries(j.cut).forEach(([k, v]) => al[k] = num0(al[k]) - v); return al; }
 function monthMoves(ym){
@@ -2601,6 +2616,7 @@ function monthMoves(ym){
   const invA = al && !(isAct(ym) && Object.keys(S.monthin?.[ym]?.used || {}).some(n => zanGrp(n) === "invest")) ? Math.max(a.inv, num0(al.invest)) : a.inv;   // 2026-11-16：余りからのNISA積立は、実績を入れるまでは積み立てた扱い
   mv.emergency = al ? a.inc - MAIN4.reduce((s, k) => s + num0(al[k]), 0) - invA : p.move.emergency != null ? p.move.emergency : num0(a.mv.emergency);
   p.savMoves.forEach(x => { xf[x.from] = num0(xf[x.from]) - num0(x.amount); xf[x.to] = num0(xf[x.to]) + num0(x.amount); });
+  (p.balAdj || []).forEach(x => { xf[x.b] = num0(xf[x.b]) + num0(x.amount); });   // 2026-11-21：貯蓄の合計を合わせた分（残高調整）
   (p.goalMoves || []).forEach(x => { const gOf = id => goalsAll().find(g => g.id === id), fb = goalGrp(gOf(x.from)), tb = String(x.to).startsWith("b:") ? String(x.to).slice(2) : goalGrp(gOf(x.to)); if (fb !== tb){ xf[fb] = num0(xf[fb]) - num0(x.amount); xf[tb] = num0(xf[tb]) + num0(x.amount); } });   // 2026-11-21：枠をまたぐ目標の移動は貯金どうしの移動
   return {mv, xf, p};
 }
@@ -3282,7 +3298,7 @@ function lifeView(){
     ${M.fund && M.fund.some(x => x > 0) ? `<tr class="fundr"><th class="lh">　うち 車・子どもの積立</th>${cols.map(c => `<td>${lifeK(M.fund[c.ix[c.ix.length - 1]]) || ""}</td>`).join("")}</tr>` : ""}
     ${L.nisa || L.nisa0 ? `<tr class="nisa"><th class="lh"><button type="button" class="lbl" data-act="lifeEdit" data-id="nisa">NISA評価額</button></th>${cols.map(c => `<td>${lifeK(nv[c.ix[c.ix.length - 1]]) || "0"}</td>`).join("")}${af("nisaV")}</tr>` : ""}`;
   // 65歳からの取り崩し
-  return `${lifeTree()}<div class="lifehead"><button type="button" class="linkbtn lhelp" data-act="lifeHelp">📖 この表の見方</button><span class="lt">${yms[0].slice(0, 4)}〜${L.endY}年<small>万円</small>${info(`${L.endAge}歳（${L.endY}年）までの見通しです。<br>・左の項目名をタップ → その項目の入力。▸をタップ → 内訳<br>・年をタップ → その年の1〜12月。月をタップ → 年に戻る<br>・🚗（車の購入）・👶（生まれる月）・💼（次の会社に入る月）・📌（1回だけの予定）・🏥（老人ホームに入る月）は長押しして横に動かすと、時期が変わり、費用や収入・税金も一緒にずれます<br>・項目はFPのキャッシュフロー表の分け方（基本生活費・住居関連費・車両費・教育費・保険料・税・社会保険料・一時的な支出・その他の支出）です<br>・収入は額面（税・社会保険料を引く前）。税・社会保険料は別の行で引きます。会社にいる間は健康保険・厚生年金・雇用保険（額面の約15%）・所得税・住民税、退職して次の会社に入るまでは国保・国民年金・住民税、65歳からは年金から国保（75歳から後期高齢者医療）・介護保険・所得税・住民税（どれも目安）<br>・貯蓄残高がマイナスの年は赤くなります<br>・NISAは退職するまで積み立て、そのあとも年${num0(L.nisaR)}%で運用。貯蓄が生活費の${L.bufM}か月分を下回る月だけ、足りない分を売って貯蓄に入れます（売る年は、その年の積立を止めます）${L.infl ? `<br>・支出は毎年${L.infl}%ずつ上がる計算` : ""}`)}</span><button class="sbtn ghost2" data-act="lifeSet">⚙ 設定・予定</button></div>
+  return `${lifeTree()}<div class="lifehead"><button type="button" class="linkbtn lhelp" data-act="lifeHelp">📖 見方</button><span class="lt">${yms[0].slice(0, 4)}〜${L.endY}年<small>万円</small>${info(`${L.endAge}歳（${L.endY}年）までの見通しです。<br>・左の項目名をタップ → その項目の入力。▸をタップ → 内訳<br>・年をタップ → その年の1〜12月。月をタップ → 年に戻る<br>・🚗（車の購入）・👶（生まれる月）・💼（次の会社に入る月）・📌（1回だけの予定）・🏥（老人ホームに入る月）は長押しして横に動かすと、時期が変わり、費用や収入・税金も一緒にずれます<br>・項目はFPのキャッシュフロー表の分け方（基本生活費・住居関連費・車両費・教育費・保険料・税・社会保険料・一時的な支出・その他の支出）です<br>・収入は額面（税・社会保険料を引く前）。税・社会保険料は別の行で引きます。会社にいる間は健康保険・厚生年金・雇用保険（額面の約15%）・所得税・住民税、退職して次の会社に入るまでは国保・国民年金・住民税、65歳からは年金から国保（75歳から後期高齢者医療）・介護保険・所得税・住民税（どれも目安）<br>・貯蓄残高がマイナスの年は赤くなります<br>・NISAは退職するまで積み立て、そのあとも年${num0(L.nisaR)}%で運用。貯蓄が生活費の${L.bufM}か月分を下回る月だけ、足りない分を売って貯蓄に入れます（売る年は、その年の積立を止めます）${L.infl ? `<br>・支出は毎年${L.infl}%ずつ上がる計算` : ""}`)}</span><button class="sbtn ghost2" data-act="lifeSet">⚙ 設定</button></div>
   <div class="lifewrap"><table class="lifet"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
   ${L.nisa || L.nisa0 ? `<p class="note nmkl"><i class="nmk-up"></i>余りをNISAへ <i class="nmk-down"></i>積立を減らす・止める（色は変わり目の年だけ） <i class="nmk-sell"></i>NISAを売る　｜「NISAへ積立」をタップ → 毎月の積立額をくらべる</p>` : ""}
 `;
@@ -3438,8 +3454,8 @@ function topView(){
     <span class="rl" style="grid-row:6">貯蓄</span>
     ${(() => { const liv = num0(bal.common) + num0(bal.emergency), irr = num0(bal.irregular), dl = sv.sv_common != null && sv.sv_emg != null ? num0(sv.sv_common) + num0(sv.sv_emg) : null, lw = ym === nowYm && dl != null && Math.round(dl) !== Math.round(liv), ng = goalsOn().filter(g => num0(g.target) > 0).length;
       return `<button class="cb mrg${lw ? " warn" : ""}" data-col="2" data-row="6" style="grid-column:2;grid-row:6" data-act="balset" data-id="__liv" aria-label="生活費の貯蓄の残高を合わせる"><span class="ct">生活費</span><span class="cn2 num${liv < 0 ? " neg" : ""}">${kY(liv)}</span><span class="cu">万円</span>${keep ? `<span class="keep${liv < keep ? " ng" : ""}"><span>目標${kY(keep)}万</span>${liv < keep ? `<b>不足${kY(keep - liv)}万</b>` : ""}</span>` : ""}${lw ? `<span class="cd">ドコモ${kY(dl)}</span>` : ""}</button>
-    <button class="cb mrg" data-col="3" data-row="6" style="grid-column:3;grid-row:6" data-act="goals" data-id="irregular" aria-label="特別費の貯蓄（目標ごとの積立）"><span class="ct">特別費</span><span class="cn2 num${irr < 0 ? " neg" : ""}">${kY(irr)}</span><span class="cu">万円</span><span class="keep"><span>${ng ? `目標${ng}件` : "目標を決める"}</span></span></button>`; })()}
-    ${cols.map((c, j) => c.inv ? (() => { const g = invGain(ym); return `<button class="cb inv" ${tAt(j, 6)} data-act="invlist" aria-label="証券の評価額と投資先の一覧"><span class="ct">証券</span><span class="cn2 num">${kY(c.bal)}</span><span class="cu">万円</span>${g ? `<span class="gain ${g.g < 0 ? "neg" : "pos"}">損益${kS(g.g)}万<br>(${g.g >= 0 ? "+" : "−"}${Math.abs(g.pct).toFixed(1)}%)</span>` : ""}</button>`; })() : j >= 2 ? balC(c, j) : "").join("")}
+    <button class="cb mrg" data-col="3" data-row="6" style="grid-column:3;grid-row:6" data-act="goals" data-id="irregular" aria-label="特別費の貯蓄（目標ごとの積立）"><span class="ct">特別費</span><span class="cn2 num${irr < 0 ? " neg" : ""}">${kY(irr)}</span><span class="cu">万円</span>${(() => { const cap = goalsOn().filter(g => goalGrp(g) === "irregular").reduce((t, g) => t + num0(g.target), 0); return cap ? `<span class="keep"><span>上限${kY(cap)}万</span></span>` : ""; })()}</button>`; })()}
+    ${cols.map((c, j) => c.inv ? (() => { const g = invGain(ym); return `<button class="cb inv" ${tAt(j, 6)} data-act="invlist" aria-label="証券の評価額と投資先の一覧"><span class="ct">証券</span><span class="cn2 num">${kY(c.bal)}</span><span class="cu">万円</span>${g ? `<span class="gain ${g.g < 0 ? "neg" : "pos"}">損益<br>${kS(g.g)}万<br>(${g.g >= 0 ? "+" : "−"}${Math.abs(g.pct).toFixed(1)}%)</span>` : ""}</button>`; })() : j >= 2 ? balC(c, j) : "").join("")}
   </section>
   <div class="totwrap tg"><span class="rl" style="grid-column:1">計</span><span class="tfr" style="grid-column:2 / 5"></span><span class="tfr tfr2" style="grid-column:5 / 7"><span class="asof">${Number(ym.slice(5))}月末時点</span></span>
     <button class="tb" style="grid-column:2" data-act="incact"><span class="tl">収入</span><b class="num">${kY(a.inc)}</b><small class="tu">万円</small></button>
@@ -3478,6 +3494,17 @@ function invChartSheet(k){ const ym = curYm(), yms = [ym]; for (let i = 0; i < 1
   <div class="rows">${yms.slice().reverse().map((y, i) => { const x = ps[11 - i]; return x ? `<div class="mrow"><span class="n">${ymLabel(y)}</span><span class="v">${yen(x.v)}<small> / 損益 ${x.v - x.c >= 0 ? "+" : "−"}${yen(Math.abs(x.v - x.c))}</small></span></div>` : ""; }).join("") || `<p class="note">まだ記録がありません。</p>`}</div>
   <div class="sheet-actions"><button type="button" class="btn ghost" data-act="invlist">戻る</button><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
 /* 2026-11-14：分配をタップ → この月の分配の内訳と、分配の決まり（予算を変えるのは支出をタップした先） */
+/* 2026-11-21：☰ を押したまま動かして並べ替える（余った収入の行き先・足りないとき） */
+document.addEventListener("pointerdown", e => { const h = e.target.closest?.(".rdrag"); if (!h) return; e.preventDefault(); const row = h.closest(".rulerow"), list = row.parentElement, l = row.dataset.l; let y0 = e.clientY;
+  row.classList.add("dragging"); try { h.setPointerCapture(e.pointerId); } catch (x) {}
+  const sib = () => [...list.querySelectorAll(`.rulerow[data-l="${l}"]`)];
+  const move = ev => { const dy = ev.clientY - y0, a = sib(), i = a.indexOf(row), nx = a[i + 1], pv = a[i - 1];
+    if (nx && dy > nx.offsetHeight / 2){ list.insertBefore(nx, row); y0 += nx.offsetHeight; } else if (pv && dy < -pv.offsetHeight / 2){ list.insertBefore(row, pv); y0 -= pv.offsetHeight; }
+    row.style.transform = `translateY(${ev.clientY - y0}px)`; };
+  const up = () => { h.removeEventListener("pointermove", move); h.removeEventListener("pointerup", up); h.removeEventListener("pointercancel", up); row.style.transform = ""; row.classList.remove("dragging");
+    const L = sib().map(r => r.dataset.rk), cur = l === "plus" ? rulePlus() : ruleMinus(); if (L.join() === cur.join()) return;
+    save(() => db.doc("settings/plan").set({...(S.plan || {}), [l === "plus" ? "rulePlus" : "ruleMinus"]: L, updatedAt: new Date().toISOString()}), "順番を変えました").then(ok => ok && setTimeout(allocRuleSheet, 250)); };
+  h.addEventListener("pointermove", move); h.addEventListener("pointerup", up); h.addEventListener("pointercancel", up); });
 const ruleMv = (l, i, n) => `<span class="rmv"><button type="button" class="sbtn ghost2" data-act="rulemv" data-l="${l}" data-i="${i}" data-d="-1" ${i ? "" : "disabled"} aria-label="上へ">↑</button><button type="button" class="sbtn ghost2" data-act="rulemv" data-l="${l}" data-i="${i}" data-d="1" ${i < n - 1 ? "" : "disabled"} aria-label="下へ">↓</button></span>`;
 function allocRuleSheet(){ const ym = curYm(), p = planOf(ym), a = monthAgg(ym), j = adjOf(ym), al = allocEff(ym) || {}, ib = incBudSum(ym), pm = Number(prevYmOf(ym).slice(5));
   const rows = p.alloc ? GRP5.map(k => [GN[k] || k, num0(p.alloc[k]), num0(al[k])]) : [];
@@ -3492,13 +3519,14 @@ function allocRuleSheet(){ const ym = curYm(), p = planOf(ym), a = monthAgg(ym),
     ${rows.map(([n, b, e]) => `<div class="bar ar3"><span class="n">${esc(n)}</span>${cell(b, e)}</div>`).join("")}</section>` : `<p class="note">この月は予算がありません。</p>`}
   <section class="card spri"><h2>余った収入の行き先（上から順に）</h2>
     <p class="note">${a.incDef ? `${pm}月に入った収入を入れると、余りの行き先が決まります（今は予算の額で計算）。` : j.d >= 0 ? `${pm}月に入った収入が予算より <b class="plusn">${kY(j.d)}万</b> 多いので、上から順に入れます。` : `${pm}月に入った収入が予算より <b class="neg">${kY(-j.d)}万</b> 少ない月です（下の「足りないとき」）。`}</p>
-    ${(() => { const L = rulePlus(), NO = "①②③④⑤", val = {living: num0(j.add.living), goals: Object.values(j.gadd || {}).reduce((t, v) => t + Math.max(0, num0(v)), 0), pocket: num0(j.add.miho) + num0(j.add.kazu), invest: num0(j.add.invest)};
-      return L.map((k, i) => `<div class="srow rulerow">${ruleMv("plus", i, L.length)}<span class="sno">${NO[i]}</span><span class="sn"><b>${RULE_P[k][0]}</b><small>${k === "living" ? `今 ${kY(liv)}万 ／ 目標 ${kY(keep)}万` : RULE_P[k][1]}</small>${k === "goals" ? `<div class="sgoals">${gl}</div><button type="button" class="linkbtn" data-act="goals">目標を見る・変える</button>` : ""}</span><span class="sv">${plus(val[k])}</span></div>`).join(""); })()}
-    <p class="note">↑↓で順番を変えられます。NISA積立より下にしたものには、余りが回りません。</p>
+    <div class="rlist">${(() => { const L = rulePlus(), NO = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫", val = k => k.startsWith("g:") ? Math.max(0, num0(j.gadd?.[k.slice(2)])) : ({living: num0(j.add.living), pocket: num0(j.add.miho) + num0(j.add.kazu), invest: num0(j.add.invest)})[k] || 0;
+      return L.map((k, i) => { const [t, sub] = ruleLab(k), g = k.startsWith("g:") ? goalsAll().find(x => x.id === k.slice(2)) : null;
+        return `<div class="srow rulerow" data-l="plus" data-rk="${esc(k)}"><span class="sno">${NO[i] || i + 1}</span><span class="sn"><b>${esc(t)}</b><small>${k === "living" ? `今 ${kY(liv)}万 ／ 目標 ${kY(keep)}万` : g ? `${esc(sub)}・今 ${kY(num0(ge[g.id]))}万` : sub}</small></span><span class="sv">${plus(val(k))}</span><span class="rdrag" aria-label="押したまま動かして並べ替え">☰</span></div>`; }).join(""); })()}</div>
+    <p class="note">右の ☰ を押したまま上下に動かすと、順番を変えられます。NISA積立より下にしたものには、余りが回りません。<button type="button" class="linkbtn" data-act="goals" data-id="irregular">目標を見る・変える</button></p>
   </section>
   <section class="card spri"><h2>足りないとき（上から順に減らす）</h2>
     ${(() => { const L = ruleMinus(), NO = "①②", val = {kozShared: Object.entries(j.cut).filter(([k]) => k !== "miho" && k !== "kazu").reduce((t, [, v]) => t + num0(v), 0), kozEach: num0(j.cut.miho)};
-      return L.map((k, i) => `<div class="srow rulerow">${ruleMv("minus", i, L.length)}<span class="sno">${NO[i]}</span><span class="sn"><b>${RULE_M[k][0]}</b><small>${RULE_M[k][1]}</small></span><span class="sv">${val[k] > 0 ? `<b class="neg num">−${kY(val[k])}万${k === "kozEach" ? "ずつ" : ""}</b>` : `<span class="note">－</span>`}</span></div>`).join(""); })()}
+      return `<div class="rlist">${L.map((k, i) => `<div class="srow rulerow" data-l="minus" data-rk="${k}"><span class="sno">${NO[i]}</span><span class="sn"><b>${RULE_M[k][0]}</b><small>${RULE_M[k][1]}</small></span><span class="sv">${val[k] > 0 ? `<b class="neg num">−${kY(val[k])}万${k === "kozEach" ? "ずつ" : ""}</b>` : `<span class="note">－</span>`}</span><span class="rdrag" aria-label="押したまま動かして並べ替え">☰</span></div>`).join("")}</div>`; })()}
     <p class="note">それでも足りない分は、生活費の貯蓄から出します。</p></section>
   <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
 /* 2026-11-16：貯蓄額確認。今の楽天銀行・財布・カードの未払い・反映前の支出・ドコモの目的別口座を入れると、
@@ -3600,6 +3628,25 @@ function goalDelSheet(id){ const g = goalsAll().find(x => x.id === id); if (!g) 
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">移して消す</button></div></form>`); }
 const goalSaveAll = (out, msg) => save(() => db.doc("settings/plan").set({...(S.plan || {}), goals: out, updatedAt: new Date().toISOString()}), msg);
 /* 2026-11-21：貯蓄の金額だけを直す（生活費・👩🏼・🧑🏻）。開始額を差の分だけ動かして、今の月末がその額になるようにする */
+/* 2026-11-21：生活費・美穂・和弥の貯蓄は、月ごとの残高の棒グラフ（金額はここでは変えない） */
+function savChartSheet(k){ const ym = curYm(), ys = [ym]; for (let i = 0; i < 11; i++) ys.unshift(prevYmOf(ys[0]));
+  const v = y => { const b = bucketBal(y); return k === "__liv" ? num0(b.common) + num0(b.emergency) : num0(b[k]); }, vals = ys.map(v), mx = Math.max(1, ...vals.map(Math.abs)), nm = k === "__liv" ? "生活費" : GN[k];
+  openSheet(`<h3>${nm}の貯蓄（月末）</h3><div class="schart">${ys.map((y, i) => `<div class="sb${y === ym ? " on" : ""}"><b>${kY(vals[i])}</b><i class="${vals[i] < 0 ? "neg" : ""}" style="height:${Math.max(2, Math.round(Math.abs(vals[i]) / mx * 100))}px"></i><span>${Number(y.slice(5))}月</span></div>`).join("")}</div>
+    <p class="note">万円。貯蓄の金額は、下の「計」の貯蓄で合計を合わせます。</p>
+    <div class="sheet-actions"><button type="button" class="btn ghost" data-act="savtotal">残高を合わせる</button><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
+/* 2026-11-21：貯蓄の合計だけを入れて合わせる。美穂・和弥は変えない。増えた分は「余った収入の行き先」の順、減った分は「足りないとき」の順に、残りは生活費で合わせる */
+function savTotalPlan(ym, delta){ const out = []; let rest = Math.round(delta); const bal = bucketBal(ym), p = planOf(ym), ge = goalEnd(ym);
+  if (rest > 0){ const keep = num0(p.alloc?.living) * keepM(ym), liv = num0(bal.common) + num0(bal.emergency);
+    rulePlus().forEach(k => { if (rest <= 0) return;
+      if (k === "living"){ const x = Math.max(0, Math.min(rest, Math.round(keep - liv))); if (x){ out.push({b: "common", amount: x, what: "生活費"}); rest -= x; } }
+      else if (k.startsWith("g:")){ const g = goalsOn().find(x => x.id === k.slice(2)); if (!g) return; const x = Math.max(0, Math.min(rest, Math.round(num0(g.target) - num0(ge[g.id])))); if (x){ out.push({b: goalGrp(g), goal: g.id, amount: x, what: g.name}); rest -= x; } } }); }
+  else if (rest < 0){ let need = -rest; ruleMinus().forEach(k => { if (need <= 0 || k !== "kozShared") return; const g = goalOf("👬こづかい"); if (!g) return; const x = Math.min(need, Math.max(0, Math.round(num0(ge[g.id])))); if (x){ out.push({b: goalGrp(g), goal: g.id, amount: -x, what: g.name}); need -= x; } }); rest = -need; }
+  if (rest) out.push({b: "common", amount: rest, what: "生活費"}); return out; }
+function savTotalSheet(){ const ym = curYm(), bal = bucketBal(ym), cur = Object.keys(BK).reduce((t, b) => t + num0(bal[b]), 0);
+  openSheet(`<h3>貯蓄の合計を合わせる（${ymLabel(ym)}末）</h3><form data-form="savtotal" style="display:grid;gap:10px">
+    <div class="field"><label for="st_v">本当の貯蓄の合計</label><input id="st_v" class="yenin3 num" inputmode="numeric" value="${Math.round(cur).toLocaleString("ja-JP")}"></div>
+    <p class="note">今のアプリの合計は ${yen(cur)} です。👩🏼・🧑🏻の貯蓄は変えません。増えた分は「余った収入の行き先」の順に、減った分は「足りないとき」の順に入れて、残りは生活費で合わせます。</p>
+    <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">合わせる</button></div></form>`); }
 function savEditSheet(k){ const ym = curYm(), bal = bucketBal(ym), cur = k === "__liv" ? num0(bal.common) + num0(bal.emergency) : num0(bal[k]), nm = k === "__liv" ? "生活費" : GN[k];
   openSheet(`<h3>${nm}の貯蓄（${ymLabel(ym)}末）</h3><form data-form="savedit" data-k="${k}" style="display:grid;gap:10px">
     <div class="field"><label for="se_v">金額</label><input id="se_v" class="yenin3 num" inputmode="numeric" value="${Math.round(cur).toLocaleString("ja-JP")}"></div>
@@ -4398,7 +4445,8 @@ document.addEventListener("click", e => {
     case "taxsub": UI.taxsub = b.dataset.k; render(); toTop(); break;
     case "taxitem": taxItemSheet(b.dataset.i); break;
     case "taxdel": { const T = taxDoc(), i = Number(b.dataset.i); if (!confirm(`${T.items[i]?.name || ""}を消しますか？`)) break; T.items.splice(i, 1); save(() => db.doc("settings/tax").set({...T, ratesSrc: TAXRSRC, updatedAt: new Date().toISOString()}), "消しました").then(ok => ok && closeSheet()); break; }
-    case "balset": if (["__liv", "miho", "kazu", "common", "emergency"].includes(id)) savEditSheet(id === "common" || id === "emergency" ? "__liv" : id); else balSheet(id); break;
+    case "balset": if (["__liv", "miho", "kazu", "common", "emergency"].includes(id)) savChartSheet(id === "common" || id === "emergency" ? "__liv" : id); else if (!id) savTotalSheet(); else balSheet(id); break;
+    case "savtotal": savTotalSheet(); break;
     case "goalEdit": goalEditSheet(b.dataset.id || "", b.dataset.g || "irregular"); break;
     case "goalDel": goalDelSheet(b.dataset.id); break;
     case "gozan": closeSheet(); UI.pg = "act"; render(); toTop(); break;
@@ -4803,6 +4851,10 @@ async function submitBody(e, f){
     ok = await save(async () => { if (to && amt) await planDoc(ym).set({...d, goalMoves: [...(d.goalMoves || []), {from: id, to, amount: amt, at: new Date().toISOString(), note: `「${g?.name}」を消したので移す`}], updatedAt: new Date().toISOString()});
       await db.doc("settings/plan").set({...(S.plan || {}), goals: goalsAll().map(x => x.id === id ? {...x, off: true} : x), updatedAt: new Date().toISOString()}); }, to && amt ? `${yen(amt)}を移して消しました` : "消しました");
     if (ok){ const G = goalGrp(g); setTimeout(() => grpGoalsSheet(G), 250); return; }
+  } else if (kind === "savtotal"){   // 2026-11-21：貯蓄の合計だけで合わせる
+    const ym = curYm(), bal = bucketBal(ym), cur = Object.keys(BK).reduce((t, b) => t + num0(bal[b]), 0), nv = numOrNull(val("st_v")); if (nv == null){ toast("金額を入れてください"); return; }
+    const dl = Math.round(nv - cur); if (!dl){ toast("差はありません"); return; } const plan = savTotalPlan(ym, dl), d = S.plans[ym] || {}, at = new Date().toISOString();
+    ok = await save(() => planDoc(ym).set({...d, balAdj: [...(d.balAdj || []), ...plan.map(x => ({...x, at, note: `合計を${yen(nv)}に合わせた`}))], updatedAt: at}), plan.map(x => `${x.what} ${x.amount > 0 ? "+" : "−"}${kY(Math.abs(x.amount))}万`).join("・"));
   } else if (kind === "savedit"){   // 貯蓄の金額だけを直す
     const k = f.dataset.k, ym = curYm(), bal = bucketBal(ym), cur = k === "__liv" ? num0(bal.common) + num0(bal.emergency) : num0(bal[k]), nv = numOrNull(val("se_v")); if (nv == null){ toast("金額を入れてください"); return; }
     const b = k === "__liv" ? "common" : k, op = {...(S.buckets?.opening || {})}; op[b] = num0(op[b]) + Math.round(nv - cur);

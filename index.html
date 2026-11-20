@@ -615,7 +615,7 @@ div.down { text-align: center; font-weight: 700; color: var(--muted); font-size:
 .wrap { padding-top: 10px !important; padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
 .syncrow { display: flex; justify-content: flex-end; margin-bottom: -8px; }
 .syncrow:empty, .syncrow:has(#syncState:empty) { display: none; }
-.tabs { position: fixed; z-index: 9; left: 50%; transform: translateX(-50%); bottom: max(6px, calc(env(safe-area-inset-bottom, 0px) - 14px)); width: calc(100% - 24px); max-width: calc(40rem - 8px); box-sizing: border-box; margin: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(98, 84, 150, .18); }
+.tabs { position: fixed; z-index: 9; left: 50%; transform: translateX(-50%); bottom: max(4px, calc(env(safe-area-inset-bottom, 0px) - 26px)); width: calc(100% - 24px); max-width: calc(40rem - 8px); box-sizing: border-box; margin: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 8px 24px rgba(98, 84, 150, .18); }
 .tabs button { display: grid; justify-items: center; gap: 1px; padding: 6px 0 5px; border-radius: 999px; font-size: .68rem; font-weight: 700; line-height: 1.2; color: var(--muted); background: none; }
 .tabs button svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .tabs button[aria-current="page"] { background: var(--lav); color: var(--accent); }
@@ -3339,7 +3339,7 @@ function consHelp(){ openSheet(`<h3>消耗品の見方</h3><div class="helpb">
   <p><b>品目のボタン</b><br>・<b>買った</b>：買ったら押して、値段と量を入れます。次になくなる日が自動で出ます。<br>・<b>比べる</b>：ネットの値段を比べます。<br>・<b>まだ少し持ちそう</b>：思ったより減っていないときに押すと、なくなる日がのびます。<br>・一番上の<b>「買うもの」</b>に出ているものが、そろそろなくなるものです。</p>
   <p class="note">店の欄に「概算」とあるものは、まだ買った記録がなく、だいたいの値段で入れています。買ったら「買った」で正しい値段に変わります。</p></div>
   <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
-function fitLife(){ const w = document.querySelector(".lifewrap"), t = document.querySelector(".lifet"); if (!w || !t) return; const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), avail = tb - 10 - w.getBoundingClientRect().top;
+function fitLife(){ const w = document.querySelector(".lifewrap"), t = document.querySelector(".lifet"); if (!w || !t) return; const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), avail = tb - 10 - (document.querySelector(".nmkl")?.offsetHeight || 0) - 6 - w.getBoundingClientRect().top;   // 2026-11-21：表の下の色の説明がタブに隠れないように
   const n = t.querySelectorAll("tr").length || 1;
   if (lifeWide()){ w.style.maxHeight = avail + "px"; let h = Math.min(90, Math.floor(avail / (n + .6)));
     const set = () => { const fs = Math.max(9, Math.min(15, Math.round(h * .55))); t.style.setProperty("--lrh", h + "px"); t.style.setProperty("--lhd", Math.max(Math.round(h * 1.6), fs * 2 + 4) + "px"); t.style.setProperty("--lfs", fs + "px"); t.style.setProperty("--lcw", Math.round(fs * 3) + "px"); };

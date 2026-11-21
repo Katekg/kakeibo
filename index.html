@@ -850,7 +850,7 @@ html.lifelock #view { row-gap: 4px !important; } html.lifelock, html.lifelock bo
 .catl .irow, .group.soon .irow, .group.sale .irow { padding: 5px 8px 5px 10px; gap: 8px; }
 .catl .ibtn .nm, .group.soon .ibtn .nm { font-size: .84rem; } .catl .ibtn .sub, .group.soon .ibtn .sub { font-size: .68rem; }
 .catl .ival, .group.soon .ival { font-size: .8rem; } .catl .ival small { font-size: .64rem; }
-.list li.wbar { box-shadow: inset 4px 0 0 var(--wc); } .list li.wbar .irow, .list li.wbar .ibtns { padding-left: 14px; }
+.list li.wbar { box-shadow: inset 4px 0 0 var(--wc); } .catl li.lowst { background: #fff3c4 !important; } .catl li.lowst .ibtn .sub { color: #8a6a00; } .list li.wbar .irow, .list li.wbar .ibtns { padding-left: 14px; }
 .catl li { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; background: var(--surface); }
 .wigon .catl li { animation: wig .28s ease-in-out infinite alternate; } .wigon .catl li:nth-child(2n) { animation-delay: -.14s; }
 @keyframes wig { from { transform: rotate(-.6deg); } to { transform: rotate(.6deg); } }
@@ -1534,7 +1534,8 @@ function itemRow(it, soon = false, mode = ""){
   const btns = `<button class="sbtn ghost2" data-act="compare" data-id="${it.id}" aria-label="${esc(it.name)}の値段を比べる">比べる</button><button class="sbtn" data-act="buy" data-id="${it.id}" aria-label="${esc(it.name)}を買った記録">買った</button>`;
   // 2026-11-21：品目の一覧ではボタンを出さない（タップした先に 比べる・買った・なくなった）。買うものの行は左に誰の色
   const opn = UI.itOpen === it.id + (soon ? ":s" : "");   // 2026-11-21：タップで一覧の中に開く
-  return `<li class="${mk ? "mk" : ""}${soon ? " wbar" : ""}${opn ? " iopen" : ""}" data-id="${it.id}" style="--wc:${whoCol(cwhoOf(it))}"><div class="irow">
+  const low = !soon && (gone || (l && l.dOut <= SOON_DAYS));
+  return `<li class="${mk ? "mk" : ""}${soon ? " wbar" : ""}${opn ? " iopen" : ""}${low ? " lowst" : ""}" data-id="${it.id}" style="--wc:${whoCol(cwhoOf(it))}"><div class="irow">
     <button class="ibtn" data-act="hist" data-id="${it.id}" data-s="${soon ? 1 : ""}" aria-expanded="${opn}"><span class="nm">${esc(it.name)}</span><span class="sub">${esc(sub) || "&nbsp;"}</span></button>
     <span class="ival">${m != null ? `${yen(m)}<small>／月</small>` : `<span class="badge warn">未入力</span>`}</span>
   </div>${opn ? `<div class="iexp">${histBody(it, true)}</div>` : ""}${soon && !opn ? `<div class="ibtns">${mode === "sale" ? "" : gone ? `<button class="sbtn ghost2" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button class="sbtn ghost2" data-act="later" data-id="${it.id}">まだ少し持ちそう</button>`}${btns}</div>` : ""}</li>`;
@@ -1634,7 +1635,7 @@ function itemsView(){
     ${stockUp.length ? `<ul class="list">${stockUp.map(it => itemRow(it, true, "sale")).join("")}</ul>` : `<p class="note" style="padding:0 6px">${SALE_DAYS}日以内になくなる品目はありません。</p>`}</div>`);
   if (soon.length) out.push(`<div class="group soon"><h3><span>買うもの（在庫もなくなる・あと${SOON_DAYS}日以内）</span><span class="num">${soon.length}品</span></h3><ul class="list">${soon.map(it => itemRow(it, true)).join("")}</ul></div>`);
   // カテゴリーごとに折りたたみ（タップで開く）
-  const its = essentials("consumable").filter(it => !soon.includes(it) && !swap.includes(it));
+  const its = essentials("consumable");   // 2026-11-21：買うものに出ている品目も、いつもの一覧に残す（黄色で印）
   const off = itemsArr().filter(it => it.essential === false && KINDS[it.kind]);
   const cats = [...new Set([...its.map(it => it.cat || "その他"), ...(S.settings.cats || [])])];
   const acc = (key, label, a, sumTxt) => { const open = UI.catOpen.has(key) || (UI.mark && a.some(consUnsynced));
@@ -2436,6 +2437,7 @@ function budgetSheet(){
   openSheet(`<h3>消耗品の予算</h3>
   <form data-form="settings" style="display:grid;gap:12px">
     <div class="fgrid">
+      <p class="note" style="grid-column:1 / -1">1,000円単位で入れます（端数は四捨五入）。</p>
       <div class="field"><label for="b1m">👩🏼の予算（月）</label><input id="b1m" inputmode="numeric" value="${S.settings.budgets?.consMiho ?? ""}"></div>
       <div class="field"><label for="b1k">🧑🏻の予算（月）</label><input id="b1k" inputmode="numeric" value="${S.settings.budgets?.consKazu ?? ""}"></div>
     </div>
@@ -4859,7 +4861,7 @@ async function submitBody(e, f){
     } else { const lp = histOf(id).find(x => x.date), chg = lp && data.days && Number(lp.days) !== data.days;
       ok = await save(async () => { await db.doc("items/" + id).update({...data, sh: false}); if (chg) await db.doc("purchases/" + lp._id).update({days: data.days, months: data.months, synced: false, sh: false}); }, "保存しました"); if (ok) consSyncSoon([id], chg ? [lp._id] : []); }
   } else if (kind === "settings"){
-    const bm = numOrNull(val("b1m")) ?? 0, bk = numOrNull(val("b1k")) ?? 0, s = {budgets: {consumable: bm + bk, consMiho: bm, consKazu: bk, food: S.settings.budgets?.food ?? 0}, high: S.settings.high ?? .1, low: S.settings.low ?? .02, cats: S.settings.cats || []};
+    const r1k = v => Math.round(num0(v) / 1000) * 1000, bm = r1k(numOrNull(val("b1m"))), bk = r1k(numOrNull(val("b1k"))),   // 2026-11-21：予算は1,000円単位 s = {budgets: {consumable: bm + bk, consMiho: bm, consKazu: bk, food: S.settings.budgets?.food ?? 0}, high: S.settings.high ?? .1, low: S.settings.low ?? .02, cats: S.settings.cats || []};
     ok = await save(() => db.doc("settings/main").set(s), "保存しました");
   } else if (kind === "fixed"){
     const name = val("fxn"), n = numOrNull(val("fxa")); if (!name || !n){ toast("名前と金額を入れてください"); return; }

@@ -825,7 +825,7 @@ html.lifelock #view { row-gap: 4px !important; } html.lifelock, html.lifelock bo
 .lifet .lh .lbl.lsm { font-size: .74em; letter-spacing: -.03em; }
 .lifet .lh { text-overflow: clip !important; } .lifet .lh .lbl { display: inline-block !important; max-width: 86px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
 /* 2026-11-21：ライフの一番上に、白い背景の止まる帯（iPhoneの上のもや対策：上に固定の帯があると、ステータスバーがその色になる） */
-.lifetop { position: sticky; top: 0; z-index: 6; background: #fff; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); padding: 0 max(8px, env(safe-area-inset-left, 0px)) 2px; }
+.lifetop { position: sticky; top: 0; z-index: 6; background: #fff; margin: -10px calc(-1 * max(8px, env(safe-area-inset-left, 0px))) 0; padding: 10px max(8px, env(safe-area-inset-left, 0px)) 2px; }   /* 画面の一番上（y=0）にくっつける。消耗品のタブの帯と同じ形 */
 /* 2026-11-21：消耗品 — 一覧の中で開く、👩🏼・🧑🏻ごとの予算 */
 .list li.iopen { background: color-mix(in srgb, var(--wc) 6%, var(--surface)); } .iexp { padding: 0 10px 10px 14px; display: grid; gap: 6px; } .iexp .hbtns { margin: 0; } .iexp .btn { padding: 6px 8px; font-size: .8rem; min-height: 0; } .iexp .sh4 { margin: 2px 0 0; font-size: .76rem; } .iexp .hlist { font-size: .78rem; } .iexp .iedit { justify-self: start; font-size: .76rem; } .iexp > .note { font-size: .74rem; margin: 0; }
 .consp { border-left: 5px solid var(--wc); } .consp h2 { font-size: 1.1rem; } .cprow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; } .cprow .k { color: var(--muted); font-size: .8rem; } .cprow .big { font-size: 1.6rem; font-weight: 800; }

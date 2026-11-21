@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>家計予算帳</title><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="家計予算帳"><meta name="theme-color" content="#f6f4fa"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.tabs { grid-template-columns: repeat(3, 1fr) !important; }
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>家計予算帳</title><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="家計予算帳"><meta name="theme-color" content="#ffffff"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.tabs { grid-template-columns: repeat(3, 1fr) !important; }
 .lifehead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .lifewrap { overflow: auto; overscroll-behavior: none; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); -webkit-overflow-scrolling: touch; }
 .lifet { border-collapse: separate; border-spacing: 0; font-size: .86rem; font-variant-numeric: tabular-nums; min-width: 100%; }
@@ -820,7 +820,9 @@ html, body { overscroll-behavior: none; }
 html.lifefit .lifet th, html.lifefit .lifet td { font-size: var(--lfs, 13px) !important; line-height: 1.15 !important; padding-block: 0 !important; } html.lifefit .lifet tr.lsec th, html.lifefit .lifet tr.lsec td { font-size: calc(var(--lfs, 13px) * .9) !important; } html.lifefit .lifet button { min-height: 0 !important; height: auto !important; padding-block: 0 !important; line-height: 1.15 !important; font-size: inherit !important; }
 
 /* 2026-11-21：ライフ — 表の下の説明を3行＋1行に、上の見出しを詰める、▸を押しやすく */
-.nmkl { display: grid !important; gap: 0 !important; font-size: .7rem; line-height: 1.4; margin: 3px 0 0 !important; }
+.nmkl { display: grid !important; gap: 0 !important; font-size: .7rem; line-height: 1.4; margin: 2px 0 0 !important; padding: 0 !important; }
+html.lifelock #view { row-gap: 4px !important; }   /* 2026-11-21：ライフの「今の計画」・見出し・表・説明のあいだを詰める */
+.lifet .lh .lbl.lsm { font-size: .82em; letter-spacing: -.02em; }
 .nmkl span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .nmkl .nmkh { color: var(--muted); }
 .lifehead { margin: 0 0 2px !important; min-height: 0 !important; line-height: 1.1; }
 .lifehead .lhelp, .lifehead .lt { padding: 0 !important; } .lifehead .lt .info summary { width: 18px !important; height: 18px !important; min-width: 0 !important; font-size: .66rem !important; line-height: 18px !important; padding: 0 !important; }
@@ -1133,7 +1135,7 @@ html.pgbud .monthnav.mn2.stk { background: #eaf3fb !important; } html.pgact .mon
 .cnb { background: none; border: 0; padding: 0; font: inherit; text-align: left; color: var(--accent); text-decoration: underline dotted; cursor: pointer; }
 
 /* 2026-11-14（4回目）：5列を同じ幅・万円・証券 */
-.fg.f5.f4 { grid-template-columns: 1.3rem repeat(2, minmax(0, 1fr)) repeat(4, minmax(0, .78fr)) !important; } .rulerow { grid-template-columns: auto auto minmax(0, 1fr) auto !important; } .rmv { display: grid; gap: 2px; } .rmv .sbtn { min-height: 0; height: auto; padding: 1px 6px; font-size: .7rem; }
+.fg.f5.f4 { grid-template-columns: 1.3rem repeat(6, minmax(0, 1fr)) !important; }   /* 2026-11-21：6つの列を同じ幅に */ .rulerow { grid-template-columns: auto auto minmax(0, 1fr) auto !important; } .rmv { display: grid; gap: 2px; } .rmv .sbtn { min-height: 0; height: auto; padding: 1px 6px; font-size: .7rem; }
 .totwrap.tg { grid-template-columns: 1.3rem repeat(5, minmax(0, 1fr)) !important; grid-template-rows: 72px !important; }
 .totwrap.tg .tu { font-size: .55rem; color: var(--muted); font-weight: 600; line-height: 1; }
 .totwrap.tg .tb { gap: 1px !important; }
@@ -1463,7 +1465,7 @@ function render(){
   $("view").innerHTML = UI.nav.length ? navView() : UI.tab === "cons" ? ({avg: avgView, items: itemsView, review: itemsView, howto: howtoView, shops: howtoView})[UI.sub]() : ({tx: txView, cf: cfView, bal: balView, top: topView, tax: taxView, life: lifeView})[UI.tab]();
   { const alEl = $("sysAlert"), n = notices().length; alEl.hidden = !n || !!document.querySelector("#view .monthnav"); if (!alEl.hidden) alEl.innerHTML = `<button class="alicon" data-act="sysal" aria-label="お知らせ ${n}件">!</button>`; }
     document.documentElement.classList.toggle("toplock", UI.tab === "top" && !UI.nav.length); document.documentElement.classList.toggle("pgbud", UI.tab === "top" && !UI.nav.length && TPG() === "bud"); document.documentElement.classList.toggle("pgact", UI.tab === "top" && !UI.nav.length && TPG() === "act"); document.documentElement.classList.toggle("lifelock", UI.tab === "life" && !UI.nav.length); document.documentElement.classList.toggle("lifewide", UI.tab === "life" && !UI.nav.length && lifeWide());
-  { const tc = document.querySelector('meta[name="theme-color"]'), bg = getComputedStyle(document.body).backgroundColor; if (tc && bg && tc.content !== bg) tc.content = bg; }   // 2026-11-21：上のステータスバーの色をページの色に合わせる（ほかのタブで上がもやっと見えないように）
+  { const tc = document.querySelector('meta[name="theme-color"]'), bg = getComputedStyle(document.body).backgroundColor; if (tc && bg && tc.content !== bg){ const nm = document.createElement("meta"); nm.name = "theme-color"; nm.content = bg; tc.replaceWith(nm); } }   // 2026-11-21：上のステータスバーの色をページの色に合わせる（ほかのタブで上がもやっと見えないように）
   document.documentElement.classList.toggle("wigon", !!UI.wig && UI.tab === "cons" && UI.sub === "items" && !UI.nav.length);
   placeTabs(); if (UI.tab === "top" && !UI.nav.length && 1) fitTop(); if (UI.tab === "life" && !UI.nav.length) fitLife();
   if (typeof sqSoon === "function") sqSoon();
@@ -3214,15 +3216,16 @@ function lifeModel(ov){
   const TXK0 = [["itax", "所得税"], ["res", "住民税"], ["hi", "健康保険"], ["pen", "厚生年金"], ["ltc", "介護保険"], ["emp", "雇用保険"]];   // 2026-11-21：天引き（給与・年金から）は生活費の上に
   rows.push(grp("taxw", "税・社保（天引き）", -1, TXK0.map(([c, l]) => ({id: "taxw-" + c, label: l, f: ym => TAXP.reduce((t, [k]) => t + withOf(k, ym, c), 0)}))));
   rows.push(grp("living", "生活費", -1, lvKids, {icon: "🏥"}));
+  let evRowL = null;
   // 2026-11-21：特別費＝税保険等（手払いの税・社会保険料。目標の月に向けて積み立てる）＋医療など（毎月）。👩🏼・🧑🏻の同じ名前のカテゴリは1行にまとめる
   { const noEmo = n => String(n).replace(/^(👬|👩🏼|🧑🏻|🧰)\s*/u, ""), isKoz = n => String(n).includes("こづかい"), merge = arr => { const m = new Map(); arr.forEach(([n, v]) => { const k = noEmo(n); m.set(k, num0(m.get(k)) + v); }); return [...m].map(([n, v]) => catKid([n, v])); };
     const irr = [{id: "irr-tax", label: "税保険等（手払い）", fixed: true, f: ym => TAXP.reduce((t, [k]) => t + handBy(k, ym), 0)}, ...merge(lvCats.filter(([n]) => zanGrp(n) === "irregular" && !isKoz(n)))];
     rows.push(grp("lvg-irregular", GN.irregular, -1, irr));
     const evG = goalsOn().filter(g => goalGrp(g) === "event" && g.due && num0(g.target) > 0), evOther = lvCats.filter(([n]) => zanGrp(n) === "event" && !isKoz(n));
     // イベントは1行（たたまない）。期限のあるイベントはその月に、それ以外のイベントのカテゴリは毎月
-    rows.push({id: "lvg-event", label: GN.event, sign: -1, icon: "📅", fixed: true, f: ym => evG.filter(g => g.due === ym).reduce((t, g) => t + num0(g.target), 0) + (inNH(ym) ? 0 : evOther.reduce((t, [, v]) => t + v, 0)), mark: ym => evG.some(g => g.due === ym) ? "goalev" : null, evAmt: ym => evG.filter(g => g.due === ym).reduce((t, g) => t + num0(g.target), 0)});
+    evRowL = ({id: "lvg-event", label: GN.event, sign: -1, icon: "📅", fixed: true, f: ym => evG.filter(g => g.due === ym).reduce((t, g) => t + num0(g.target), 0) + (inNH(ym) ? 0 : evOther.reduce((t, [, v]) => t + v, 0)), mark: ym => evG.some(g => g.due === ym) ? "goalev" : null, evAmt: ym => evG.filter(g => g.due === ym).reduce((t, g) => t + num0(g.target), 0)});   // 2026-11-21：イベントは子どもの下に出す
     // こづかい（2人の分・👩🏼・🧑🏻）は1つにまとめてたたむ
-    const kz = lvCats.filter(([n]) => isKoz(n)).map(([n, v]) => ({...catKid([n, v]), label: n.startsWith("👬") ? "2人のこづかい" : n}));
+    const kz = lvCats.filter(([n]) => isKoz(n)).map(([n, v]) => ({...catKid([n, v]), label: n}));
     if (kz.length) rows.push(grp("lvg-koz", "こづかい", -1, kz));
     ["miho", "kazu"].forEach(g => { const ks = grpKids(g).filter(k => !isKoz(k.label)); if (ks.length) rows.push(grp("lvg-" + g, GN[g], -1, ks)); }); }
   const house = reps("house").map(repKid);   // 2026-11-20：固定資産税は税・社会保険料の行へ
@@ -3233,6 +3236,7 @@ function lifeModel(ov){
       kids: CARPARTS.map(([k, l]) => ({id: `carp-${k}`, label: l, f: ym => carsE.reduce((t, [e]) => t + num0(carCost(e, ym)[k]), 0), mark: k === "buy" ? buyMk : null, icon: "🚗"}))}); }
   kidsE.forEach(([e, i]) => rows.push({id: "child-" + i, ev: i, icon: "👶", label: "👶 " + (e.name || "子ども"), sign: -1, f: ym => Object.values(childCost(e, ym)).reduce((t, v) => t + v, 0), mark: ym => ym === e.start ? i : null,
     kids: CHILDPARTS.map(([k, l]) => ({id: `child-${i}-${k}`, label: l, f: ym => num0(childCost(e, ym)[k]), mark: k === "birth" ? (ym => ym === e.start ? i : null) : null, icon: "👶"}))}));
+  if (evRowL) rows.push(evRowL);
   if (reps("ins").length) rows.push(grp("ins", "保険料", -1, reps("ins").map(repKid)));
   if (reps("event").length) rows.push(grp("event", "一時的な支出", -1, reps("event").map(repKid), {icon: "📌"}));
   reps("other").map(repKid).forEach(k => rows.push({...k, sign: -1}));   // 2026-11-20：奨学金・歯列矯正などは、それぞれ1行で出す
@@ -3352,7 +3356,7 @@ function lifeView(){
     if (mk === "goalev") return `<td class="${cls} ev${v ? " out" : ""}" data-col="${c.key}"${tap || ` data-act="lifeGoalEv" data-ym="${c.key}"`}>📅${lifeK(v)}</td>`;
     return `<td class="${cls}${mk != null ? " ev" : ""}${r.sign < 0 && v ? " out" : ""}${nk}" data-col="${c.key}"${tap}${mk != null ? ` data-ev="${mk}" data-icon="${ic}"` : ""}>${mk != null ? ic : ""}${lifeK(v)}${r.tag && c.ix.some(j => r.tag(yms[j])) ? `<small class="tg">（年金）</small>` : ""}</td>`; };
   LIFEM = {M, cols};
-  const line = (r, kid) => `<tr class="${kid ? "kid" : r.kids ? "grp" : ""}"><th class="lh">${r.kids ? `<button type="button" class="chev2 lchev${open.has(r.id) ? " on" : ""}" data-act="lifeRow" data-id="${r.id}" aria-label="内訳を${open.has(r.id) ? "閉じる" : "開く"}"><i>▶</i></button>` : ""}<button type="button" class="lbl" data-act="lifeEdit" data-id="${r.id}">${esc(r.label)}</button></th>${cols.map(c => cell(r, c, kid ? "k" : "")).join("")}${AF ? (kid ? `<td class="af"></td>` : af(r.id)) : ""}</tr>`;
+  const line = (r, kid) => `<tr class="${kid ? "kid" : r.kids ? "grp" : ""}"><th class="lh">${r.kids ? `<button type="button" class="chev2 lchev${open.has(r.id) ? " on" : ""}" data-act="lifeRow" data-id="${r.id}" aria-label="内訳を${open.has(r.id) ? "閉じる" : "開く"}"><i>▶</i></button>` : ""}<button type="button" class="lbl${[...String(r.label)].length > 7 ? " lsm" : ""}" data-act="lifeEdit" data-id="${r.id}">${esc(r.label)}</button></th>${cols.map(c => cell(r, c, kid ? "k" : "")).join("")}${AF ? (kid ? `<td class="af"></td>` : af(r.id)) : ""}</tr>`;
   // 2026-11-15：収入と支出の区切り（見出しの行）。項目名の色も分ける
   const secRow = (sign) => `<tr class="lsec ${sign > 0 ? "in" : "out"}"><th class="lh">${sign > 0 ? "＋ 入ってくるお金" : "－ 出ていくお金"}</th>${cols.map(() => `<td></td>`).join("")}</tr>`;
   const NX = new Set(["nisa", "nisaout"]), sv = (id, c) => V[id] ? sum(V[id], c) : 0;
@@ -3402,6 +3406,11 @@ function taxSelfSheet(){ let M; { const k = UI.lifeBr; UI.lifeBr = ""; try { M =
     ${yms.length ? `<ul class="kv">${yms.map(ym => `<li><span>${esc(ymLabel(ym))}</span><span class="num">${TAXP.filter(([k]) => by[ym][k]).map(([k, l]) => `${l} ${man(by[ym][k])}`).join("　")}</span></li>`).join("")}</ul>` : `<p class="note">これから自分で払う予定はありません。</p>`}
     <h4>そのほかの税金</h4>${T.items.length ? `<ul class="shopl">${T.items.map((it, i) => `<li><span class="n">${esc(it.name)}<small>${whoNm(it.who || "both")}・年 ${yen(num0(it.annual))}・${esc(it.months || "")}月</small></span><button type="button" class="sbtn ghost2" data-act="taxitem" data-i="${i}">直す</button></li>`).join("")}</ul>` : `<p class="note">固定資産税・自動車税などがあれば追加してください。</p>`}
     <div class="btnrow"><button type="button" class="btn ghost" data-act="taxitem" data-i="">＋ 税金を追加</button><button type="button" class="btn ghost" data-act="taxCond">退職・入社の月や国保の条件</button></div>
+    <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
+/* 2026-11-21：こづかいの行。金額はトップの予算と同じ（ここでは直さない） */
+function lifeKozSheet(){ const ym = TODAY.slice(0, 7), ks = (typeof zanCats === "function" ? zanCats() : []).filter(n => n.includes("こづかい")).map(n => [n, num0(zanBud(ym, n))]), L = lifeDoc();
+  openSheet(`<h3>こづかい</h3><ul class="kv">${ks.map(([n, v]) => `<li><span>${esc(n)}</span><span class="num">月 ${yen(v)}</span></li>`).join("")}<li><span><b>合計</b></span><span class="num"><b>月 ${yen(ks.reduce((t, [, v]) => t + v, 0))}</b></span></li></ul>
+    <p class="note">毎月の額は、トップの予算（${ymLabel(ym)}）と同じです。変えるときは、トップの予算で変えてください。表では物価の上がる分をかけ、🧑🏻が${L.oldA1}歳から${L.oldP1}%、${L.oldA2}歳から${L.oldP2}%に減らしています（基本生活費と同じ）。</p>
     <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
 /* 2026-11-18：はじめて見る人向けの説明（ライフプラン・消耗品） */
 function lifeHelp(){ openSheet(`<h3>ライフプランの見方</h3><div class="helpb">
@@ -3456,7 +3465,7 @@ function lifeIncomeSheet(){ const L = lifeDoc(), n = lifeN;
     ${lifeFld(`people.${k}.partAge`, "パートに切り替える年齢", p.partAge ?? "", {dec: 1, ph: "なし"})}${lifeFld(`people.${k}.partPay`, "パートの月収（今のお金の価値）", n(p.partPay))}
     ${lifeFld(`people.${k}.retAge`, "退職する年齢", p.retAge ?? "", {dec: 1, ph: "65"})}${lifeFld(`people.${k}.penAge`, "年金を受け取る年齢（60〜75）", p.penAge ?? "", {dec: 1, ph: "65"})}
     ${lifeFld(`people.${k}.rb`, "退職金（手取り）", n(p.rb))}${lifeFld(`people.${k}.rbYm`, "退職金の月", esc(p.rbYm || ""), {month: 1})}</div></section>`; };
-  lifeForm("収入", "退職・転職の時期は、表の💼を長押しで動かすか、税金タブで入れます。額面は源泉徴収票の「支払金額」（税・社会保険料を引く前）です。年金は「60歳まで会社員で、65歳から受け取る」場合の月額を、今のお金の価値で入れます（ねんきん定期便の見込み額÷12）。退職する年齢が60歳より早い／遅いと厚生年金が減る／増え、受け取りを遅らせると1か月0.7%増えます（70歳で42%増）。辞めてから年金までの間は、貯蓄とNISAを崩してつなぎます。表では毎年（物価上昇−0.5%）ずつ増やします（マクロ経済スライドの目安）。", `<div class="btnrow"><button type="button" class="btn ghost" data-act="lifeRetFind">退職と年金の年齢をくらべる</button><button type="button" class="btn ghost" data-act="lifePenGrid">2人の年金の年齢をくらべる</button></div>` + TAXP.map(person).join("")); }
+  lifeForm("収入", "退職・転職の時期は、表の💼を長押しで動かすか、特別費の「税保険等」の画面の「退職・入社の月や国保の条件」で入れます。額面は源泉徴収票の「支払金額」（税・社会保険料を引く前）です。年金は「60歳まで会社員で、65歳から受け取る」場合の月額を、今のお金の価値で入れます（ねんきん定期便の見込み額÷12）。退職する年齢が60歳より早い／遅いと厚生年金が減る／増え、受け取りを遅らせると1か月0.7%増えます（70歳で42%増）。辞めてから年金までの間は、貯蓄とNISAを崩してつなぎます。表では毎年（物価上昇−0.5%）ずつ増やします（マクロ経済スライドの目安）。", `<div class="btnrow"><button type="button" class="btn ghost" data-act="lifeRetFind">退職と年金の年齢をくらべる</button><button type="button" class="btn ghost" data-act="lifePenGrid">2人の年金の年齢をくらべる</button></div>` + TAXP.map(person).join("")); }
 function lifeLivingSheet(){ const L = lifeDoc(), cats = (typeof zanCats === "function" ? zanCats() : []).filter(nm => num0(zanBud(TODAY.slice(0, 7), nm)) > 0 && zanGrp(nm) !== "invest");
   lifeForm("基本生活費", "空のときは、トップの予算配分のカテゴリの合計（印を外したカテゴリは除く）を使います。老人ホームに入る月からは、基本生活費の代わりに老人ホームの費用（月額×人数、入る月は入居一時金も）になります。費用の目安は、介護付き有料老人ホームで1人月15〜20万円（郊外）、特養で月8〜15万円です。表では毎年の物価上昇をかけますが、名前に「家賃」が入るカテゴリは、引っ越さなければほぼ上がらないので、かけません。年をとると外食・こづかい・仕事の費用などが減るので、家賃以外の生活費を🧑🏻の年齢で減らします（FPの表でよく使う、65歳から8割・75歳から7割が初期値）。", `<section class="lfs"><div class="lfg">${lifeFld("living", "毎月の生活費", lifeN(S.life?.living ?? null), {ph: "予算配分から"})}</div>
 </section>
@@ -3528,7 +3537,7 @@ function topView(){
   const balC = (c, j) => `<button class="cb${c.warn ? " warn" : ""}" ${tAt(j, 6)} data-act="${c.k === "event" ? "goals" : "balset"}" data-id="${c.k === "event" ? "event" : c.b}" aria-label="${BK[c.b]}の残高を合わせる"><span class="ct">${c.n}</span><span class="cn2 num${c.bal < 0 ? " neg" : ""}">${kY(c.bal)}</span><span class="cu">万円</span>${c.warn ? `<span class="cd">ドコモ${kY(c.act)}</span>` : ""}</button>`;
   return [topNav(ym), `<section class="fg f5 f4">
     <span class="rl" style="grid-row:1">収入</span>
-    ${advBox(ym) ? advBox(ym) : ""}<button class="incbar" style="grid-row:1;grid-column:2 / ${advBox(ym) ? "6" : "-1"}" data-act="incact" aria-label="収入を入れる"><span class="big2 num">${kY(a.inc)}<small>万円</small></span><span class="ips incs"><span class="incm">${Number(prevYmOf(ym).slice(5))}月に入った収入</span>${!a.incDef ? (ib != null ? `<span>予算 <b class="num">${kY(ib)}</b>万円</span><span>差 <b class="num">${kS(a.inc - ib)}</b></span>` : "") : `<span>${ib == null ? "収入の予算が未入力" : "未入力（予算の額）"}</span>`}</span></button>
+    ${advBox(ym) ? advBox(ym) : ""}<button class="incbar" style="grid-row:1;grid-column:2 / ${advBox(ym) ? "6" : "-1"}" data-act="incact" aria-label="収入を入れる"><span class="big2 num">${kY(a.inc)}<small>万円</small></span><span class="ips incs"><span class="incm">${Number(prevYmOf(ym).slice(5))}月の収入</span>${!a.incDef ? (ib != null ? `<span>予算 <b class="num">${kY(ib)}</b>万円</span><span>差 <b class="num">${kS(a.inc - ib)}</b></span>` : "") : `<span>${ib == null ? "収入の予算が未入力" : "未入力（予算の額）"}</span>`}</span></button>
     <span class="rl" style="grid-row:3">分配</span>${cols.map((c, j) => { const v = c.inv ? (invB == null ? null : num0(invB) + num0(adj.add.invest)) : p.alloc ? c.alloc : null, plus = num0(adj.add[c.inv ? "invest" : c.k]), cut = c.inv ? 0 : num0(adj.cut[c.k]);
       return `<button class="ca ${v ? "down" : "none"}${c.inv ? " inv" : ""}${cut > 0 ? " red" : ""}" ${tAt(j, 3)} data-act="allocrule" data-id="${c.k}" aria-label="${c.n}の分配（決まりの説明）">${(() => { const sv = !c.inv && (c.k === "event" || c.k === "irregular") && v != null ? Math.min(Math.max(0, planSave(ym, c.k)), v - Math.max(0, plus)) : 0, pl = plus > 0 && cut <= 0 && v != null ? plus : 0, bs = v == null ? 0 : v - sv - pl;
       // 2026-11-21：分配を色分け。ふつう＝使うつもりの予算、黄＝積み立てる予算（車・子ども・期限のあるイベント）、青＝余り
@@ -4521,7 +4530,7 @@ document.addEventListener("click", e => {
     case "lifeBrDel": { const id = b.dataset.id, br = (S.life?.branches || []).find(x => x.id === id); if (!br || !confirm(`「${br.title}」を消しますか？`)) break; UI.lifeBr = "";
       lifeSave({branches: (S.life.branches || []).filter(x => x.id !== id)}, "消しました").then(ok => ok && closeSheet()); break; }
     case "lifeEdit": { const id = b.dataset.id, L = lifeDoc(), num = x => Number(String(id).split("-")[1]);
-      if (id === "lvg-event") lifeGoalEvSheet(""); else if (/^(irr-tax|taxw|lvg-irregular)/.test(id)) taxSelfSheet(); else
+      if (id === "lvg-event") lifeGoalEvSheet(""); else if (id === "lvg-koz" || /^lv-c-.*こづかい/.test(id)) lifeKozSheet(); else if (/^(irr-tax|taxw|lvg-irregular)/.test(id)) taxSelfSheet(); else
       if (/^(inc|aid|allow|lvpay|once-in|rb-)/.test(id)) lifeIncomeSheet(); else if (/^nisa(out|w|s)/.test(id)) lifeNisaSheet(); else if (/^(living|lv-|lvg-)/.test(id)) lifeLivingSheet(); else if (id === "bal") lifeSavSheet(); else if (id === "nisa") lifeNisaSheet();
       else if (id === "cars"){ const cs = L.events.map((e, i) => [e, i]).filter(([e]) => e.type === "car"); if (cs.length === 1) lifeEvSheet(String(cs[0][1])); else openSheet(`<h3>🚗 車</h3><div style="display:grid;gap:8px">${cs.map(([e, i]) => `<button type="button" class="btn ghost" data-act="lifeEv" data-i="${i}">${esc(e.name || "車")}（${esc(e.start || "")}〜${esc(e.end || "")}）</button>`).join("")}</div><div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
       else if (/^carp-/.test(id)) { const c0 = L.events.findIndex(e => e.type === "car"); if (c0 >= 0) lifeEvSheet(String(c0)); }
@@ -4645,7 +4654,7 @@ function lifeBalSheet(key){ if (!LIFEM) return; const {M, cols} = LIFEM, c = col
   const man = v => `${(Math.round(v / 1000) / 10).toLocaleString("ja-JP")}万円`, lab = c.m ? `${ymLabel(c.key)}末` : `${c.key}年末`; if (!k) return;
   const other = bal - k.fund - k.keep - k.rsv, row = (n, v, sub = "") => `<div class="cmid tot"><span class="n">${n}${sub ? `<small class="gsub">${sub}</small>` : ""}</span><span class="num">${man(v)}</span><span></span></div>`;
   openSheet(`<h3>貯蓄残高（${lab}）</h3><section class="cgrp">
-    ${row("🚗👶 車・子どもの積立", k.fund, "使う予定が決まっているお金")}
+    ${row("🚗👶🧾 車・子ども・税保険等の積立", k.fund, "使う予定が決まっているお金")}
     ${row(`生活の${k.m}か月分`, k.keep, `生活費 ${man(k.living)}・特別費 ${man(k.irregular)}${k.rep ? `・奨学金など ${man(k.rep)}` : ""}${k.house ? `・住居 ${man(k.house)}` : ""}${k.ins ? `・保険 ${man(k.ins)}` : ""}（月あたり）× ${k.m}`)}
     ${k.rsv ? row("この先12か月の赤字の月への備え", k.rsv, "車検・税金など、出ていく方が多い月の分") : ""}
     ${Math.round(other / 1000) ? row(other > 0 ? "それ以外（次の月にNISAへ）" : "線に足りない分", other) : ""}

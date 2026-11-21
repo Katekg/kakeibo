@@ -3433,8 +3433,8 @@ function taxSelfSheet(){ let M; { const k = UI.lifeBr; UI.lifeBr = ""; try { M =
     <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
 /* 2026-11-21：トップの貯蓄と計のあいだの一言。①ライフプランで赤字になる年齢 ②実績の月で予算オーバーの枠 ③生活費の貯蓄が目標に足りない */
 let TMSG = {k: null, v: null};
-function topMsg(ym){ const key = [S.life, S.tax, S.plan, TODAY]; let neg = null;
-  if (TMSG.k && TMSG.k.every((x, i) => x === key[i])) neg = TMSG.v; else { try { const k0 = UI.lifeBr; UI.lifeBr = ""; try { const M = lifeModel(), j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth; neg = j >= 0 ? {age: kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) : null, y: M.yms[j].slice(0, 4)} : false; } finally { UI.lifeBr = k0; } } catch (e) { neg = false; } TMSG = {k: key, v: neg}; }
+function topMsg(ym){ const key = [S.life, S.tax, S.plan, TODAY]; let neg = null; if (S.ready < 2) return ["", ""];   // データが変わると GCACHE が作り直されるので、その中に覚える
+  if (GCACHE.__neg && GCACHE.__neg.k.every((x, i) => x === key[i])) neg = GCACHE.__neg.v; else { try { const k0 = UI.lifeBr; UI.lifeBr = ""; try { const M = lifeModel(), j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth; neg = j >= 0 ? {age: kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) : null, y: M.yms[j].slice(0, 4)} : false; } finally { UI.lifeBr = k0; } } catch (e) { neg = false; } GCACHE.__neg = {k: key, v: neg}; }
   if (neg) return ["neg", `このままだと${neg.age != null ? neg.age + "歳" : neg.y + "年"}で貯蓄が足りなくなります。予算を超えないように気をつけましょう`];
   if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = MAIN4.filter(k => num0(a.g[k]) - num0(al[k]) > 500); if (ov.length) return ["warn", `${ov.map(k => GN[k]).join("・")}が予算をオーバーしています`]; } }
   const p = planOf(ym), b = bucketBal(ym), liv = num0(b.common) + num0(b.emergency), keep = num0(p.alloc?.living) * keepM(ym);

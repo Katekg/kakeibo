@@ -829,6 +829,25 @@ html.lifefit .lifet th, html.lifefit .lifet td { font-size: var(--lfs, 13px) !im
 .lifet .lh .chev2.lchev { display: inline-grid; place-items: center; width: 1.5em; height: 1.5em; margin: 0 4px 0 -2px; vertical-align: middle; border-radius: 7px; background: color-mix(in srgb, var(--accent) 13%, var(--surface)); color: var(--accent); }
 .lifet .lh .chev2.lchev i { font-style: normal; font-size: .62em; line-height: 1; transition: transform .15s; } .lifet .lh .chev2.lchev.on i { transform: rotate(90deg); }
 .lifet .lh .chev2.lchev::after { content: ""; position: absolute; inset: -6px -4px; } .lifet .lh .chev2.lchev { position: relative; }
+
+/* 2026-11-21：消耗品 — 1行を低く・文字を小さく、大カテゴリー（誰）の色、買うものの左の色、ぐらぐら（並べ替え）、使い道を詰める */
+.whoblk { border-left: 4px solid var(--cc); padding-left: 8px; display: grid; gap: 4px; margin-top: 8px; }
+.whoh { display: flex; justify-content: space-between; align-items: baseline; padding: 0 2px; } .whoh .t { font-weight: 800; font-size: 1.05rem; } .whoh .num { font-size: .76rem; color: var(--muted); }
+.subblk .cath { padding: 0 2px; } .subblk .cath .t { color: var(--cc); font-size: .82rem; } .subblk .list { border-color: color-mix(in srgb, var(--cc) 35%, var(--line)); min-height: 8px; }
+.catl .irow, .group.soon .irow, .group.sale .irow { padding: 5px 8px 5px 10px; gap: 8px; }
+.catl .ibtn .nm, .group.soon .ibtn .nm { font-size: .84rem; } .catl .ibtn .sub, .group.soon .ibtn .sub { font-size: .68rem; }
+.catl .ival, .group.soon .ival { font-size: .8rem; } .catl .ival small { font-size: .64rem; }
+.list li.wbar { box-shadow: inset 4px 0 0 var(--wc); } .list li.wbar .irow, .list li.wbar .ibtns { padding-left: 14px; }
+.catl li { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; background: var(--surface); }
+.wigon .catl li { animation: wig .28s ease-in-out infinite alternate; } .wigon .catl li:nth-child(2n) { animation-delay: -.14s; }
+@keyframes wig { from { transform: rotate(-.6deg); } to { transform: rotate(.6deg); } }
+.catl li.dragging { animation: none !important; position: relative; z-index: 20; box-shadow: 0 8px 22px rgba(0,0,0,.18); border-radius: 10px; }
+.wigbar { position: sticky; top: 0; z-index: 8; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 8px; background: var(--surface); border: 1.5px solid var(--accent); border-radius: 12px; font-size: .8rem; }
+.wighint { font-size: .7rem; text-align: center; }
+.hbtns { margin: 4px 0 8px; }
+.mrow .n { font-weight: 700; }
+details.ht { margin: 4px 0 !important; } details.ht > summary { padding: 6px 10px !important; gap: 0 !important; }
+.htcard { padding-top: 10px !important; } .htcard .htq { margin: 4px 0 !important; } h3.rvcat.htc { margin: 8px 0 2px !important; font-size: .82rem; }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
 .iot2 small { font-size: .66rem; font-weight: 400; opacity: .8; } .iot2.o { background: #ffe1e1; color: #b3261e; } .iot2.i { background: #fff3c4; color: #7a5a00; } .iot2.ro { cursor: default; align-content: center; }
@@ -1444,6 +1463,7 @@ function render(){
   { const alEl = $("sysAlert"), n = notices().length; alEl.hidden = !n || !!document.querySelector("#view .monthnav"); if (!alEl.hidden) alEl.innerHTML = `<button class="alicon" data-act="sysal" aria-label="お知らせ ${n}件">!</button>`; }
     document.documentElement.classList.toggle("toplock", UI.tab === "top" && !UI.nav.length); document.documentElement.classList.toggle("pgbud", UI.tab === "top" && !UI.nav.length && TPG() === "bud"); document.documentElement.classList.toggle("pgact", UI.tab === "top" && !UI.nav.length && TPG() === "act"); document.documentElement.classList.toggle("lifelock", UI.tab === "life" && !UI.nav.length); document.documentElement.classList.toggle("lifewide", UI.tab === "life" && !UI.nav.length && lifeWide());
   { const tc = document.querySelector('meta[name="theme-color"]'), bg = getComputedStyle(document.body).backgroundColor; if (tc && bg && tc.content !== bg) tc.content = bg; }   // 2026-11-21：上のステータスバーの色をページの色に合わせる（ほかのタブで上がもやっと見えないように）
+  document.documentElement.classList.toggle("wigon", !!UI.wig && UI.tab === "cons" && UI.sub === "items" && !UI.nav.length);
   placeTabs(); if (UI.tab === "top" && !UI.nav.length && 1) fitTop(); if (UI.tab === "life" && !UI.nav.length) fitLife();
   if (typeof sqSoon === "function") sqSoon();
 }
@@ -1469,24 +1489,27 @@ function avgView(){
         <div class="fixed"><span class="k">必須品（月平均）</span><span class="v">${yen(s.total)}</span><span class="s">予算の${s.budget ? Math.round(s.total / s.budget * 100) : 0}%</span></div>
         <div class="freebox"><span class="k">${over ? "予算オーバー" : "自由に使えるのは"}</span><span class="v">${yen(s.free)}</span><span class="s">1日あたり 約${yen(s.free / 30)}</span></div>
       </div>
-      ${s.cats.length > 1 ? `<div class="rows">${s.cats.map(([c, v]) => `<div class="mrow"><span class="n">${esc(c)}</span><span class="v">${yen(v)}・${s.budget ? Math.round(v / s.budget * 100) : 0}%</span><div class="mbar"><i style="width:${(v / s.cats[0][1] * 100).toFixed(1)}%"></i></div></div>`).join("")}</div>` : ""}
+      ${kind === "consumable" ? (bw => `<div class="rows">${bw.map(([l, v, col]) => `<div class="mrow" style="--wc:${col}"><span class="n">${l}</span><span class="v">${yen(v)}・${s.budget ? Math.round(v / s.budget * 100) : 0}%</span><div class="mbar"><i style="width:${(v / Math.max(1, ...bw.map(x => x[1])) * 100).toFixed(1)}%;background:${col}"></i></div></div>`).join("")}</div>`)(CWHO.map(([w, l, col]) => [l, s.known.filter(it => cwhoOf(it) === w).reduce((t, it) => t + monthly(it), 0), col])) : s.cats.length > 1 ? `<div class="rows">${s.cats.map(([c, v]) => `<div class="mrow"><span class="n">${esc(c)}</span><span class="v">${yen(v)}・${s.budget ? Math.round(v / s.budget * 100) : 0}%</span><div class="mbar"><i style="width:${(v / s.cats[0][1] * 100).toFixed(1)}%"></i></div></div>`).join("")}</div>` : ""}
       ${s.missing.length ? `<div class="notice"><p>金額か「もつ期間」が未入力の品目が <b>${s.missing.length}件</b> あり、この平均に入っていません（${s.missing.slice(0, 6).map(it => esc(it.name)).join("、")}${s.missing.length > 6 ? " ほか" : ""}）。「品目」から入力すると、実際の平均に近づきます。</p></div>` : ""}
       ` : `<p class="note">まだ品目がありません。「品目」タブの「＋ 品目を追加」から、決まって買う${kind === "food" ? "食材（米など）" : "消耗品"}を登録してください。</p>`}
     </section>`;
   }).join("");
 }
 
+/* 2026-11-21：消耗品の大カテゴリー＝誰に交換をお願いするか（👩🏼＝ピンク・🧑🏻＝青）。小カテゴリー＝今までの分類（洗面・お風呂など） */
+const CWHO = [["miho", "👩🏼", "#de819d"], ["kazu", "🧑🏻", "#5b8dd0"]], cwhoOf = it => it.who === "miho" ? "miho" : "kazu", whoCol = w => (CWHO.find(x => x[0] === w) || CWHO[1])[2];
+/* 「なくなった」を押したもの（そのあとまだ買っていない） */
+const isGone = it => !!it.outAt && !histOf(it.id).some(p => (p.date || "") >= it.outAt);
 function itemRow(it, soon = false, mode = ""){
-  const m = monthly(it), l = lifeOf(it), mk = UI.mark && consUnsynced(it);
+  const m = monthly(it), l = lifeOf(it), mk = UI.mark && consUnsynced(it), gone = isGone(it);
   const when = (d, n) => `${md(d)}ごろ${n < 0 ? `（${-n}日過ぎ）` : n <= SOON_DAYS ? `（あと${n}日）` : ""}`;
-  const sub = [it.product, l ? [l.swap && l.dSwap < l.dOut ? `交換 ${when(l.swap, l.dSwap)}` : "", `なくなる ${when(l.out, l.dOut)}`, l.stock ? `在庫${l.stock}個` : ""].filter(Boolean).join("・") : it.lastBought ? `前回${md(it.lastBought)}` : ""].filter(Boolean).join(" ・ ");
+  const sub = [gone ? "なくなった" : "", it.note, it.product, l && !gone ? [l.swap && l.dSwap < l.dOut ? `交換 ${when(l.swap, l.dSwap)}` : "", `なくなる ${when(l.out, l.dOut)}`, l.stock ? `在庫${l.stock}個` : ""].filter(Boolean).join("・") : it.lastBought ? `前回${md(it.lastBought)}` : ""].filter(Boolean).join(" ・ ");
   const btns = `<button class="sbtn ghost2" data-act="compare" data-id="${it.id}" aria-label="${esc(it.name)}の値段を比べる">比べる</button><button class="sbtn" data-act="buy" data-id="${it.id}" aria-label="${esc(it.name)}を買った記録">買った</button>`;
-  const rv = rvOfItem(it.id);
-  return `<li class="${mk ? "mk" : ""}"><div class="irow">
+  // 2026-11-21：品目の一覧ではボタンを出さない（タップした先に 比べる・買った・なくなった）。買うものの行は左に誰の色
+  return `<li class="${mk ? "mk" : ""}${soon ? " wbar" : ""}" data-id="${it.id}" style="--wc:${whoCol(cwhoOf(it))}"><div class="irow">
     <button class="ibtn" data-act="hist" data-id="${it.id}"><span class="nm">${esc(it.name)}</span><span class="sub">${esc(sub) || "&nbsp;"}</span></button>
     <span class="ival">${m != null ? `${yen(m)}<small>／月</small>` : `<span class="badge warn">未入力</span>`}</span>
-    ${soon ? "" : btns}
-  </div>${rv ? `<button type="button" class="rvnote${rv.to.type === "drop" ? " drop" : ""}" data-act="rvgo">🔁 見直し：${esc(rvLine(rv))}</button>` : ""}${soon ? `<div class="ibtns">${mode === "sale" ? "" : `<button class="sbtn ghost2" data-act="later" data-id="${it.id}">まだ少し持ちそう</button>`}${btns}</div>` : ""}</li>`;
+  </div>${soon ? `<div class="ibtns">${mode === "sale" ? "" : gone ? `<button class="sbtn ghost2" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button class="sbtn ghost2" data-act="later" data-id="${it.id}">まだ少し持ちそう</button>`}${btns}</div>` : ""}</li>`;
 }
 const daysLeft = it => { const n = nextDate(it); return n ? Math.round((parse(n) - parse(TODAY)) / 864e5) : null; };
 const SOON_DAYS = 14, SALE_DAYS = 60;   // セールのときは、60日以内になくなる品目を買いだめ候補にする
@@ -1575,7 +1598,7 @@ function itemsView(){
   const out = [];
   // そろそろなくなりそうな物（前回の購入日＋もつ期間から、あと14日以内・過ぎたもの）を一番上に
   const all = essentials("consumable"), L = Object.fromEntries(all.map(it => [it.id, lifeOf(it)]));
-  const soon = all.filter(it => L[it.id] && L[it.id].dOut <= SOON_DAYS).sort((a, b) => L[a.id].dOut - L[b.id].dOut);
+  const soon = all.filter(it => isGone(it) || (L[it.id] && L[it.id].dOut <= SOON_DAYS)).sort((a, b) => (isGone(b) - isGone(a)) || ((L[a.id]?.dOut ?? -999) - (L[b.id]?.dOut ?? -999)));
   const swap = [];
   const sales = salesNow(), stockUp = sales.length ? all.filter(it => L[it.id] && L[it.id].dOut <= SALE_DAYS).sort((a, b) => (L[a.id]?.dOut ?? 0) - (L[b.id]?.dOut ?? 0)) : [];
   if (sales.length) out.push(`<div class="group sale"><h3><span>セール中・買いだめ候補</span><span class="num">${stockUp.length}品</span></h3>
@@ -1588,11 +1611,15 @@ function itemsView(){
   const cats = [...new Set([...its.map(it => it.cat || "その他"), ...(S.settings.cats || [])])];
   const acc = (key, label, a, sumTxt) => { const open = UI.catOpen.has(key) || (UI.mark && a.some(consUnsynced));
     return `<div class="group acc"><button class="acch" data-act="catT" data-k="${esc(key)}" aria-expanded="${open}"><span class="chev2">${open ? "▾" : "▸"}</span><span class="t">${esc(label)}</span><span class="num">${sumTxt}</span></button>${open ? (a.length ? `<ul class="list">${a.map(it => itemRow(it)).join("")}</ul>` : `<p class="note" style="padding:0 6px">まだ品目がありません。「＋ 品目を追加」でこのカテゴリーを選んでください。</p>`) : ""}</div>`; };
-  // 2026-11-18：カテゴリーは常に開いて、縁の色で分ける。名前の横の「直す」で名前の変更・削除
-  cats.forEach((c, i) => { const a = its.filter(it => (it.cat || "その他") === c), sum = a.reduce((s, it) => s + (monthly(it) || 0), 0);
-    out.push(`<div class="group catblk" style="--cc:${CATCOL[i % CATCOL.length]}"><div class="cath"><span class="t">${esc(c)}</span><span class="num">${a.length}品・月 ${yen(sum)}</span><button type="button" class="linkbtn" data-act="catedit" data-k="${esc(c)}">直す</button></div>${a.length ? `<ul class="list">${a.map(it => itemRow(it)).join("")}</ul>` : `<p class="note" style="padding:0 6px">まだ品目がありません。</p>`}</div>`); });
+  // 2026-11-21：大カテゴリー（👩🏼・🧑🏻）の中に小カテゴリー。長押しでぐらぐら → ドラッグで並べ替え・カテゴリーの移動
+  const msum = a => a.reduce((s, it) => s + (monthly(it) || 0), 0), wig = !!UI.wig;
+  if (wig) out.push(`<div class="wigbar"><span>ドラッグで並べ替え・カテゴリーの移動</span><button type="button" class="btn" data-act="wigoff">完了</button></div>`);
+  CWHO.forEach(([w, lab, col]) => { const wi = its.filter(it => cwhoOf(it) === w), subs = [...new Set([...wi.map(it => it.cat || "その他"), ...(wig ? cats : [])])];
+    out.push(`<div class="group whoblk" style="--cc:${col}"><div class="whoh"><span class="t">${lab}</span><span class="num">${wi.length}品・月 ${yen(msum(wi))}</span></div>${subs.map(c => { const a = wi.filter(it => (it.cat || "その他") === c);
+      return `<div class="subblk"><div class="cath"><span class="t">${esc(c)}</span><span class="num">月 ${yen(msum(a))}</span><button type="button" class="linkbtn" data-act="catedit" data-k="${esc(c)}">直す</button></div><ul class="list catl" data-who="${w}" data-cat="${esc(c)}">${a.map(it => itemRow(it)).join("")}</ul></div>`; }).join("")}</div>`); });
   if (off.length) out.push(acc("__off", "決まって買うものから外したもの", off, `${off.length}品`));
   out.push(`<div class="btnrow"><button class="btn" data-act="add">＋ 品目を追加</button><button class="btn ghost" data-act="catadd">＋ カテゴリーを追加</button></div>`);
+  out.push(`<p class="note wighint">品目を長押しすると、並べ替えやカテゴリーの移動ができます。</p>`);
   out.push(`<section class="card"><h2>購入の記録について</h2><p class="note">「買った」で記録すると、前の分を使い切った日から次の分を使い始める、という順につないで、なくなる日を出します（前の分をもう使い切っていたときは、記録のときに印をつけます）。思ったより持ちそうなときは「まだ少し持ちそう」で日数を延ばせて、これまでの平均もそれに合わせて変わります。1回に何個も買う品目は、もつ日数÷個数ごとに交換の目安と在庫を自動で出します。金額ともつ日数は月平均に反映されます。品目名をタップすると、これまでの購入の一覧が出ます。記録はその場でスプレッドシート（家計予算帳 - データベースの「消耗品_購入履歴」タブ）にも書き込まれます。</p></section>`);
   return out.join("");
 }
@@ -2221,10 +2248,14 @@ function fitSheet(){ const sh = $("sheet"); if (sh) sh.style.overflowY = sh.scro
 function closeSheet(){ $("sheet").classList.remove("trbig"); if (UI.backModal && !$("sheetWrap").hidden){ const g = UI.backModal, sy = UI.backSY || 0; UI.backModal = null; grpModal(g); requestAnimationFrame(() => { $("sheet").scrollTop = sy; }); return; }
   $("sheetWrap").hidden = true; $("sheetWrap").classList.remove("top"); document.documentElement.classList.remove("lock"); $("sheet").innerHTML = ""; UI.modal = null; $("sheet").classList.remove("h23"); if (pending){ pending = false; render(); } const y = UI.sheetSY || 0; requestAnimationFrame(() => setSY(y)); setTimeout(() => setSY(y), 120); }
 function buySheet(it, pre = {}){
-  const k = pre.packs ?? it.packs ?? 1, q = pre.qty ?? it.qty ?? "", a = avgDays(it), segs = chainOf(it), d0 = a.n ? a.d : (Number(it.days) || segs[segs.length - 1]?.planDays || mo2d(it.months) || "");
+  const k = pre.packs ?? it.packs ?? 1, q = pre.qty ?? it.qty ?? "", segs = chainOf(it), vs = Array.isArray(it.variants) ? it.variants : [];
+  // 2026-11-21：種類のある品目（石鹸または泡ボディソープ）は、選んだ種類のこれまでの平均の日数を入れる（なくなるペースが違うため）
+  const vAvg = v => { const a2 = segs.filter(x => x.done && x.days > 0 && x.p?.variant === v); return a2.length ? Math.round(a2.reduce((t, x) => t + x.days, 0) / a2.length) : null; }, v0 = vs.length ? (histOf(it.id).find(p => p.variant)?.variant || vs[0]) : "";
+  const a = avgDays(it), d0 = (v0 && vAvg(v0)) || (a.n ? a.d : (Number(it.days) || segs[segs.length - 1]?.planDays || mo2d(it.months) || ""));
   openSheet(`<h3>${esc(it.name)}を買った</h3>
   <form data-form="buy" data-id="${it.id}" style="display:grid;gap:12px">
     <div class="fgrid">
+      ${vs.length ? `<div class="field"><label for="bv">種類</label><select id="bv" onchange="const d=this.selectedOptions[0].dataset.d; if (d) document.getElementById('bm').value=d">${vs.map(v => `<option ${v === v0 ? "selected" : ""} data-d="${vAvg(v) || ""}">${esc(v)}</option>`).join("")}</select></div>` : ""}
       <div class="field"><label for="bd">購入日</label><input id="bd" type="date" value="${TODAY}"></div>
       <div class="field"><label for="bp">金額（円）</label><input id="bp" inputmode="numeric" value="${pre.price ?? it.price ?? ""}"></div>
       <div class="field"><label for="bq">数量（1個あたり）</label><input id="bq" data-calc="tot" value="${esc(q)}" placeholder="例 100m・400ml"></div>
@@ -3140,9 +3171,10 @@ function lifeModel(ov){
   const hh = (num0(R.medH) + num0(R.supH) + num0(R.kidH)) / 12, hhTax = ym => TAXP.some(([k]) => selfOff(k, ym) || (age65(k) && ym >= age65(k) && P0(k) && ageAt(k, ym) < 75)) ? hh : 0;
   const joinYm = k => { const p = T?.people?.[k]; return p && p.retire && p.join ? p.join : null; };
   // 2026-11-21：自分で払う（手払い）月か。会社にいる間（給与から天引き）と、年金からの天引き（65歳から）は false
-  const selfMode = (k, ym) => { if (netOf1(k, ym) != null) return false; const a65 = age65(k), rY = retYm(k); if (a65 && ym >= a65) return false;
+  const selfMode = (k, ym) => { const a65 = age65(k), rY = retYm(k); if (a65 && ym >= a65) return false;
     if (rY && ym >= rY && !leaveOf(k, ym)) return !(pen(k, ym) > 0); return selfOff(k, ym); };
-  const handOf = (k, ym) => { if (!selfMode(k, ym)) return 0; const o = taxParts(k, ym); return o.hi + o.ltc + o.pen + o.res; };
+  // 手取りが分かっている月（失業手当など）も、国保・国民年金・住民税は自分で払う
+  const handOf = (k, ym) => { if (!selfMode(k, ym)) return 0; if (netOf1(k, ym) != null) return selfTax(k, ym); const o = taxParts(k, ym); return o.hi + o.ltc + o.pen + o.res; };
   const withOf = (k, ym, c) => { const o = taxParts(k, ym); return selfMode(k, ym) ? (c === "itax" ? o.itax : 0) : o[c]; };
   const titemOf = (who, ym) => titems.filter(it => (it.who || "both") === who).reduce((t, it) => t + itemCost(it, ym), 0);
   // 手払いの税保険等（人ごと）：国保の世帯の分は🧑🏻、2人の分（both）の税金は半分ずつ
@@ -4135,9 +4167,11 @@ function histSheet(it){
   const dInfo = p => { const x = segs.find(y => y.p === p); if (!x || !x.days) return {d: "", per: ""}; const c = cntOf(p);
     return {d: x.done ? `${x.days}日もった` : x.start > TODAY ? `${md(x.start)}から${x.days}日の予定` : `${x.days}日の予定`, per: c ? `1${c.u}あたり${fmtD(x.days / c.n)}日` : ""}; };
   openSheet(`<div class="hhead"><h3>${esc(it.name)}</h3><button type="button" class="sbtn ghost2" data-act="edit" data-id="${it.id}">✏️ 品目を編集</button></div>
+  ${it.note ? `<p class="note">${esc(it.note)}</p>` : ""}
+  <div class="btnrow three hbtns"><button type="button" class="btn ghost" data-act="compare" data-id="${it.id}">比べる</button><button type="button" class="btn" data-act="buy" data-id="${it.id}">買った</button>${isGone(it) ? `<button type="button" class="btn ghost" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button type="button" class="btn ghost" data-act="gone" data-id="${it.id}">なくなった</button>`}</div>
   <p class="note">${esc([it.product, it.shop].filter(Boolean).join(" ・ "))}${m != null ? `${it.product || it.shop ? " ・ " : ""}月 ${yen(m)}` : ""}${a.n ? ` ・ 平均${a.d}日もつ（${a.n}回分）` : ""}</p>
   ${h.length ? `<h4 class="sh4">これまでの購入（タップで直せます）</h4><ul class="hlist">${h.map(p => { const u = unitOf(p), di = dInfo(p); return `<li><button type="button" class="hl" data-act="editp" data-id="${p._id}"><span class="d">${p.date ? p.date.replace(/-/g, "/") : "日付不明"}</span><span class="pr num">${p.price ? yen(p.price) : "—"}${di.d ? `<small> ・ ${di.d}</small>` : ""}</span><span class="q">${esc([p.product, qtyLabel(p)].filter(Boolean).join(" ・ "))}</span><span class="u num">${[u ? unitTxt(u) : "", di.per].filter(Boolean).join(" ・ ")}</span></button></li>`; }).join("")}</ul>` : `<p class="note">まだ購入の記録がありません。</p>`}
-  <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">閉じる</button><button type="button" class="btn" data-act="buy" data-id="${it.id}">買った</button></div>`);
+  <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">閉じる</button></div>`);
 }
 function laterSheet(it){
   const l = lifeOf(it), c = l?.cur, f = d => d ? d.replace(/-/g, "/") : "—";
@@ -4361,7 +4395,10 @@ document.addEventListener("click", e => {
     case "mark": markNext(); break;
     case "markoff": UI.mark = false; render(); break;
     case "sheetsync": sheetSyncAll(); break;
-    case "hist": histSheet(S.items[id]); break;
+    case "hist": if (UI.wig || WIG.justDropped) break; histSheet(S.items[id]); break;
+    case "gone": { const it = S.items[id]; save(() => db.doc("items/" + id).update({outAt: TODAY, sh: false}), `${it.name}を「買うもの」に入れました`).then(ok => { if (!ok) return; closeSheet(); UI.sub = "items"; render(); toTop(); }); break; }
+    case "ungone": { const it = S.items[id]; save(() => db.doc("items/" + id).update({outAt: null, sh: false}), `${it.name}を「買うもの」から外しました`).then(ok => { if (ok){ closeSheet(); render(); } }); break; }
+    case "wigoff": UI.wig = false; render(); break;
     case "later": laterSheet(S.items[id]); break;
     case "shopdel": { const L = shopsOf().slice(), x = L[Number(b.dataset.i)]; if (!x || !confirm(`${x.name}をお店の一覧から消しますか？`)) break; L.splice(Number(b.dataset.i), 1); save(() => shopsDoc({list: L}), "消しました"); break; }
     case "shopadd": { const n = $("shn").value.trim(); if (!n){ toast("お店の名前を入れてください"); break; } if (shopsOf().some(x => x.name === n)){ toast("もうあります"); break; } save(() => shopsDoc({list: [...shopsOf(), {name: n, rate: 1, url: $("shu").value.trim(), saleUrl: $("shs").value.trim()}]}), `${n}を追加しました`); break; }
@@ -4729,10 +4766,10 @@ async function submitBody(e, f){
     if (ok){ if (linking){ UI.link = null; UI.linkCtx = null; render(); } if (ref?.id) syncTxSoon(["app-" + ref.id]); }
   } else if (kind === "buy"){
     const it = S.items[id], date = val("bd") || TODAY; let pref = null;
-    const rec = {date, itemId: id, kind: it.kind, cat: it.cat || "", name: it.name, product: val("bn"), shop: val("bs"), qty: val("bq"), packs: numOrNull(val("bk")) || 1, price: numOrNull(val("bp")), days: numOrNull(val("bm")), months: d2mo(numOrNull(val("bm"))), fresh: $("bu")?.checked ? true : null, source: "app", synced: false, createdAt: new Date().toISOString()};
+    const rec = {date, itemId: id, kind: it.kind, cat: it.cat || "", name: it.name, variant: $("bv")?.value || null, product: val("bn"), shop: val("bs"), qty: val("bq"), packs: numOrNull(val("bk")) || 1, price: numOrNull(val("bp")), days: numOrNull(val("bm")), months: d2mo(numOrNull(val("bm"))), fresh: $("bu")?.checked ? true : null, source: "app", synced: false, createdAt: new Date().toISOString()};
     ok = await save(async () => {
       pref = await db.collection("purchases").add({...rec, sh: false});
-      const upd = {product: rec.product, shop: rec.shop, qty: rec.qty, packs: rec.packs, price: rec.price, days: rec.days, months: rec.months, sh: false};
+      const upd = {product: rec.product, shop: rec.shop, qty: rec.qty, packs: rec.packs, price: rec.price, days: rec.days, months: rec.months, outAt: null, sh: false};
       if (!it.lastBought || date >= it.lastBought) upd.lastBought = date;
       await db.doc("items/" + id).update(upd);
     }, `${it.name}を記録しました`);
@@ -5110,6 +5147,28 @@ let sqRaf = 0; const sqSoon = () => { cancelAnimationFrame(sqRaf); sqRaf = reque
 try { new ResizeObserver(sqSoon).observe(document.getElementById("view")); } catch (e) {}
 try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", sqSoon); new MutationObserver(sqSoon).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]}); } catch (e) {}
 
+/* 2026-11-21：消耗品の並べ替え。品目を長押し → ぐらぐら（UI.wig）→ ドラッグで場所・カテゴリー（誰・小カテゴリー）を変える。
+   並び順は前後の品目の間の数（order）にするので、書き込みは動かした1品だけ */
+const WIG = {t: 0, li: null, x: 0, y: 0, on: false, justDropped: false};
+document.addEventListener("pointerdown", e => { const li = e.target.closest?.(".catl li[data-id]"); if (!li || UI.tab !== "cons" || UI.nav.length) return;
+  WIG.li = li; WIG.x = e.clientX; WIG.y = e.clientY; WIG.on = false; clearTimeout(WIG.t);
+  const start = () => { WIG.on = true; if (!UI.wig){ UI.wig = true; const id = li.dataset.id; render(); WIG.li = document.querySelector(`.catl li[data-id="${id}"]`); } WIG.li?.classList.add("dragging"); WIG.oy = WIG.y; navigator.vibrate?.(15); };
+  if (UI.wig) start(); else WIG.t = setTimeout(start, 450); });
+document.addEventListener("pointermove", e => { if (!WIG.li) return; if (!WIG.on){ if (Math.hypot(e.clientX - WIG.x, e.clientY - WIG.y) > 8){ clearTimeout(WIG.t); WIG.li = null; } return; }
+  e.preventDefault(); const li = WIG.li; li.style.pointerEvents = "none";   // 指の下の場所に、その行を差し込む
+  const under = document.elementFromPoint(e.clientX, e.clientY), tli = under?.closest?.(".catl li[data-id]"), tul = under?.closest?.(".catl") || under?.closest?.(".subblk")?.querySelector(".catl");
+  if (tli && tli !== li){ const r = tli.getBoundingClientRect(); tli.parentNode.insertBefore(li, e.clientY < r.top + r.height / 2 ? tli : tli.nextSibling); } else if (tul && !tli && !tul.contains(li)) tul.appendChild(li);
+  li.style.pointerEvents = "";
+  if (e.clientY > innerHeight - 110) scrollBy(0, 10); if (e.clientY < 80) scrollBy(0, -10); }, {passive: false});
+document.addEventListener("touchmove", e => { if (WIG.on && WIG.li && e.cancelable) e.preventDefault(); }, {passive: false});
+const wigEnd = () => { clearTimeout(WIG.t); const li = WIG.li, on = WIG.on; WIG.li = null; WIG.on = false; if (!li || !on) return; li.classList.remove("dragging"); li.style.transform = "";
+  WIG.justDropped = true; setTimeout(() => WIG.justDropped = false, 350);
+  const ul = li.parentNode, id = li.dataset.id, it = S.items[id]; if (!it || !ul?.dataset) return; const ord = x => Number(S.items[x?.dataset?.id]?.order);
+  const pv = li.previousElementSibling, nx = li.nextElementSibling, a = pv ? ord(pv) : null, b = nx ? ord(nx) : null;
+  const order = a != null && b != null ? (a + b) / 2 : a != null ? a + 1 : b != null ? b - 1 : num0(it.order), cat = ul.dataset.cat, who = ul.dataset.who;
+  const upd = {}; if (Math.abs(order - num0(it.order)) > 1e-9 && !(a != null && b != null && num0(it.order) > a && num0(it.order) < b)) upd.order = Math.round(order * 1e6) / 1e6; if (cat && cat !== (it.cat || "その他")) upd.cat = cat; if (who && who !== cwhoOf(it)) upd.who = who;
+  if (!Object.keys(upd).length) return; S.items[id] = {...it, ...upd}; save(() => db.doc("items/" + id).update({...upd, sh: false}), "並べ替えました").then(() => render()); };
+document.addEventListener("pointerup", wigEnd); document.addEventListener("pointercancel", wigEnd);
 /* ---------- boot ---------- */
 // 相手のスマホからの更新で、入力中のフォームが消えないようにする
 let pending = false;

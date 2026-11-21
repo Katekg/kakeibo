@@ -2850,7 +2850,7 @@ const ZAN_ALIAS = {"👬水道光熱": ["👬水道光熱費"], "👬税保険�
 /* カテゴリの予算：その枠の中項目の予算。枠がまだ前の中項目のままなら、名前の近い前の中項目（ほかの枠も含む）の予算を使う */
 /* 2026-11-21：支出を入れていないカテゴリは予算どおり使ったとみなす。ただし前もって貯めるイベント（車・子ども・期限のある旅行など）は、使った時に入れるので、入れていなければ0（積み立てたまま） */
 const isSaveGoal = n => { const g = goalOf(n); return !!g && (!!g.auto || (goalGrp(g) === "event" && !!g.due)); };
-const spendDef = (ym, n) => { if (!isSaveGoal(n)) return zanBud(ym, n); const g = goalOf(n);   // 2026-11-21：自動の積立（税保険等・車など）は、払う予定の月はその額を使ったことにする
+const spendDef = (ym, n) => { const g = goalOf(n); if (!isSaveGoal(n) || (g?.start && ym < g.start)) return zanBud(ym, n);   // 積立を始める前の月は今までどおり   // 2026-11-21：自動の積立（税保険等・車など）は、払う予定の月はその額を使ったことにする
   return g?.auto ? Math.round((autoInfo().lumps[g.auto] || []).filter(x => x.ym === ym).reduce((t, x) => t + x.amt, 0) / 1000) * 1000 : 0; };
 function zanBud(ym, n){ const v = (planOf(ym).allocMid || {})[zanGrp(n)]?.[n]; return v == null ? null : num0(v); }
 const zanBudget = ym => { let y = ym; for (let i = 0; i < 24; i++){ const v = S.monthin?.[y]?.zan?.["予算合計"]; if (v !== undefined && v !== null && v !== "") return {v: num0(v), from: y}; y = prevYmOf(y); } return null; };
@@ -3509,7 +3509,7 @@ function advManSheet(){ const ym = curYm(), a = advManOf(ym), y0 = v => v ? num0
     ${!a.own && a.from ? `<p class="note">${ymLabel(a.from)}の合計を引き継いでいます。保存すると${ymLabel(ym)}の記録になります。</p>` : ""}
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div></form>`); }
 /* 2026-11-21：移行額の矢印の色。赤＝貯蓄から支出へ回した、黄＝予算どおり積立として貯蓄へ、青＝予算より多く貯蓄できた（余り） */
-const planSave = (ym, g) => zanCatsOf(g).filter(n => isSaveGoal(n)).reduce((t, n) => t + num0(zanBud(ym, n)), 0);
+const planSave = (ym, g) => zanCatsOf(g).filter(n => isSaveGoal(n) && !(goalOf(n)?.start > ym)).reduce((t, n) => t + num0(zanBud(ym, n)), 0);
 const mvArrow = (j, m, p, act, k, nm) => { m = Math.round(m); if (!m) return tArrow(j, 5, 0, act, k, `${nm}の移行額`);
   if (m < 0) return `<button class="ca up mvr" ${tAt(j, 5)} data-act="${act}" data-id="${k}" aria-label="${nm}：貯蓄から支出へ${kY(-m)}万"><span class="g">↑</span><span class="n num">${kY(-m)}</span><span class="un">万円</span></button>`;
   const y = Math.min(m, Math.max(0, Math.round(p))), b = m - y, one = (cls, v, u) => `<span class="pa ${cls}"><span class="g">↓</span><span class="n num">${kY(v)}</span><span class="un">${u}</span></span>`;

@@ -1323,24 +1323,35 @@ html.lifewide .wrap { padding-bottom: calc(78px + max(6px, env(safe-area-inset-b
   const snapC = c => ({docs: Object.entries(CACHE[c] || {}).map(([id, v]) => ({id, data: () => v}))});
   const snapD = (c, id) => { const v = (CACHE[c] || {})[id]; return {exists: !!v, data: () => v}; };
   const fire = cs => subs.slice().forEach(s => { if (!cs || cs.includes(s.c)) try { s.cb(s.id == null ? snapC(s.c) : snapD(s.c, s.id)); } catch (e) { console.error(e); } });
-  const load = () => loaded = (KEY() || inGAS ? run("getAll") : new Promise(() => { const g = () => keyGate(); document.body ? g() : document.addEventListener("DOMContentLoaded", g); })).then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; });
-  load();
+  const load = () => loaded = (KEY() || inGAS ? run("getAll") : new Promise(() => { const g = () => keyGate(); document.body ? g() : document.addEventListener("DOMContentLoaded", g); })).then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; saveLocal(); });
+  /* 2026-11-21：ホーム画面アプリは、前回のデータ（この端末の中だけに保存）ですぐ画面を出し、裏で最新を取りに行く。
+     最新が届くまでは「更新中」を出し、保存（書き込み）は最新が届いてからにする */
+  const LKEY = "kkCache1", saveLocal = () => { if (inGAS) return; clearTimeout(saveLocal.t); saveLocal.t = setTimeout(() => { try { localStorage.setItem(LKEY, JSON.stringify({data: CACHE, stamp: STAMP, me: window.KAKEI_ME || "", url: window.KAKEI_SS || "", at: Date.now()})); } catch (e) {} }, 300); };
+  const stale = on => { window.KAKEI_STALE = on; const f = () => { let b = document.getElementById("staleBadge"); if (on && !b){ b = document.createElement("div"); b.id = "staleBadge"; b.textContent = "最新に更新中…"; b.style.cssText = "position:fixed;top:calc(6px + env(safe-area-inset-top,0px));right:8px;z-index:50;font:600 11px -apple-system,sans-serif;color:#5b6;background:rgba(255,255,255,.92);border:1px solid #cde;border-radius:999px;padding:2px 9px;pointer-events:none"; document.body.appendChild(b); } if (!on && b) b.remove(); }; document.body ? f() : document.addEventListener("DOMContentLoaded", f); };
+  let fresh = null;
+  const cached = (() => { if (inGAS || !KEY()) return null; try { const c = JSON.parse(localStorage.getItem(LKEY) || "null"); return c && c.data ? c : null; } catch (e) { return null; } })();
+  if (cached){ Object.assign(CACHE, cached.data); STAMP = cached.stamp; window.KAKEI_ME = cached.me; window.KAKEI_SS = cached.url; loaded = Promise.resolve(); stale(true);
+    fresh = run("getAll").then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; saveLocal(); stale(false); fire(); }, e => { stale(false); throw e; });
+  } else load();
+  const ready = () => fresh ? fresh.catch(() => {}) : Promise.resolve();
   // 相手のスマホで記録した分：1分ごと（と、画面に戻ったとき）に変わったかを見て、変わっていれば読み直す
-  const check = async () => { if (document.hidden) return; try { const st = await run("getStamp"); if (st !== STAMP){ await load(); fire(); } } catch (e) {} };
+  const check = async () => { if (document.hidden || window.KAKEI_STALE) return; try { const st = await run("getStamp"); if (st !== STAMP){ await load(); fire(); } } catch (e) {} };
   setInterval(check, 60000); document.addEventListener("visibilitychange", check);
-  const local = (c, id, v, st) => { if (st) STAMP = st; CACHE[c] = CACHE[c] || {}; if (v === null) delete CACHE[c][id]; else CACHE[c][id] = v; fire([c]); };
+  const local = (c, id, v, st) => { if (st) STAMP = st; CACHE[c] = CACHE[c] || {}; if (v === null) delete CACHE[c][id]; else CACHE[c][id] = v; fire([c]); saveLocal(); };
   const clean = o => JSON.parse(JSON.stringify(o));
   const listen = (c, id) => (cb, err) => { const s = {c, id, cb}; subs.push(s); loaded.then(() => cb(id == null ? snapC(c) : snapD(c, id))).catch(e => err && err(e)); return () => subs.splice(subs.indexOf(s), 1); };
   const DB = {
-    collection: c => ({onSnapshot: listen(c, null), add: async doc => { const r = await run("addDoc", c, clean(doc)); local(c, r.id, r.doc, r.stamp); return {id: r.id}; }}),
+    collection: c => ({onSnapshot: listen(c, null), add: async doc => { await ready(); const r = await run("addDoc", c, clean(doc)); local(c, r.id, r.doc, r.stamp); return {id: r.id}; }}),
     doc: p => { const [c, id] = p.split("/"); return {
       onSnapshot: listen(c, id),
-      set: async doc => { let r; try { r = await run("setDoc", c, id, clean(doc), false, (CACHE[c] || {})[id]?.updatedAt ?? null); } catch (e){ if (String(e?.message || e).includes("STALE")){ await load(); fire(); const x = new Error("stale"); x.code = "stale"; throw x; } throw e; } local(c, id, r.doc, r.stamp); },   // 2026-11-17：古い画面からの上書きを止める
-      update: async part => { const r = await run("setDoc", c, id, clean(part), true); local(c, id, r.doc, r.stamp); },
-      delete: async () => { const r = await run("delDoc", c, id); local(c, id, null, r.stamp); }}; }
+      set: async doc => { await ready(); let r; try { r = await run("setDoc", c, id, clean(doc), false, (CACHE[c] || {})[id]?.updatedAt ?? null); } catch (e){ if (String(e?.message || e).includes("STALE")){ await load(); fire(); const x = new Error("stale"); x.code = "stale"; throw x; } throw e; } local(c, id, r.doc, r.stamp); },   // 2026-11-17：古い画面からの上書きを止める
+      update: async part => { await ready(); const r = await run("setDoc", c, id, clean(part), true); local(c, id, r.doc, r.stamp); },
+      delete: async () => { await ready(); const r = await run("delDoc", c, id); local(c, id, null, r.stamp); }}; }
   };
   window.claude = {use: async n => n === "db" ? DB : null};
   window.GAS = run;   // Apps Script のほかの関数（Gemini で調べる aiSales・aiPrice）
+  // 2026-11-21：ホーム画面アプリは、画面のファイルもiPhoneに覚えておく（sw.js）。新しい版は裏で取ってきて、次に開いた時から
+  if (!inGAS && "serviceWorker" in navigator && location.protocol === "https:") try { navigator.serviceWorker.register("sw.js"); } catch (e) {}
 })();
 </script>
 <div class="wrap" id="app" lang="ja">

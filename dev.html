@@ -826,7 +826,7 @@ html.lifefit .lifet th, html.lifefit .lifet td { font-size: var(--lfs, 13px) !im
 .lifehead .lhelp, .lifehead .lt { padding: 0 !important; } .lifehead .lt .info summary { width: 18px !important; height: 18px !important; min-width: 0 !important; font-size: .66rem !important; line-height: 18px !important; padding: 0 !important; }
 .lifehead .sbtn { padding: 1px 8px !important; min-height: 0 !important; }
 .ltbar { padding: 4px 10px !important; margin: 2px 0 3px !important; }
-.lifet .lh .chev2.lchev { display: inline-grid; place-items: center; width: 1.5em; height: 1.5em; margin: 0 4px 0 -2px; vertical-align: middle; border-radius: 7px; background: color-mix(in srgb, var(--accent) 13%, var(--surface)); color: var(--accent); }
+.lifet .lh .chev2.lchev { display: inline-grid !important; place-items: center; width: 19px !important; height: 19px !important; box-sizing: border-box; margin: 0 4px 0 -2px; vertical-align: middle; border-radius: 7px; background: color-mix(in srgb, var(--accent) 13%, var(--surface)); color: var(--accent); }
 .lifet .lh .chev2.lchev i { font-style: normal; font-size: .62em; line-height: 1; transition: transform .15s; } .lifet .lh .chev2.lchev.on i { transform: rotate(90deg); }
 .lifet .lh .chev2.lchev::after { content: ""; position: absolute; inset: -6px -4px; } .lifet .lh .chev2.lchev { position: relative; }
 
@@ -845,6 +845,7 @@ html.lifefit .lifet th, html.lifefit .lifet td { font-size: var(--lfs, 13px) !im
 .wigbar { position: sticky; top: 0; z-index: 8; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 8px; background: var(--surface); border: 1.5px solid var(--accent); border-radius: 12px; font-size: .8rem; }
 .wighint { font-size: .7rem; text-align: center; }
 .hbtns { margin: 4px 0 8px; }
+.group.soon .ibtns, .group.sale .ibtns { padding: 0 8px 6px 14px !important; gap: 6px !important; } .group.soon .ibtns .sbtn, .group.sale .ibtns .sbtn { padding: 4px 10px !important; font-size: .76rem !important; min-height: 0 !important; }
 .mrow .n { font-weight: 700; }
 details.ht { margin: 4px 0 !important; } details.ht > summary { padding: 6px 10px !important; gap: 0 !important; }
 .htcard { padding-top: 10px !important; } .htcard .htq { margin: 4px 0 !important; } h3.rvcat.htc { margin: 8px 0 2px !important; font-size: .82rem; }
@@ -2849,7 +2850,8 @@ const ZAN_ALIAS = {"👬水道光熱": ["👬水道光熱費"], "👬税保険�
 /* カテゴリの予算：その枠の中項目の予算。枠がまだ前の中項目のままなら、名前の近い前の中項目（ほかの枠も含む）の予算を使う */
 /* 2026-11-21：支出を入れていないカテゴリは予算どおり使ったとみなす。ただし前もって貯めるイベント（車・子ども・期限のある旅行など）は、使った時に入れるので、入れていなければ0（積み立てたまま） */
 const isSaveGoal = n => { const g = goalOf(n); return !!g && (!!g.auto || (goalGrp(g) === "event" && !!g.due)); };
-const spendDef = (ym, n) => isSaveGoal(n) ? 0 : zanBud(ym, n);
+const spendDef = (ym, n) => { if (!isSaveGoal(n)) return zanBud(ym, n); const g = goalOf(n);   // 2026-11-21：自動の積立（税保険等・車など）は、払う予定の月はその額を使ったことにする
+  return g?.auto ? Math.round((autoInfo().lumps[g.auto] || []).filter(x => x.ym === ym).reduce((t, x) => t + x.amt, 0) / 1000) * 1000 : 0; };
 function zanBud(ym, n){ const v = (planOf(ym).allocMid || {})[zanGrp(n)]?.[n]; return v == null ? null : num0(v); }
 const zanBudget = ym => { let y = ym; for (let i = 0; i < 24; i++){ const v = S.monthin?.[y]?.zan?.["予算合計"]; if (v !== undefined && v !== null && v !== "") return {v: num0(v), from: y}; y = prevYmOf(y); } return null; };
 function zanView(){
@@ -3210,7 +3212,7 @@ function lifeModel(ov){
   if (L.kozDown) lvKids.push({id: "lv-kozd", label: "こづかいを下げる（もしの案）", fixed: true, f: ym => ym < a65k ? -L.kozDown : 0});   // 2026-11-21：減らした分は貯蓄に残り、線を超えた分が毎月NISAへ
   if (L.nhStart) lvKids.push({id: "lv-nh", label: "🏥 老人ホーム", f: nhCost, mark: ym => ym === L.nhStart ? "nh" : null, icon: "🏥"});
   const TXK0 = [["itax", "所得税"], ["res", "住民税"], ["hi", "健康保険"], ["pen", "厚生年金"], ["ltc", "介護保険"], ["emp", "雇用保険"]];   // 2026-11-21：天引き（給与・年金から）は生活費の上に
-  rows.push(grp("taxw", "税・社会保険料（天引き）", -1, TXK0.map(([c, l]) => ({id: "taxw-" + c, label: l, f: ym => TAXP.reduce((t, [k]) => t + withOf(k, ym, c), 0)}))));
+  rows.push(grp("taxw", "税・社保（天引き）", -1, TXK0.map(([c, l]) => ({id: "taxw-" + c, label: l, f: ym => TAXP.reduce((t, [k]) => t + withOf(k, ym, c), 0)}))));
   rows.push(grp("living", "生活費", -1, lvKids, {icon: "🏥"}));
   // 2026-11-21：特別費＝税保険等（手払いの税・社会保険料。目標の月に向けて積み立てる）＋医療など（毎月）。👩🏼・🧑🏻の同じ名前のカテゴリは1行にまとめる
   { const noEmo = n => String(n).replace(/^(👬|👩🏼|🧑🏻|🧰)\s*/u, ""), isKoz = n => String(n).includes("こづかい"), merge = arr => { const m = new Map(); arr.forEach(([n, v]) => { const k = noEmo(n); m.set(k, num0(m.get(k)) + v); }); return [...m].map(([n, v]) => catKid([n, v])); };

@@ -59,7 +59,7 @@ html.lifedrag, html.lifedrag body { overflow: hidden; touch-action: none; }
 .taxt td, .taxt th { font-size: .78rem; padding: 5px 4px; }
 .taxp { border-left: 5px solid var(--zc); } .taxp .field input, .taxp .field select, .taxr .field input { font-size: 16px; }
 .taxr summary { cursor: pointer; } .taxr .field small { font-size: .7rem; }
-#subnav .subtabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#subnav .subtabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .group.swap > h3 { color: var(--accent); } .group.sale > h3 { color: #b0651a; } .group.sale .list { border-color: #f0c99a; }
 .salechips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 2px 4px; } .schip { background: #fff1de; color: #8a4a10; border-radius: 999px; padding: 2px 10px; font-size: .74rem; } .schip.soon { background: var(--bg); color: var(--muted); } .schip small { margin-left: 4px; opacity: .8; }
 .shopl { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; } .shopl li { display: flex; align-items: center; gap: 8px; background: var(--bg); border-radius: 12px; padding: 6px 10px; } .shopl .n { flex: 1; min-width: 0; font-weight: 700; } .shopl .n small { display: block; font-weight: 400; font-size: .72rem; color: var(--muted); }
@@ -822,7 +822,18 @@ html.lifefit .lifet th, html.lifefit .lifet td { font-size: var(--lfs, 13px) !im
 /* 2026-11-21：ライフ — 表の下の説明を3行＋1行に、上の見出しを詰める、▸を押しやすく */
 .nmkl { display: grid !important; gap: 0 !important; font-size: .7rem; line-height: 1.4; margin: 2px 0 0 !important; padding: 0 !important; }
 html.lifelock #view { row-gap: 4px !important; }   /* 2026-11-21：ライフの「今の計画」・見出し・表・説明のあいだを詰める */
-.lifet .lh .lbl.lsm { font-size: .82em; letter-spacing: -.02em; }
+.lifet .lh .lbl.lsm { font-size: .74em; letter-spacing: -.03em; }
+.lifet .lh .lbl { display: inline-block !important; max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+/* 2026-11-21：ライフの一番上に、白い背景の止まる帯（iPhoneの上のもや対策：上に固定の帯があると、ステータスバーがその色になる） */
+.lifetop { position: sticky; top: 0; z-index: 6; background: #fff; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); padding: 0 max(8px, env(safe-area-inset-left, 0px)) 2px; }
+/* 2026-11-21：消耗品 — 一覧の中で開く、👩🏼・🧑🏻ごとの予算 */
+.list li.iopen { background: color-mix(in srgb, var(--wc) 6%, var(--surface)); } .iexp { padding: 0 10px 10px 14px; display: grid; gap: 6px; } .iexp .hbtns { margin: 0; } .iexp .btn { padding: 6px 8px; font-size: .8rem; min-height: 0; } .iexp .sh4 { margin: 2px 0 0; font-size: .76rem; } .iexp .hlist { font-size: .78rem; } .iexp .iedit { justify-self: start; font-size: .76rem; } .iexp > .note { font-size: .74rem; margin: 0; }
+.consp { border-left: 5px solid var(--wc); } .consp h2 { font-size: 1.1rem; } .cprow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; } .cprow .k { color: var(--muted); font-size: .8rem; } .cprow .big { font-size: 1.6rem; font-weight: 800; }
+.cpbar { position: relative; height: 10px; border-radius: 6px; background: color-mix(in srgb, var(--wc) 12%, var(--surface)); display: flex; overflow: hidden; } .cpbar i { background: var(--wc); } .cpbar b { background: var(--alert); }
+.cpst { margin: 2px 0 0; font-size: .82rem; font-weight: 700; } .cpst.ok { color: #2f8f5f; } .cpst.ng { color: var(--alert); } .cptop { font-size: .74rem; }
+.cpsum { padding: 8px 12px !important; } .cpsum .cprow .num { font-size: .9rem; }
+/* 2026-11-21：トップの貯蓄と計のあいだの一言（文字がない時も同じ高さを空けておく） */
+.topmsg { margin: -8px 0 -6px; min-height: 1.4em; font-size: .7rem; line-height: 1.4; text-align: center; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .topmsg.neg { color: var(--alert); font-weight: 700; } .topmsg.warn { color: #b07a00; font-weight: 700; }
 .nmkl span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .nmkl .nmkh { color: var(--muted); }
 .lifehead { margin: 0 0 2px !important; min-height: 0 !important; line-height: 1.1; }
 .lifehead .lhelp, .lifehead .lt { padding: 0 !important; } .lifehead .lt .info summary { width: 18px !important; height: 18px !important; min-width: 0 !important; font-size: .66rem !important; line-height: 18px !important; padding: 0 !important; }
@@ -958,7 +969,7 @@ html.lifedrag, html.lifedrag body { overflow: hidden; touch-action: none; }
 .taxt td, .taxt th { font-size: .78rem; padding: 5px 4px; }
 .taxp { border-left: 5px solid var(--zc); } .taxp .field input, .taxp .field select, .taxr .field input { font-size: 16px; }
 .taxr summary { cursor: pointer; } .taxr .field small { font-size: .7rem; }
-#subnav .subtabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#subnav .subtabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .group.swap > h3 { color: var(--accent); } .group.sale > h3 { color: #b0651a; } .group.sale .list { border-color: #f0c99a; }
 .salechips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 2px 4px; } .schip { background: #fff1de; color: #8a4a10; border-radius: 999px; padding: 2px 10px; font-size: .74rem; } .schip.soon { background: var(--bg); color: var(--muted); } .schip small { margin-left: 4px; opacity: .8; }
 .shopl { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; } .shopl li { display: flex; align-items: center; gap: 8px; background: var(--bg); border-radius: 12px; padding: 6px 10px; } .shopl .n { flex: 1; min-width: 0; font-weight: 700; } .shopl .n small { display: block; font-weight: 400; font-size: .72rem; color: var(--muted); }
@@ -1471,8 +1482,19 @@ function render(){
   if (typeof sqSoon === "function") sqSoon();
 }
 
+/* 2026-11-21：消耗品は👩🏼・🧑🏻それぞれに予算（settings/main.budgets.consMiho・consKazu）。合計が消耗品の予算 */
+const consBud = w => num0(S.settings.budgets?.[w === "miho" ? "consMiho" : "consKazu"]);
+function consPersonCard([w, l, col]){ const its = essentials("consumable").filter(it => cwhoOf(it) === w), known = its.filter(it => monthly(it) != null), miss = its.filter(it => monthly(it) == null);
+  const avg = known.reduce((t, it) => t + monthly(it), 0), bud = consBud(w), rest = bud - avg, mx = Math.max(bud, avg) || 1, top = known.slice().sort((a, b) => monthly(b) - monthly(a)).slice(0, 3);
+  return `<section class="card consp" style="--wc:${col}"><div class="card-head"><h2>${l}</h2><button class="linkbtn" data-act="budget">予算 <span class="num">${yen(bud)}</span>／月</button></div>
+    <div class="cprow"><span class="k">月平均</span><span class="big num">${yen(avg)}</span></div>
+    <div class="cpbar"><i style="width:${(Math.min(avg, bud) / mx * 100).toFixed(1)}%"></i>${avg > bud ? `<b style="width:${((avg - bud) / mx * 100).toFixed(1)}%"></b>` : ""}</div>
+    <p class="cpst ${rest >= 0 ? "ok" : "ng"}">${bud ? (rest >= 0 ? `✓ 予算内・あと <b class="num">${yen(rest)}</b> の余裕` : `⚠️ 予算を <b class="num">${yen(-rest)}</b> オーバー`) : "予算が未設定です"}</p>
+    ${top.length ? `<p class="note cptop">大きいもの：${top.map(it => `${esc(it.name)} ${yen(monthly(it))}`).join("・")}</p>` : ""}
+    ${miss.length ? `<p class="note">まだ金額が入っていない：${miss.map(it => esc(it.name)).join("、")}（「品目」で買ったときに入ります）</p>` : ""}</section>`; }
 function avgView(){
-  return Object.keys(KINDS).map(kind => {
+  const sAll = summary("consumable"), bAll = CWHO.reduce((t, [w]) => t + consBud(w), 0);
+  return `<section class="card cpsum"><div class="cprow"><span class="k">2人の合計</span><span class="num"><b>${yen(sAll.total)}</b> ／ 予算 ${yen(bAll)}</span></div><p class="cpst ${bAll - sAll.total >= 0 ? "ok" : "ng"}">${bAll - sAll.total >= 0 ? `あと ${yen(bAll - sAll.total)} の余裕` : `${yen(sAll.total - bAll)} オーバー`}</p></section>` + CWHO.map(consPersonCard).join("") + Object.keys(KINDS).filter(k => k !== "consumable").map(kind => {
     const s = summary(kind);
     const base = Math.max(s.budget, s.total) || 1, w = n => (Math.max(0, n) / base * 100).toFixed(2) + "%";
     const over = s.total > s.budget;
@@ -1509,10 +1531,11 @@ function itemRow(it, soon = false, mode = ""){
   const sub = [gone ? "なくなった" : "", it.note, it.product, l && !gone ? [l.swap && l.dSwap < l.dOut ? `交換 ${when(l.swap, l.dSwap)}` : "", `なくなる ${when(l.out, l.dOut)}`, l.stock ? `在庫${l.stock}個` : ""].filter(Boolean).join("・") : it.lastBought ? `前回${md(it.lastBought)}` : ""].filter(Boolean).join(" ・ ");
   const btns = `<button class="sbtn ghost2" data-act="compare" data-id="${it.id}" aria-label="${esc(it.name)}の値段を比べる">比べる</button><button class="sbtn" data-act="buy" data-id="${it.id}" aria-label="${esc(it.name)}を買った記録">買った</button>`;
   // 2026-11-21：品目の一覧ではボタンを出さない（タップした先に 比べる・買った・なくなった）。買うものの行は左に誰の色
-  return `<li class="${mk ? "mk" : ""}${soon ? " wbar" : ""}" data-id="${it.id}" style="--wc:${whoCol(cwhoOf(it))}"><div class="irow">
-    <button class="ibtn" data-act="hist" data-id="${it.id}"><span class="nm">${esc(it.name)}</span><span class="sub">${esc(sub) || "&nbsp;"}</span></button>
+  const opn = UI.itOpen === it.id + (soon ? ":s" : "");   // 2026-11-21：タップで一覧の中に開く
+  return `<li class="${mk ? "mk" : ""}${soon ? " wbar" : ""}${opn ? " iopen" : ""}" data-id="${it.id}" style="--wc:${whoCol(cwhoOf(it))}"><div class="irow">
+    <button class="ibtn" data-act="hist" data-id="${it.id}" data-s="${soon ? 1 : ""}" aria-expanded="${opn}"><span class="nm">${esc(it.name)}</span><span class="sub">${esc(sub) || "&nbsp;"}</span></button>
     <span class="ival">${m != null ? `${yen(m)}<small>／月</small>` : `<span class="badge warn">未入力</span>`}</span>
-  </div>${soon ? `<div class="ibtns">${mode === "sale" ? "" : gone ? `<button class="sbtn ghost2" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button class="sbtn ghost2" data-act="later" data-id="${it.id}">まだ少し持ちそう</button>`}${btns}</div>` : ""}</li>`;
+  </div>${opn ? `<div class="iexp">${histBody(it, true)}</div>` : ""}${soon && !opn ? `<div class="ibtns">${mode === "sale" ? "" : gone ? `<button class="sbtn ghost2" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button class="sbtn ghost2" data-act="later" data-id="${it.id}">まだ少し持ちそう</button>`}${btns}</div>` : ""}</li>`;
 }
 const daysLeft = it => { const n = nextDate(it); return n ? Math.round((parse(n) - parse(TODAY)) / 864e5) : null; };
 const SOON_DAYS = 14, SALE_DAYS = 60;   // セールのときは、60日以内になくなる品目を買いだめ候補にする
@@ -2411,7 +2434,8 @@ function budgetSheet(){
   openSheet(`<h3>消耗品の予算</h3>
   <form data-form="settings" style="display:grid;gap:12px">
     <div class="fgrid">
-      <div class="field"><label for="b1">消耗品の予算（月）</label><input id="b1" inputmode="numeric" value="${S.settings.budgets?.consumable ?? ""}"></div>
+      <div class="field"><label for="b1m">👩🏼の予算（月）</label><input id="b1m" inputmode="numeric" value="${S.settings.budgets?.consMiho ?? ""}"></div>
+      <div class="field"><label for="b1k">🧑🏻の予算（月）</label><input id="b1k" inputmode="numeric" value="${S.settings.budgets?.consKazu ?? ""}"></div>
     </div>
     <p class="note">予算はマネーフォワードで決めている金額に合わせてください。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
@@ -3370,7 +3394,7 @@ function lifeView(){
     ${M.fund && M.fund.some(x => x > 0) ? `<tr class="fundr"><th class="lh">　うち 積立（車・子ども・税）</th>${cols.map(c => `<td>${lifeK(M.fund[c.ix[c.ix.length - 1]]) || ""}</td>`).join("")}</tr>` : ""}
     ${L.nisa || L.nisa0 ? `<tr class="nisa"><th class="lh"><button type="button" class="lbl" data-act="lifeEdit" data-id="nisa">NISA評価額</button></th>${cols.map(c => `<td>${lifeK(nv[c.ix[c.ix.length - 1]]) || "0"}</td>`).join("")}${af("nisaV")}</tr>` : ""}`;
   // 65歳からの取り崩し
-  return `${lifeTree()}<div class="lifehead"><button type="button" class="linkbtn lhelp" data-act="lifeHelp">📖 見方</button><span class="lt">${yms[0].slice(0, 4)}〜${L.endY}年<small>万円</small>${info(`${L.endAge}歳（${L.endY}年）までの見通しです。<br>・左の項目名をタップ → その項目の入力。▸をタップ → 内訳<br>・年をタップ → その年の1〜12月。月をタップ → 年に戻る<br>・🚗（車の購入）・👶（生まれる月）・💼（次の会社に入る月）・📌（1回だけの予定）・🏥（老人ホームに入る月）は長押しして横に動かすと、時期が変わり、費用や収入・税金も一緒にずれます<br>・項目はFPのキャッシュフロー表の分け方（基本生活費・住居関連費・車両費・教育費・保険料・税・社会保険料・一時的な支出・その他の支出）です<br>・収入は額面（税・社会保険料を引く前）。税・社会保険料は別の行で引きます。会社にいる間は健康保険・厚生年金・雇用保険（額面の約15%）・所得税・住民税、退職して次の会社に入るまでは国保・国民年金・住民税、65歳からは年金から国保（75歳から後期高齢者医療）・介護保険・所得税・住民税（どれも目安）<br>・貯蓄残高がマイナスの年は赤くなります<br>・NISAは退職するまで積み立て、そのあとも年${num0(L.nisaR)}%で運用。貯蓄が生活費の${L.bufM}か月分を下回る月だけ、足りない分を売って貯蓄に入れます（売る年は、その年の積立を止めます）${L.infl ? `<br>・支出は毎年${L.infl}%ずつ上がる計算` : ""}`)}</span><button class="sbtn ghost2" data-act="lifeSet">⚙ 設定</button></div>
+  return `<div class="lifetop">${lifeTree()}</div><div class="lifehead"><button type="button" class="linkbtn lhelp" data-act="lifeHelp">📖 見方</button><span class="lt">${yms[0].slice(0, 4)}〜${L.endY}年<small>万円</small>${info(`${L.endAge}歳（${L.endY}年）までの見通しです。<br>・左の項目名をタップ → その項目の入力。▸をタップ → 内訳<br>・年をタップ → その年の1〜12月。月をタップ → 年に戻る<br>・🚗（車の購入）・👶（生まれる月）・💼（次の会社に入る月）・📌（1回だけの予定）・🏥（老人ホームに入る月）は長押しして横に動かすと、時期が変わり、費用や収入・税金も一緒にずれます<br>・項目はFPのキャッシュフロー表の分け方（基本生活費・住居関連費・車両費・教育費・保険料・税・社会保険料・一時的な支出・その他の支出）です<br>・収入は額面（税・社会保険料を引く前）。税・社会保険料は別の行で引きます。会社にいる間は健康保険・厚生年金・雇用保険（額面の約15%）・所得税・住民税、退職して次の会社に入るまでは国保・国民年金・住民税、65歳からは年金から国保（75歳から後期高齢者医療）・介護保険・所得税・住民税（どれも目安）<br>・貯蓄残高がマイナスの年は赤くなります<br>・NISAは退職するまで積み立て、そのあとも年${num0(L.nisaR)}%で運用。貯蓄が生活費の${L.bufM}か月分を下回る月だけ、足りない分を売って貯蓄に入れます（売る年は、その年の積立を止めます）${L.infl ? `<br>・支出は毎年${L.infl}%ずつ上がる計算` : ""}`)}</span><button class="sbtn ghost2" data-act="lifeSet">⚙ 設定</button></div>
   <div class="lifewrap"><table class="lifet"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
   ${L.nisa || L.nisa0 ? `<p class="note nmkl"><span><i class="nmk-up"></i>余りをNISAへ</span><span><i class="nmk-down"></i>積立を減らす・止める（色は変わり目の年だけ）</span><span><i class="nmk-sell"></i>NISAを売る</span><span class="nmkh">「NISAへ積立」をタップ → 毎月の積立額をくらべる</span></p>` : ""}
 `;
@@ -3407,6 +3431,15 @@ function taxSelfSheet(){ let M; { const k = UI.lifeBr; UI.lifeBr = ""; try { M =
     <h4>そのほかの税金</h4>${T.items.length ? `<ul class="shopl">${T.items.map((it, i) => `<li><span class="n">${esc(it.name)}<small>${whoNm(it.who || "both")}・年 ${yen(num0(it.annual))}・${esc(it.months || "")}月</small></span><button type="button" class="sbtn ghost2" data-act="taxitem" data-i="${i}">直す</button></li>`).join("")}</ul>` : `<p class="note">固定資産税・自動車税などがあれば追加してください。</p>`}
     <div class="btnrow"><button type="button" class="btn ghost" data-act="taxitem" data-i="">＋ 税金を追加</button><button type="button" class="btn ghost" data-act="taxCond">退職・入社の月や国保の条件</button></div>
     <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
+/* 2026-11-21：トップの貯蓄と計のあいだの一言。①ライフプランで赤字になる年齢 ②実績の月で予算オーバーの枠 ③生活費の貯蓄が目標に足りない */
+let TMSG = {k: null, v: null};
+function topMsg(ym){ const key = [S.life, S.tax, S.plan, TODAY]; let neg = null; if (S.ready < 2) return ["", ""];   // データが変わると GCACHE が作り直されるので、その中に覚える
+  if (GCACHE.__neg && GCACHE.__neg.k.every((x, i) => x === key[i])) neg = GCACHE.__neg.v; else { try { const k0 = UI.lifeBr; UI.lifeBr = ""; try { const M = lifeModel(), j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth; neg = j >= 0 ? {age: kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) : null, y: M.yms[j].slice(0, 4)} : false; } finally { UI.lifeBr = k0; } } catch (e) { neg = false; } GCACHE.__neg = {k: key, v: neg}; }
+  if (neg) return ["neg", `このままだと${neg.age != null ? neg.age + "歳" : neg.y + "年"}で貯蓄が足りなくなります。予算を超えないように気をつけましょう`];
+  if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = MAIN4.filter(k => num0(a.g[k]) - num0(al[k]) > 500); if (ov.length) return ["warn", `${ov.map(k => GN[k]).join("・")}が予算をオーバーしています`]; } }
+  const p = planOf(ym), b = bucketBal(ym), liv = num0(b.common) + num0(b.emergency), keep = num0(p.alloc?.living) * keepM(ym);
+  if (keep && liv < keep) return ["info", `生活費の貯蓄は目標まであと${kY(keep - liv)}万。予算内でやりくりして少しずつ貯めましょう`];
+  return ["", ""]; }
 /* 2026-11-21：こづかいの行。金額はトップの予算と同じ（ここでは直さない） */
 function lifeKozSheet(){ const ym = TODAY.slice(0, 7), ks = (typeof zanCats === "function" ? zanCats() : []).filter(n => n.includes("こづかい")).map(n => [n, num0(zanBud(ym, n))]), L = lifeDoc();
   openSheet(`<h3>こづかい</h3><ul class="kv">${ks.map(([n, v]) => `<li><span>${esc(n)}</span><span class="num">月 ${yen(v)}</span></li>`).join("")}<li><span><b>合計</b></span><span class="num"><b>月 ${yen(ks.reduce((t, [, v]) => t + v, 0))}</b></span></li></ul>
@@ -3550,6 +3583,7 @@ function topView(){
     <button class="cb mrg" data-col="3" data-row="6" style="grid-column:3;grid-row:6" data-act="goals" data-id="irregular" aria-label="特別費の貯蓄（目標ごとの積立）"><span class="ct">特別費</span><span class="cn2 num${irr < 0 ? " neg" : ""}">${kY(irr)}</span><span class="cu">万円</span>${(() => { const cap = goalsOn().filter(g => goalGrp(g) === "irregular").reduce((t, g) => t + num0(g.target), 0); return cap ? `<span class="keep"><span>上限${kY(cap)}万</span></span>` : ""; })()}</button>`; })()}
     ${cols.map((c, j) => c.inv ? (() => { const g = invGain(ym); return `<button class="cb inv" ${tAt(j, 6)} data-act="invlist" aria-label="証券の評価額と投資先の一覧"><span class="ct">証券</span><span class="cn2 num">${kY(c.bal)}</span><span class="cu">万円</span>${g ? `<span class="gain ${g.g < 0 ? "neg" : "pos"}">損益<br>${kS(g.g)}万<br>(${g.g >= 0 ? "+" : "−"}${Math.abs(g.pct).toFixed(1)}%)</span>` : ""}</button>`; })() : j >= 2 ? balC(c, j) : "").join("")}
   </section>
+  ${(([c, t]) => `<p class="topmsg ${c}">${t ? esc(t) : "&nbsp;"}</p>`)(topMsg(ym))}
   <div class="totwrap tg"><span class="rl" style="grid-column:1">計</span><span class="tfr" style="grid-column:2 / 5"></span><span class="tfr tfr2" style="grid-column:5 / 7"><span class="asof">${Number(ym.slice(5))}月末時点</span></span>
     <button class="tb" style="grid-column:2" data-act="incact"><span class="tl">収入</span><b class="num">${kY(a.inc)}</b><small class="tu">万円</small></button>
     <button class="tb" style="grid-column:3" data-act="mval" data-id="spend"><span class="tl">支出</span><b class="num">${kY(a.spend)}</b><small class="tu">万円</small></button>
@@ -4177,12 +4211,20 @@ function histSheet(it){
   const CNT = /^(個|本|枚|袋|箱|ロール|回|錠|包|パック|セット|足|組)?$/, cntOf = p => { const q = qtyNum(p.qty), k = Number(p.packs) || 1; return q && q.n > 0 && CNT.test(q.u) ? {n: q.n * k, u: q.u || "個"} : k > 1 ? {n: k, u: "個"} : null; };
   const dInfo = p => { const x = segs.find(y => y.p === p); if (!x || !x.days) return {d: "", per: ""}; const c = cntOf(p);
     return {d: x.done ? `${x.days}日もった` : x.start > TODAY ? `${md(x.start)}から${x.days}日の予定` : `${x.days}日の予定`, per: c ? `1${c.u}あたり${fmtD(x.days / c.n)}日` : ""}; };
-  openSheet(`<div class="hhead"><h3>${esc(it.name)}</h3><button type="button" class="sbtn ghost2" data-act="edit" data-id="${it.id}">✏️ 品目を編集</button></div>
-  ${it.note ? `<p class="note">${esc(it.note)}</p>` : ""}
+  openSheet(`<div class="hhead"><h3>${esc(it.name)}</h3><button type="button" class="sbtn ghost2" data-act="edit" data-id="${it.id}">✏️ 品目を編集</button></div>${histBody(it)}
+  <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">閉じる</button></div>`);
+}
+/* 2026-11-21：品目の中身（一覧の中で開く・シートでも使う）：説明・ボタン（比べる・買った・なくなった）・これまでの購入 */
+function histBody(it, inline = false){
+  const h = histOf(it.id), m = monthly(it), segs = chainOf(it), a = avgDays(it);
+  const CNT = /^(個|本|枚|袋|箱|ロール|回|錠|包|パック|セット|足|組)?$/, cntOf = p => { const q = qtyNum(p.qty), k = Number(p.packs) || 1; return q && q.n > 0 && CNT.test(q.u) ? {n: q.n * k, u: q.u || "個"} : k > 1 ? {n: k, u: "個"} : null; };
+  const dInfo = p => { const x = segs.find(y => y.p === p); if (!x || !x.days) return {d: "", per: ""}; const c = cntOf(p);
+    return {d: x.done ? `${x.days}日もった` : x.start > TODAY ? `${md(x.start)}から${x.days}日の予定` : `${x.days}日の予定`, per: c ? `1${c.u}あたり${fmtD(x.days / c.n)}日` : ""}; };
+  return `${it.note ? `<p class="note">${esc(it.note)}</p>` : ""}
   <div class="btnrow three hbtns"><button type="button" class="btn ghost" data-act="compare" data-id="${it.id}">比べる</button><button type="button" class="btn" data-act="buy" data-id="${it.id}">買った</button>${isGone(it) ? `<button type="button" class="btn ghost" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button type="button" class="btn ghost" data-act="gone" data-id="${it.id}">なくなった</button>`}</div>
   <p class="note">${esc([it.product, it.shop].filter(Boolean).join(" ・ "))}${m != null ? `${it.product || it.shop ? " ・ " : ""}月 ${yen(m)}` : ""}${a.n ? ` ・ 平均${a.d}日もつ（${a.n}回分）` : ""}</p>
-  ${h.length ? `<h4 class="sh4">これまでの購入（タップで直せます）</h4><ul class="hlist">${h.map(p => { const u = unitOf(p), di = dInfo(p); return `<li><button type="button" class="hl" data-act="editp" data-id="${p._id}"><span class="d">${p.date ? p.date.replace(/-/g, "/") : "日付不明"}</span><span class="pr num">${p.price ? yen(p.price) : "—"}${di.d ? `<small> ・ ${di.d}</small>` : ""}</span><span class="q">${esc([p.product, qtyLabel(p)].filter(Boolean).join(" ・ "))}</span><span class="u num">${[u ? unitTxt(u) : "", di.per].filter(Boolean).join(" ・ ")}</span></button></li>`; }).join("")}</ul>` : `<p class="note">まだ購入の記録がありません。</p>`}
-  <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">閉じる</button></div>`);
+  ${inline ? `<button type="button" class="linkbtn iedit" data-act="edit" data-id="${it.id}">✏️ 品目を編集</button>` : ""}
+  ${h.length ? `<h4 class="sh4">これまでの購入（タップで直せます）</h4><ul class="hlist">${h.map(p => { const u = unitOf(p), di = dInfo(p); return `<li><button type="button" class="hl" data-act="editp" data-id="${p._id}"><span class="d">${p.date ? p.date.replace(/-/g, "/") : "日付不明"}</span><span class="pr num">${p.price ? yen(p.price) : "—"}${di.d ? `<small> ・ ${di.d}</small>` : ""}</span><span class="q">${esc([p.product, qtyLabel(p)].filter(Boolean).join(" ・ "))}</span><span class="u num">${[u ? unitTxt(u) : "", di.per].filter(Boolean).join(" ・ ")}</span></button></li>`; }).join("")}</ul>` : `<p class="note">まだ購入の記録がありません。</p>`}`;
 }
 function laterSheet(it){
   const l = lifeOf(it), c = l?.cur, f = d => d ? d.replace(/-/g, "/") : "—";
@@ -4406,7 +4448,7 @@ document.addEventListener("click", e => {
     case "mark": markNext(); break;
     case "markoff": UI.mark = false; render(); break;
     case "sheetsync": sheetSyncAll(); break;
-    case "hist": if (UI.wig || WIG.justDropped) break; histSheet(S.items[id]); break;
+    case "hist": { if (UI.wig || WIG.justDropped) break; const k = id + (b.dataset.s ? ":s" : ""); UI.itOpen = UI.itOpen === k ? null : k; render(); break; }
     case "gone": { const it = S.items[id]; save(() => db.doc("items/" + id).update({outAt: TODAY, sh: false}), `${it.name}を「買うもの」に入れました`).then(ok => { if (!ok) return; closeSheet(); UI.sub = "items"; render(); toTop(); }); break; }
     case "ungone": { const it = S.items[id]; save(() => db.doc("items/" + id).update({outAt: null, sh: false}), `${it.name}を「買うもの」から外しました`).then(ok => { if (ok){ closeSheet(); render(); } }); break; }
     case "wigoff": UI.wig = false; render(); break;
@@ -4815,7 +4857,7 @@ async function submitBody(e, f){
     } else { const lp = histOf(id).find(x => x.date), chg = lp && data.days && Number(lp.days) !== data.days;
       ok = await save(async () => { await db.doc("items/" + id).update({...data, sh: false}); if (chg) await db.doc("purchases/" + lp._id).update({days: data.days, months: data.months, synced: false, sh: false}); }, "保存しました"); if (ok) consSyncSoon([id], chg ? [lp._id] : []); }
   } else if (kind === "settings"){
-    const s = {budgets: {consumable: numOrNull(val("b1")) ?? 0, food: S.settings.budgets?.food ?? 0}, high: S.settings.high ?? .1, low: S.settings.low ?? .02, cats: S.settings.cats || []};
+    const bm = numOrNull(val("b1m")) ?? 0, bk = numOrNull(val("b1k")) ?? 0, s = {budgets: {consumable: bm + bk, consMiho: bm, consKazu: bk, food: S.settings.budgets?.food ?? 0}, high: S.settings.high ?? .1, low: S.settings.low ?? .02, cats: S.settings.cats || []};
     ok = await save(() => db.doc("settings/main").set(s), "保存しました");
   } else if (kind === "fixed"){
     const name = val("fxn"), n = numOrNull(val("fxa")); if (!name || !n){ toast("名前と金額を入れてください"); return; }

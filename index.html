@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>家計予算帳</title><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="家計予算帳"><meta name="theme-color" content="#f6f4fa"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.tabs { grid-template-columns: repeat(4, 1fr) !important; }
 .lifehead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.lifewrap { overflow: auto; overscroll-behavior: contain; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); -webkit-overflow-scrolling: touch; }
+.lifewrap { overflow: auto; overscroll-behavior: none; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); -webkit-overflow-scrolling: touch; }
 .lifet { border-collapse: separate; border-spacing: 0; font-size: .86rem; font-variant-numeric: tabular-nums; min-width: 100%; }
 .lifet th, .lifet td { height: var(--lrh, 40px); padding: 0 8px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); min-width: 58px; box-sizing: border-box; }
 .lifet .af { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); border-left: 2px solid var(--accent); font-weight: 700; } .lifet thead th.af { background: color-mix(in srgb, var(--accent) 18%, var(--bg)); cursor: default; }
@@ -815,6 +815,9 @@ html.lock body { position: fixed; left: 0; right: 0; top: var(--lockY, 0px); ove
 .topguide { margin: -2px 2px 0; font-size: .74rem; color: var(--butter-ink); background: #fff8d6; border-radius: var(--r-sm); padding: 5px 10px; line-height: 1.45; }
 .gpager { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; background: var(--lav); border-radius: 999px; padding: 3px; }
 .gp { border: 0; background: none; border-radius: 999px; padding: 6px 2px; font: inherit; font-size: .82rem; font-weight: 700; color: var(--muted); cursor: pointer; } .gp.on { background: var(--surface); color: var(--ink); }
+html.lifefit .lifet { font-size: var(--lfs, 13px); line-height: 1; } html.lifefit .lifet th, html.lifefit .lifet td { padding: 0 5px; min-width: var(--lcw, 44px); } html.lifefit .lifet thead th { height: var(--lhd, 30px); } html.lifefit .lifet thead th b { font-size: calc(var(--lfs, 13px) * 1.1); line-height: 1.1; } html.lifefit .lifet thead th small { font-size: calc(var(--lfs, 13px) * .75); line-height: 1.1; } html.lifefit .lifet .lh { font-size: var(--lfs, 13px); }
+html, body { overscroll-behavior: none; }
+html.lifefit .lifet th, html.lifefit .lifet td { font-size: var(--lfs, 13px) !important; line-height: 1.15 !important; padding-block: 0 !important; } html.lifefit .lifet tr.lsec th, html.lifefit .lifet tr.lsec td { font-size: calc(var(--lfs, 13px) * .9) !important; } html.lifefit .lifet button { min-height: 0 !important; height: auto !important; padding-block: 0 !important; line-height: 1.15 !important; font-size: inherit !important; }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
 .iot2 small { font-size: .66rem; font-weight: 400; opacity: .8; } .iot2.o { background: #ffe1e1; color: #b3261e; } .iot2.i { background: #fff3c4; color: #7a5a00; } .iot2.ro { cursor: default; align-content: center; }
@@ -863,7 +866,7 @@ html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavi
 .kv li .appv { display: block; font-size: .7rem; color: var(--butter-ink); }
 .tabs { grid-template-columns: repeat(4, 1fr) !important; }
 .lifehead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.lifewrap { overflow: auto; overscroll-behavior: contain; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); -webkit-overflow-scrolling: touch; }
+.lifewrap { overflow: auto; overscroll-behavior: none; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); -webkit-overflow-scrolling: touch; }
 .lifet { border-collapse: separate; border-spacing: 0; font-size: .86rem; font-variant-numeric: tabular-nums; min-width: 100%; }
 .lifet th, .lifet td { height: var(--lrh, 40px); padding: 0 8px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); min-width: 58px; box-sizing: border-box; }
 .lifet .af { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); border-left: 2px solid var(--accent); font-weight: 700; } .lifet thead th.af { background: color-mix(in srgb, var(--accent) 18%, var(--bg)); cursor: default; }
@@ -3344,8 +3347,13 @@ function fitLife(){ const w = document.querySelector(".lifewrap"), t = document.
   if (lifeWide()){ w.style.maxHeight = avail + "px"; let h = Math.min(90, Math.floor(avail / (n + .6)));
     const set = () => { const fs = Math.max(9, Math.min(15, Math.round(h * .55))); t.style.setProperty("--lrh", h + "px"); t.style.setProperty("--lhd", Math.max(Math.round(h * 1.6), fs * 2 + 4) + "px"); t.style.setProperty("--lfs", fs + "px"); t.style.setProperty("--lcw", Math.round(fs * 3) + "px"); };
     set(); while (t.offsetHeight > avail && h > 12){ h--; set(); } return; }
-  ["--lhd", "--lfs", "--lcw"].forEach(k => t.style.removeProperty(k));
-  const h = Math.max(36, Math.min(64, Math.floor(avail / n))); t.style.setProperty("--lrh", h + "px"); w.style.maxHeight = Math.max(200, avail) + "px"; }
+  ["--lhd", "--lfs", "--lcw"].forEach(k => t.style.removeProperty(k)); const R = document.documentElement.classList; R.remove("lifefit");
+  let h = Math.min(64, Math.floor(avail / n)); w.style.maxHeight = Math.max(160, avail) + "px";
+  if (h >= 36){ t.style.setProperty("--lrh", h + "px"); return; }
+  // 2026-11-21：縦にスクロールしなくても表の全体が見えるように、行と文字を小さくする
+  R.add("lifefit"); h = Math.max(16, Math.floor(avail / (n + .5)));
+  const set = () => { const fs = Math.max(9, Math.min(14, Math.round(h * .56))); t.style.setProperty("--lrh", h + "px"); t.style.setProperty("--lhd", Math.max(Math.round(h * 1.5), fs * 2 + 4) + "px"); t.style.setProperty("--lfs", fs + "px"); t.style.setProperty("--lcw", Math.round(fs * 3.4) + "px"); };
+  set(); while (t.offsetHeight > avail && h > 14){ h--; set(); } }
 /* 横向き（タブレット・スマホを横にしたとき）。向きが変わったら描き直す */
 const lifeWide = () => innerWidth > innerHeight && innerWidth >= 560;
 { let tm = null; addEventListener("resize", () => { clearTimeout(tm); tm = setTimeout(() => { if (UI.tab !== "life" || UI.nav.length || !$("sheetWrap").hidden) return; if (lifeWide() !== document.documentElement.classList.contains("lifewide")) render(); else fitLife(); }, 150); }); }
@@ -4244,13 +4252,15 @@ function fitTop(){
   const fg = document.querySelector(".fg.f5"); if (!fg) return;
   const H = visH();
   const se = document.scrollingElement || document.documentElement, st = se.scrollTop, top = fg.getBoundingClientRect().top + st, tb = ((document.querySelector(".totwrap") || document.querySelector(".totbar"))?.offsetHeight || 0) + 36;
-  const bottom = H - (document.querySelector(".tabs")?.offsetHeight || 64) - 22;   // 下のタブの上まで
-  const w = fg.classList.contains("f4") ? [1.2, .02, .85, 1.4, .85, 1.25, .02, .02] : [1.45, .55, .9, 1.1, .9, 1.1, .45, .9], sum = w.reduce((x, y) => x + y, 0), u = Math.max(30, Math.min(110, (bottom - top - 16 - tb) / sum));
+  const tbt = document.querySelector(".tabs")?.getBoundingClientRect().top, bottom = (tbt > 100 ? Math.min(tbt, H - 40) - 14 : H - 86) + st;   // 下のタブの上まで（実際のタブの位置で）
+  const f4 = fg.classList.contains("f4"), w = f4 ? [1, 0, .85, 1.4, .85, 1.25, 0, 0] : [1.45, .55, .9, 1.1, .9, 1.1, .45, .9], sum = w.reduce((x, y) => x + y, 0), u = Math.max(30, Math.min(110, (bottom - top - 16 - tb) / sum));
+  // 2026-11-21：収入の箱の下と、貯蓄と計のあいだが空きすぎないように（空の行のすき間を詰める）
+  if (f4){ fg.style.setProperty("margin-bottom", "-12px"); const tw = document.querySelector(".totwrap"); if (tw) tw.style.setProperty("margin-top", "0px", "important"); }
   const set = u => { fg.style.setProperty("grid-template-rows", w.map(v => `${Math.floor(v * u)}px`).join(" "), "important"); fg.style.setProperty("--incH", `${Math.floor(u)}px`); };
   set(u);
   // 実際の位置で、合計欄が見える範囲からはみ出していたら縮める
   const bar = document.querySelector(".totwrap") || document.querySelector(".totbar"); if (!bar) return; const over = bar.getBoundingClientRect().bottom + st - bottom;
-  if (over > 0) set(Math.max(30, u - over / sum));
+  if (over > 0 || f4) set(Math.max(30, Math.min(110, u - over / sum)));   // 余った分は行に配る
 }
 
 /* ---------- actions ---------- */

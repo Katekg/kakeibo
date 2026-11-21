@@ -821,9 +821,9 @@ html.lifefit .lifet th, html.lifefit .lifet td { font-size: var(--lfs, 13px) !im
 
 /* 2026-11-21：ライフ — 表の下の説明を3行＋1行に、上の見出しを詰める、▸を押しやすく */
 .nmkl { display: grid !important; gap: 0 !important; font-size: .7rem; line-height: 1.4; margin: 2px 0 0 !important; padding: 0 !important; }
-html.lifelock #view { row-gap: 4px !important; }   /* 2026-11-21：ライフの「今の計画」・見出し・表・説明のあいだを詰める */
+html.lifelock #view { row-gap: 4px !important; } html.lifelock, html.lifelock body, html.lifelock #app { background: #fff !important; }   /* 2026-11-21：ライフの「今の計画」・見出し・表・説明のあいだを詰める */
 .lifet .lh .lbl.lsm { font-size: .74em; letter-spacing: -.03em; }
-.lifet .lh .lbl { display: inline-block !important; max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+.lifet .lh { text-overflow: clip !important; } .lifet .lh .lbl { display: inline-block !important; max-width: 86px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
 /* 2026-11-21：ライフの一番上に、白い背景の止まる帯（iPhoneの上のもや対策：上に固定の帯があると、ステータスバーがその色になる） */
 .lifetop { position: sticky; top: 0; z-index: 6; background: #fff; margin-inline: calc(-1 * max(8px, env(safe-area-inset-left, 0px))); padding: 0 max(8px, env(safe-area-inset-left, 0px)) 2px; }
 /* 2026-11-21：消耗品 — 一覧の中で開く、👩🏼・🧑🏻ごとの予算 */
@@ -1476,7 +1476,9 @@ function render(){
   $("view").innerHTML = UI.nav.length ? navView() : UI.tab === "cons" ? ({avg: avgView, items: itemsView, review: itemsView, howto: howtoView, shops: howtoView})[UI.sub]() : ({tx: txView, cf: cfView, bal: balView, top: topView, tax: taxView, life: lifeView})[UI.tab]();
   { const alEl = $("sysAlert"), n = notices().length; alEl.hidden = !n || !!document.querySelector("#view .monthnav"); if (!alEl.hidden) alEl.innerHTML = `<button class="alicon" data-act="sysal" aria-label="お知らせ ${n}件">!</button>`; }
     document.documentElement.classList.toggle("toplock", UI.tab === "top" && !UI.nav.length); document.documentElement.classList.toggle("pgbud", UI.tab === "top" && !UI.nav.length && TPG() === "bud"); document.documentElement.classList.toggle("pgact", UI.tab === "top" && !UI.nav.length && TPG() === "act"); document.documentElement.classList.toggle("lifelock", UI.tab === "life" && !UI.nav.length); document.documentElement.classList.toggle("lifewide", UI.tab === "life" && !UI.nav.length && lifeWide());
-  { const tc = document.querySelector('meta[name="theme-color"]'), bg = getComputedStyle(document.body).backgroundColor; if (tc && bg && tc.content !== bg){ const nm = document.createElement("meta"); nm.name = "theme-color"; nm.content = bg; tc.replaceWith(nm); } }   // 2026-11-21：上のステータスバーの色をページの色に合わせる（ほかのタブで上がもやっと見えないように）
+  { const tc = document.querySelector('meta[name="theme-color"]'), op = c => c && !/^rgba\(.*,\s*0\)$/.test(c) && c !== "transparent", hex = c => { const m = String(c).match(/\d+(\.\d+)?/g); return m && m.length >= 3 ? "#" + m.slice(0, 3).map(x => Math.round(+x).toString(16).padStart(2, "0")).join("") : c; },
+      bg = hex([document.getElementById("app"), document.body, document.documentElement].map(e => e && getComputedStyle(e).backgroundColor).find(op) || "#ffffff"); /* 2026-11-21：背景が透明の画面では白（透明のままだとiPhoneが灰色のぼかしを出す） */
+    if (tc && bg && tc.content !== bg){ const nm = document.createElement("meta"); nm.name = "theme-color"; nm.content = bg; tc.replaceWith(nm); } }   // 2026-11-21：上のステータスバーの色をページの色に合わせる（ほかのタブで上がもやっと見えないように）
   document.documentElement.classList.toggle("wigon", !!UI.wig && UI.tab === "cons" && UI.sub === "items" && !UI.nav.length);
   placeTabs(); if (UI.tab === "top" && !UI.nav.length && 1) fitTop(); if (UI.tab === "life" && !UI.nav.length) fitLife();
   if (typeof sqSoon === "function") sqSoon();
@@ -3238,7 +3240,7 @@ function lifeModel(ov){
   if (L.kozDown) lvKids.push({id: "lv-kozd", label: "こづかいを下げる（もしの案）", fixed: true, f: ym => ym < a65k ? -L.kozDown : 0});   // 2026-11-21：減らした分は貯蓄に残り、線を超えた分が毎月NISAへ
   if (L.nhStart) lvKids.push({id: "lv-nh", label: "🏥 老人ホーム", f: nhCost, mark: ym => ym === L.nhStart ? "nh" : null, icon: "🏥"});
   const TXK0 = [["itax", "所得税"], ["res", "住民税"], ["hi", "健康保険"], ["pen", "厚生年金"], ["ltc", "介護保険"], ["emp", "雇用保険"]];   // 2026-11-21：天引き（給与・年金から）は生活費の上に
-  rows.push(grp("taxw", "税・社保（天引き）", -1, TXK0.map(([c, l]) => ({id: "taxw-" + c, label: l, f: ym => TAXP.reduce((t, [k]) => t + withOf(k, ym, c), 0)}))));
+  rows.push(grp("taxw", "税・社保 天引き", -1, TXK0.map(([c, l]) => ({id: "taxw-" + c, label: l, f: ym => TAXP.reduce((t, [k]) => t + withOf(k, ym, c), 0)}))));
   rows.push(grp("living", "生活費", -1, lvKids, {icon: "🏥"}));
   let evRowL = null;
   // 2026-11-21：特別費＝税保険等（手払いの税・社会保険料。目標の月に向けて積み立てる）＋医療など（毎月）。👩🏼・🧑🏻の同じ名前のカテゴリは1行にまとめる
@@ -3435,10 +3437,10 @@ function taxSelfSheet(){ let M; { const k = UI.lifeBr; UI.lifeBr = ""; try { M =
 let TMSG = {k: null, v: null};
 function topMsg(ym){ const key = [S.life, S.tax, S.plan, TODAY]; let neg = null; if (S.ready < 2) return ["", ""];   // データが変わると GCACHE が作り直されるので、その中に覚える
   if (GCACHE.__neg && GCACHE.__neg.k.every((x, i) => x === key[i])) neg = GCACHE.__neg.v; else { try { const k0 = UI.lifeBr; UI.lifeBr = ""; try { const M = lifeModel(), j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth; neg = j >= 0 ? {age: kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) : null, y: M.yms[j].slice(0, 4)} : false; } finally { UI.lifeBr = k0; } } catch (e) { neg = false; } GCACHE.__neg = {k: key, v: neg}; }
-  if (neg) return ["neg", `このままだと${neg.age != null ? neg.age + "歳" : neg.y + "年"}で貯蓄が足りなくなります。予算を超えないように気をつけましょう`];
-  if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = MAIN4.filter(k => num0(a.g[k]) - num0(al[k]) > 500); if (ov.length) return ["warn", `${ov.map(k => GN[k]).join("・")}が予算をオーバーしています`]; } }
+  if (neg) return ["neg", `このままだと${neg.age != null ? neg.age + "歳" : neg.y + "年"}で赤字。予算オーバーに注意`];
+  if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = MAIN4.filter(k => num0(a.g[k]) - num0(al[k]) > 500); if (ov.length) return ["warn", `${ov.map(k => GN[k]).join("・")}が予算オーバー`]; } }
   const p = planOf(ym), b = bucketBal(ym), liv = num0(b.common) + num0(b.emergency), keep = num0(p.alloc?.living) * keepM(ym);
-  if (keep && liv < keep) return ["info", `生活費の貯蓄は目標まであと${kY(keep - liv)}万。予算内でやりくりして少しずつ貯めましょう`];
+  if (keep && liv < keep) return ["info", `生活費の貯蓄、目標まであと${kY(keep - liv)}万`];
   return ["", ""]; }
 /* 2026-11-21：こづかいの行。金額はトップの予算と同じ（ここでは直さない） */
 function lifeKozSheet(){ const ym = TODAY.slice(0, 7), ks = (typeof zanCats === "function" ? zanCats() : []).filter(n => n.includes("こづかい")).map(n => [n, num0(zanBud(ym, n))]), L = lifeDoc();

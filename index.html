@@ -862,6 +862,24 @@ html.lifelock #view { row-gap: 4px !important; } html.lifelock, html.lifelock bo
 .mrow .n { font-weight: 700; }
 details.ht { margin: 4px 0 !important; } details.ht > summary { padding: 6px 10px !important; gap: 0 !important; }
 .htcard { padding-top: 10px !important; } .htcard .htq { margin: 4px 0 !important; } h3.rvcat.htc { margin: 8px 0 2px !important; font-size: .82rem; }
+
+/* 2026-11-21：月平均を1画面に・使い道を詰める・並べ替えの☰ */
+.cpsum { padding: 8px 12px !important; margin-bottom: 6px !important; } .cpsum .cpst { margin: 0; }
+.cpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .cpgrid .consp { padding: 10px !important; margin: 0 !important; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.cph { display: flex; justify-content: space-between; align-items: center; gap: 4px; } .cph .cpe { font-size: 1.3rem; } .cph .linkbtn { font-size: .74rem; }
+.cpbig { font-size: 1.35rem; font-weight: 800; } .cpbig small { font-size: .66rem; font-weight: 400; color: var(--muted); margin-left: 2px; }
+.cpgrid .cpst { font-size: .76rem; margin: 0; }
+.cptop { list-style: none; margin: 2px 0 0; padding: 0; font-size: .7rem; color: var(--muted); display: grid; gap: 1px; } .cptop li { display: flex; justify-content: space-between; gap: 4px; } .cptop li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cpmiss { margin: 2px 0 0; font-size: .66rem; color: var(--muted); } .cpfood { font-size: .72rem; margin: 6px 2px 0; }
+.htcard { padding: 8px 10px !important; } .htcard .card-head { margin: 0 0 2px !important; } .htcard .card-head h2 { font-size: 1rem; } .htcard > .note { margin: 0 0 4px !important; font-size: .72rem; }
+details.ht { margin: 3px 0 !important; border-radius: 10px !important; } details.ht > summary { padding: 4px 26px 4px 10px !important; } .htt { font-size: .8rem !important; line-height: 1.3; } .htu { font-size: .66rem !important; line-height: 1.3; } .htw { font-size: .66rem !important; }
+.htwait { padding: 4px 8px !important; font-size: .7rem !important; line-height: 1.35; margin: 2px 0 4px !important; } .htwait .sbtn { padding: 3px 8px !important; font-size: .72rem !important; min-height: 0 !important; }
+.htcard .card-head .btn { padding: 4px 12px !important; font-size: .8rem !important; min-height: 0 !important; } .htcard .htq { padding: 5px 10px !important; font-size: .8rem !important; min-height: 0 !important; height: auto !important; }
+.wigbar { padding: 4px 8px !important; } .wigbar .btn { padding: 4px 12px !important; min-height: 0 !important; font-size: .8rem !important; } h3.rvcat.htc { margin: 6px 0 0 !important; font-size: .78rem !important; } .htb { padding: 4px 10px 8px !important; }
+.whand { flex: none; width: 34px; height: 34px; display: grid; place-items: center; font-size: 1.1rem; color: var(--muted); touch-action: none; cursor: grab; margin: -6px -6px -6px 2px; }
+.catl li.dragging { transition: none !important; will-change: transform; }
+.fg .cs .cn2.ovr { color: var(--alert) !important; }   /* 2026-11-21：実績で予算オーバーの支出は赤 */
+.rechelp ul { margin: 0; padding-left: 1.2em; } .rechelp h2 { font-size: .9rem; }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
 .iot2 small { font-size: .66rem; font-weight: 400; opacity: .8; } .iot2.o { background: #ffe1e1; color: #b3261e; } .iot2.i { background: #fff3c4; color: #7a5a00; } .iot2.ro { cursor: default; align-content: center; }
@@ -1488,39 +1506,17 @@ function render(){
 const consBud = w => num0(S.settings.budgets?.[w === "miho" ? "consMiho" : "consKazu"]);
 function consPersonCard([w, l, col]){ const its = essentials("consumable").filter(it => cwhoOf(it) === w), known = its.filter(it => monthly(it) != null), miss = its.filter(it => monthly(it) == null);
   const avg = known.reduce((t, it) => t + monthly(it), 0), bud = consBud(w), rest = bud - avg, mx = Math.max(bud, avg) || 1, top = known.slice().sort((a, b) => monthly(b) - monthly(a)).slice(0, 3);
-  return `<section class="card consp" style="--wc:${col}"><div class="card-head"><h2>${l}</h2><button class="linkbtn" data-act="budget">予算 <span class="num">${yen(bud)}</span>／月</button></div>
-    <div class="cprow"><span class="k">月平均</span><span class="big num">${yen(avg)}</span></div>
+  return `<section class="card consp" style="--wc:${col}"><div class="cph"><span class="cpe">${l}</span><button class="linkbtn" data-act="budget">予算 <span class="num">${yen(bud)}</span></button></div>
+    <div class="cpbig num">${yen(avg)}<small>／月</small></div>
     <div class="cpbar"><i style="width:${(Math.min(avg, bud) / mx * 100).toFixed(1)}%"></i>${avg > bud ? `<b style="width:${((avg - bud) / mx * 100).toFixed(1)}%"></b>` : ""}</div>
-    <p class="cpst ${rest >= 0 ? "ok" : "ng"}">${bud ? (rest >= 0 ? `✓ 予算内・あと <b class="num">${yen(rest)}</b> の余裕` : `⚠️ 予算を <b class="num">${yen(-rest)}</b> オーバー`) : "予算が未設定です"}</p>
-    ${top.length ? `<p class="note cptop">大きいもの：${top.map(it => `${esc(it.name)} ${yen(monthly(it))}`).join("・")}</p>` : ""}
-    ${miss.length ? `<p class="note">まだ金額が入っていない：${miss.map(it => esc(it.name)).join("、")}（「品目」で買ったときに入ります）</p>` : ""}</section>`; }
-function avgView(){
-  const sAll = summary("consumable"), bAll = CWHO.reduce((t, [w]) => t + consBud(w), 0);
-  return `<section class="card cpsum"><div class="cprow"><span class="k">2人の合計</span><span class="num"><b>${yen(sAll.total)}</b> ／ 予算 ${yen(bAll)}</span></div><p class="cpst ${bAll - sAll.total >= 0 ? "ok" : "ng"}">${bAll - sAll.total >= 0 ? `あと ${yen(bAll - sAll.total)} の余裕` : `${yen(sAll.total - bAll)} オーバー`}</p></section>` + CWHO.map(consPersonCard).join("") + Object.keys(KINDS).filter(k => k !== "consumable").map(kind => {
-    const s = summary(kind);
-    const base = Math.max(s.budget, s.total) || 1, w = n => (Math.max(0, n) / base * 100).toFixed(2) + "%";
-    const over = s.total > s.budget;
-    return `<section class="card" aria-labelledby="h-${kind}">
-      <div class="card-head"><h2 id="h-${kind}">${KINDS[kind]}</h2><button class="linkbtn" data-act="budget">予算 <span class="num">${yen(s.budget)}</span>／月</button></div>
-      ${s.its.length ? `
-      <div>
-        <div class="label">決まって買うものだけで、月平均</div>
-        <div class="big num">${yen(s.total)}</div>
-        <div class="note">年間 <span class="num">${yen(s.total * 12)}</span> ・ ${s.known.length}品目の平均</div>
-      </div>
-      <div class="bar" role="img" aria-label="予算${yen(s.budget)}のうち、必須品の月平均${yen(s.total)}、自由に使える${yen(s.free)}">
-        <i class="fixed" style="width:${w(Math.min(s.total, s.budget))}"></i>${over ? `<i class="over" style="width:${w(s.total - s.budget)}"></i>` : ""}
-      </div>
-      <div class="bar-cap"><span>¥0</span><span>予算 ${yen(s.budget)}</span></div>
-      <div class="split">
-        <div class="fixed"><span class="k">必須品（月平均）</span><span class="v">${yen(s.total)}</span><span class="s">予算の${s.budget ? Math.round(s.total / s.budget * 100) : 0}%</span></div>
-        <div class="freebox"><span class="k">${over ? "予算オーバー" : "自由に使えるのは"}</span><span class="v">${yen(s.free)}</span><span class="s">1日あたり 約${yen(s.free / 30)}</span></div>
-      </div>
-      ${kind === "consumable" ? (bw => `<div class="rows">${bw.map(([l, v, col]) => `<div class="mrow" style="--wc:${col}"><span class="n">${l}</span><span class="v">${yen(v)}・${s.budget ? Math.round(v / s.budget * 100) : 0}%</span><div class="mbar"><i style="width:${(v / Math.max(1, ...bw.map(x => x[1])) * 100).toFixed(1)}%;background:${col}"></i></div></div>`).join("")}</div>`)(CWHO.map(([w, l, col]) => [l, s.known.filter(it => cwhoOf(it) === w).reduce((t, it) => t + monthly(it), 0), col])) : s.cats.length > 1 ? `<div class="rows">${s.cats.map(([c, v]) => `<div class="mrow"><span class="n">${esc(c)}</span><span class="v">${yen(v)}・${s.budget ? Math.round(v / s.budget * 100) : 0}%</span><div class="mbar"><i style="width:${(v / s.cats[0][1] * 100).toFixed(1)}%"></i></div></div>`).join("")}</div>` : ""}
-      ${s.missing.length ? `<div class="notice"><p>金額か「もつ期間」が未入力の品目が <b>${s.missing.length}件</b> あり、この平均に入っていません（${s.missing.slice(0, 6).map(it => esc(it.name)).join("、")}${s.missing.length > 6 ? " ほか" : ""}）。「品目」から入力すると、実際の平均に近づきます。</p></div>` : ""}
-      ` : `<p class="note">まだ品目がありません。「品目」タブの「＋ 品目を追加」から、決まって買う${kind === "food" ? "食材（米など）" : "消耗品"}を登録してください。</p>`}
-    </section>`;
-  }).join("");
+    <p class="cpst ${rest >= 0 ? "ok" : "ng"}">${bud ? (rest >= 0 ? `✓ あと <b class="num">${yen(rest)}</b>` : `⚠️ <b class="num">${yen(-rest)}</b> オーバー`) : "予算が未設定"}</p>
+    ${top.length ? `<ul class="cptop">${top.map(it => `<li><span>${esc(it.name)}</span><span class="num">${yen(monthly(it))}</span></li>`).join("")}</ul>` : ""}
+    ${miss.length ? `<p class="cpmiss">未入力：${miss.map(it => esc(it.name)).join("、")}</p>` : ""}</section>`; }
+function avgView(){   // 2026-11-21：スクロールしなくても1画面で見られるように（合計・👩🏼と🧑🏻を横に並べる）
+  const sAll = summary("consumable"), bAll = CWHO.reduce((t, [w]) => t + consBud(w), 0), food = Object.keys(KINDS).filter(k => k !== "consumable").map(k => [k, summary(k)]).filter(([, f]) => f.its.length);
+  return `<section class="card cpsum"><div class="cprow"><span class="k">2人の合計</span><span class="num"><b>${yen(sAll.total)}</b> ／ 予算 ${yen(bAll)}</span></div><p class="cpst ${bAll - sAll.total >= 0 ? "ok" : "ng"}">${bAll - sAll.total >= 0 ? `✓ 予算内・あと ${yen(bAll - sAll.total)}` : `⚠️ ${yen(sAll.total - bAll)} オーバー`}</p></section>
+  <div class="cpgrid">${CWHO.map(consPersonCard).join("")}</div>
+  ${food.map(([k, f]) => `<p class="note cpfood">${esc(KINDS[k])}：月平均 ${yen(f.total)} ／ 予算 ${yen(f.budget)}</p>`).join("")}`;
 }
 
 /* 2026-11-21：消耗品の大カテゴリー＝誰に交換をお願いするか（👩🏼＝ピンク・🧑🏻＝青）。小カテゴリー＝今までの分類（洗面・お風呂など） */
@@ -1537,7 +1533,7 @@ function itemRow(it, soon = false, mode = ""){
   const low = !soon && (gone || (l && l.dOut <= SOON_DAYS));
   return `<li class="${mk ? "mk" : ""}${soon ? " wbar" : ""}${opn ? " iopen" : ""}${low ? " lowst" : ""}" data-id="${it.id}" style="--wc:${whoCol(cwhoOf(it))}"><div class="irow">
     <button class="ibtn" data-act="hist" data-id="${it.id}" data-s="${soon ? 1 : ""}" aria-expanded="${opn}"><span class="nm">${esc(it.name)}</span><span class="sub">${esc(sub) || "&nbsp;"}</span></button>
-    <span class="ival">${m != null ? `${yen(m)}<small>／月</small>` : `<span class="badge warn">未入力</span>`}</span>
+    <span class="ival">${m != null ? `${yen(m)}<small>／月</small>` : `<span class="badge warn">未入力</span>`}</span>${UI.wig && !soon ? `<span class="whand" aria-label="つかんで動かす">☰</span>` : ""}
   </div>${opn ? `<div class="iexp">${histBody(it, true)}</div>` : ""}${soon && !opn ? `<div class="ibtns">${mode === "sale" ? "" : gone ? `<button class="sbtn ghost2" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button class="sbtn ghost2" data-act="later" data-id="${it.id}">まだ少し持ちそう</button>`}${btns}</div>` : ""}</li>`;
 }
 const daysLeft = it => { const n = nextDate(it); return n ? Math.round((parse(n) - parse(TODAY)) / 864e5) : null; };
@@ -1642,14 +1638,14 @@ function itemsView(){
     return `<div class="group acc"><button class="acch" data-act="catT" data-k="${esc(key)}" aria-expanded="${open}"><span class="chev2">${open ? "▾" : "▸"}</span><span class="t">${esc(label)}</span><span class="num">${sumTxt}</span></button>${open ? (a.length ? `<ul class="list">${a.map(it => itemRow(it)).join("")}</ul>` : `<p class="note" style="padding:0 6px">まだ品目がありません。「＋ 品目を追加」でこのカテゴリーを選んでください。</p>`) : ""}</div>`; };
   // 2026-11-21：大カテゴリー（👩🏼・🧑🏻）の中に小カテゴリー。長押しでぐらぐら → ドラッグで並べ替え・カテゴリーの移動
   const msum = a => a.reduce((s, it) => s + (monthly(it) || 0), 0), wig = !!UI.wig;
-  if (wig) out.push(`<div class="wigbar"><span>ドラッグで並べ替え・カテゴリーの移動</span><button type="button" class="btn" data-act="wigoff">完了</button></div>`);
+  if (wig) out.push(`<div class="wigbar"><span>☰をつかんで並べ替え</span><button type="button" class="btn" data-act="wigoff">完了</button></div>`);
   CWHO.forEach(([w, lab, col]) => { const wi = its.filter(it => cwhoOf(it) === w), subs = [...new Set([...wi.map(it => it.cat || "その他"), ...(wig ? cats : [])])];
     out.push(`<div class="group whoblk" style="--cc:${col}"><div class="whoh"><span class="t">${lab}</span><span class="num">${wi.length}品・月 ${yen(msum(wi))}</span></div>${subs.map(c => { const a = wi.filter(it => (it.cat || "その他") === c);
       return `<div class="subblk"><div class="cath"><span class="t">${esc(c)}</span><span class="num">月 ${yen(msum(a))}</span><button type="button" class="linkbtn" data-act="catedit" data-k="${esc(c)}">直す</button></div><ul class="list catl" data-who="${w}" data-cat="${esc(c)}">${a.map(it => itemRow(it)).join("")}</ul></div>`; }).join("")}</div>`); });
   if (off.length) out.push(acc("__off", "決まって買うものから外したもの", off, `${off.length}品`));
   out.push(`<div class="btnrow"><button class="btn" data-act="add">＋ 品目を追加</button><button class="btn ghost" data-act="catadd">＋ カテゴリーを追加</button></div>`);
   out.push(`<p class="note wighint">品目を長押しすると、並べ替えやカテゴリーの移動ができます。</p>`);
-  out.push(`<section class="card"><h2>購入の記録について</h2><p class="note">「買った」で記録すると、前の分を使い切った日から次の分を使い始める、という順につないで、なくなる日を出します（前の分をもう使い切っていたときは、記録のときに印をつけます）。思ったより持ちそうなときは「まだ少し持ちそう」で日数を延ばせて、これまでの平均もそれに合わせて変わります。1回に何個も買う品目は、もつ日数÷個数ごとに交換の目安と在庫を自動で出します。金額ともつ日数は月平均に反映されます。品目名をタップすると、これまでの購入の一覧が出ます。記録はその場でスプレッドシート（家計予算帳 - データベースの「消耗品_購入履歴」タブ）にも書き込まれます。</p></section>`);
+  out.push(`<section class="card rechelp"><h2>記録のしかた</h2><ul class="note"><li>買ったら「買った」で記録すると、なくなる日と月平均が出ます。</li><li>思ったより持つときは「まだ少し持ちそう」。</li><li>品目をタップすると、これまでの購入が見られます。</li></ul></section>`);
   return out.join("");
 }
 
@@ -3437,12 +3433,18 @@ function taxSelfSheet(){ let M; { const k = UI.lifeBr; UI.lifeBr = ""; try { M =
     <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
 /* 2026-11-21：トップの貯蓄と計のあいだの一言。①ライフプランで赤字になる年齢 ②実績の月で予算オーバーの枠 ③生活費の貯蓄が目標に足りない */
 let TMSG = {k: null, v: null};
-function topMsg(ym){ const key = [S.life, S.tax, S.plan, TODAY]; let neg = null; if (S.ready < 2) return ["", ""];   // データが変わると GCACHE が作り直されるので、その中に覚える
-  if (GCACHE.__neg && GCACHE.__neg.k.every((x, i) => x === key[i])) neg = GCACHE.__neg.v; else { try { const k0 = UI.lifeBr; UI.lifeBr = ""; try { const M = lifeModel(), j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth; neg = j >= 0 ? {age: kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) : null, y: M.yms[j].slice(0, 4)} : false; } finally { UI.lifeBr = k0; } } catch (e) { neg = false; } GCACHE.__neg = {k: key, v: neg}; }
-  if (neg) return ["neg", `このままだと${neg.age != null ? neg.age + "歳" : neg.y + "年"}で赤字。予算オーバーに注意`];
-  if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = MAIN4.filter(k => num0(a.g[k]) - num0(al[k]) > 500); if (ov.length) return ["warn", `${ov.map(k => GN[k]).join("・")}が予算オーバー`]; } }
-  const p = planOf(ym), b = bucketBal(ym), liv = num0(b.common) + num0(b.emergency), keep = num0(p.alloc?.living) * keepM(ym);
-  if (keep && liv < keep) return ["info", `生活費の貯蓄、目標まであと${kY(keep - liv)}万`];
+/* 計算は少し重いので、画面を出したあとで入れる */
+function fillTopMsg(ym){ const el = document.querySelector(`.topmsg[data-ym="${ym}"]`); if (!el || S.ready < 2) return; const r = GCACHE["__msg" + ym] = topMsg(ym); el.className = "topmsg " + r[0]; el.textContent = r[1] || "\u00a0"; }
+function topMsg(ym){ if (S.ready < 2) return ["", ""];
+  // 2026-11-21：焦らせる一言（短く）。①このままで赤字になる年齢 ②実績の月で予算オーバー → その額を毎月使い続けたら何歳で赤字か
+  // ③どちらもない時は、毎月いくら多く使うと何歳で赤字になるか（1〜5万円で探す）。計算はデータが変わるまで覚えておく（GCACHE）
+  const negAge = add => { const k = "__neg" + add; if (GCACHE[k] !== undefined) return GCACHE[k]; let v = null;
+    try { const k0 = UI.lifeBr; UI.lifeBr = ""; try { const M0 = add ? lifeModel({}) : null, M = add ? lifeModel({living: M0.living + add}) : lifeModel(), j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth; v = j >= 0 ? (kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) + "歳" : M.yms[j].slice(0, 4) + "年") : null; } finally { UI.lifeBr = k0; } } catch (e) { v = null; }
+    return GCACHE[k] = v; };
+  const now = negAge(0); if (now) return ["neg", `⚠️ このままだと${now}で貯金が尽きます`];
+  if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = MAIN4.reduce((t, k) => t + Math.max(0, num0(a.g[k]) - num0(al[k])), 0);
+    if (ov > 500){ const m = Math.max(10000, Math.round(ov / 10000) * 10000), ag = negAge(m); return ["neg", ag ? `⚠️ この使い方が続くと${ag}で貯金ゼロ` : `⚠️ 今月は予算を${kY(ov)}万オーバー`]; } } }
+  for (const m of [10000, 20000, 30000, 50000]){ const ag = negAge(m); if (ag) return ["warn", `毎月あと${m / 10000}万使うと${ag}で貯金ゼロ`]; }
   return ["", ""]; }
 /* 2026-11-21：こづかいの行。金額はトップの予算と同じ（ここでは直さない） */
 function lifeKozSheet(){ const ym = TODAY.slice(0, 7), ks = (typeof zanCats === "function" ? zanCats() : []).filter(n => n.includes("こづかい")).map(n => [n, num0(zanBud(ym, n))]), L = lifeDoc();
@@ -3579,7 +3581,7 @@ function topView(){
       return `<button class="ca ${v ? "down" : "none"}${c.inv ? " inv" : ""}${cut > 0 ? " red" : ""}" ${tAt(j, 3)} data-act="allocrule" data-id="${c.k}" aria-label="${c.n}の分配（決まりの説明）">${(() => { const sv = !c.inv && (c.k === "event" || c.k === "irregular") && v != null ? Math.min(Math.max(0, planSave(ym, c.k)), v - Math.max(0, plus)) : 0, pl = plus > 0 && cut <= 0 && v != null ? plus : 0, bs = v == null ? 0 : v - sv - pl;
       // 2026-11-21：分配を色分け。ふつう＝使うつもりの予算、黄＝積み立てる予算（車・子ども・期限のあるイベント）、青＝余り
       return sv > 0 || pl > 0 ? `<span class="pair">${bs > 0 ? `<span class="pa"><span class="g">↓</span><span class="n num">${kY(bs)}</span><span class="un">万円</span></span>` : ""}${sv > 0 ? `<span class="pa py"><span class="g">↓</span><span class="n num">${kY(sv)}</span><span class="un">積立</span></span>` : ""}${pl > 0 ? `<span class="pa pb"><span class="g">↓</span><span class="n num">${kY(pl)}</span><span class="un">余り</span></span>` : ""}</span>` : null; })() ?? `<span class="g">${v ? "↓" : "－"}</span><span class="n num">${v == null ? "－" : kY(v)}</span>${v == null ? "" : `<span class="un">万円</span>`}${cut > 0 ? `<span class="cutn">(予算-${kY(cut)}万)</span>` : ""}`}</button>`; }).join("")}
-    <span class="rl" style="grid-row:4">支出</span>${cols.map((c, j) => `<button class="cs named${c.inv ? " inv" : ""}" ${tAt(j, 4)} data-act="catact" data-id="${c.k}" aria-label="${c.n}の予算と支出">${cnm(c)}<span class="cn2 num">${kY(c.spent)}</span><span class="un2">万円</span><span class="cu">${(c.inv ? invB : c.bud) == null ? "" : `予算 ${kY(c.inv ? invB : c.bud)}`}</span></button>`).join("")}
+    <span class="rl" style="grid-row:4">支出</span>${cols.map((c, j) => `<button class="cs named${c.inv ? " inv" : ""}" ${tAt(j, 4)} data-act="catact" data-id="${c.k}" aria-label="${c.n}の予算と支出">${cnm(c)}<span class="cn2 num${!c.inv && isAct(ym) && c.bud != null && num0(c.spent) > num0(c.bud) + 500 ? " ovr" : ""}">${kY(c.spent)}</span><span class="un2">万円</span><span class="cu">${(c.inv ? invB : c.bud) == null ? "" : `予算 ${kY(c.inv ? invB : c.bud)}`}</span></button>`).join("")}
     <span class="rl" style="grid-row:5">移行額</span>${cols.map((c, j) => c.inv ? "" : mvArrow(j, c.k === "living" ? c.move + emgMv : c.move, c.k === "irregular" || c.k === "event" ? planSave(ym, c.k) : 0, c.k === "irregular" || c.k === "event" ? "goals" : "allocrule", c.k, c.n)).join("")}
     <span class="rl" style="grid-row:6">貯蓄</span>
     ${(() => { const liv = num0(bal.common) + num0(bal.emergency), irr = num0(bal.irregular), dl = sv.sv_common != null && sv.sv_emg != null ? num0(sv.sv_common) + num0(sv.sv_emg) : null, lw = ym === nowYm && dl != null && Math.round(dl) !== Math.round(liv), ng = goalsOn().filter(g => num0(g.target) > 0).length;
@@ -3587,7 +3589,7 @@ function topView(){
     <button class="cb mrg" data-col="3" data-row="6" style="grid-column:3;grid-row:6" data-act="goals" data-id="irregular" aria-label="特別費の貯蓄（目標ごとの積立）"><span class="ct">特別費</span><span class="cn2 num${irr < 0 ? " neg" : ""}">${kY(irr)}</span><span class="cu">万円</span>${(() => { const cap = goalsOn().filter(g => goalGrp(g) === "irregular").reduce((t, g) => t + num0(g.target), 0); return cap ? `<span class="keep"><span>上限${kY(cap)}万</span></span>` : ""; })()}</button>`; })()}
     ${cols.map((c, j) => c.inv ? (() => { const g = invGain(ym); return `<button class="cb inv" ${tAt(j, 6)} data-act="invlist" aria-label="証券の評価額と投資先の一覧"><span class="ct">証券</span><span class="cn2 num">${kY(c.bal)}</span><span class="cu">万円</span>${g ? `<span class="gain ${g.g < 0 ? "neg" : "pos"}">損益<br>${kS(g.g)}万<br>(${g.g >= 0 ? "+" : "−"}${Math.abs(g.pct).toFixed(1)}%)</span>` : ""}</button>`; })() : j >= 2 ? balC(c, j) : "").join("")}
   </section>
-  ${(([c, t]) => `<p class="topmsg ${c}">${t ? esc(t) : "&nbsp;"}</p>`)(topMsg(ym))}
+  ${(([c, t]) => `<p class="topmsg ${c}" data-ym="${ym}">${t ? esc(t) : "&nbsp;"}</p>`)(GCACHE["__msg" + ym] || (setTimeout(() => fillTopMsg(ym), 60), ["", ""]))}
   <div class="totwrap tg"><span class="rl" style="grid-column:1">計</span><span class="tfr" style="grid-column:2 / 5"></span><span class="tfr tfr2" style="grid-column:5 / 7"><span class="asof">${Number(ym.slice(5))}月末時点</span></span>
     <button class="tb" style="grid-column:2" data-act="incact"><span class="tl">収入</span><b class="num">${kY(a.inc)}</b><small class="tu">万円</small></button>
     <button class="tb" style="grid-column:3" data-act="mval" data-id="spend"><span class="tl">支出</span><b class="num">${kY(a.spend)}</b><small class="tu">万円</small></button>
@@ -5206,25 +5208,30 @@ try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", sqSo
 
 /* 2026-11-21：消耗品の並べ替え。品目を長押し → ぐらぐら（UI.wig）→ ドラッグで場所・カテゴリー（誰・小カテゴリー）を変える。
    並び順は前後の品目の間の数（order）にするので、書き込みは動かした1品だけ */
-const WIG = {t: 0, li: null, x: 0, y: 0, on: false, justDropped: false};
+const WIG = {t: 0, li: null, x: 0, y: 0, on: false, justDropped: false, grab: 0};
+// ぐらぐらの間は、右の☰をつかんだ時だけ動かす（ほかの所は普通にスクロールできる）。ぐらぐらでない時は、長押しでぐらぐらにして、そのままつかむ
 document.addEventListener("pointerdown", e => { const li = e.target.closest?.(".catl li[data-id]"); if (!li || UI.tab !== "cons" || UI.nav.length) return;
+  if (UI.wig && !e.target.closest(".whand")) return;
   WIG.li = li; WIG.x = e.clientX; WIG.y = e.clientY; WIG.on = false; clearTimeout(WIG.t);
-  const start = () => { WIG.on = true; if (!UI.wig){ UI.wig = true; const id = li.dataset.id; render(); WIG.li = document.querySelector(`.catl li[data-id="${id}"]`); } WIG.li?.classList.add("dragging"); WIG.oy = WIG.y; navigator.vibrate?.(15); };
-  if (UI.wig) start(); else WIG.t = setTimeout(start, 450); });
+  const start = () => { WIG.on = true; if (!UI.wig){ UI.wig = true; const id = li.dataset.id; render(); WIG.li = document.querySelector(`.catl li[data-id="${id}"]`); }
+    const l2 = WIG.li; if (!l2){ WIG.on = false; return; } WIG.grab = WIG.y - l2.getBoundingClientRect().top; l2.classList.add("dragging"); l2.style.pointerEvents = "none"; navigator.vibrate?.(15); };
+  if (UI.wig){ e.preventDefault(); start(); } else WIG.t = setTimeout(start, 450); });
 document.addEventListener("pointermove", e => { if (!WIG.li) return; if (!WIG.on){ if (Math.hypot(e.clientX - WIG.x, e.clientY - WIG.y) > 8){ clearTimeout(WIG.t); WIG.li = null; } return; }
-  e.preventDefault(); const li = WIG.li; li.style.pointerEvents = "none";   // 指の下の場所に、その行を差し込む
+  e.preventDefault(); const li = WIG.li;
+  // 指の下の行の真ん中を越えたら入れかえる（つかんでいる行は当たり判定から外してある）
   const under = document.elementFromPoint(e.clientX, e.clientY), tli = under?.closest?.(".catl li[data-id]"), tul = under?.closest?.(".catl") || under?.closest?.(".subblk")?.querySelector(".catl");
   if (tli && tli !== li){ const r = tli.getBoundingClientRect(); tli.parentNode.insertBefore(li, e.clientY < r.top + r.height / 2 ? tli : tli.nextSibling); } else if (tul && !tli && !tul.contains(li)) tul.appendChild(li);
-  li.style.pointerEvents = "";
-  if (e.clientY > innerHeight - 110) scrollBy(0, 10); if (e.clientY < 80) scrollBy(0, -10); }, {passive: false});
+  // つかんでいる行は、指にぴったりついてくる
+  li.style.transform = ""; const nat = li.getBoundingClientRect().top; li.style.transform = `translateY(${e.clientY - WIG.grab - nat}px)`;
+  if (e.clientY > innerHeight - 110) scrollBy(0, 8); if (e.clientY < 80) scrollBy(0, -8); }, {passive: false});
 document.addEventListener("touchmove", e => { if (WIG.on && WIG.li && e.cancelable) e.preventDefault(); }, {passive: false});
-const wigEnd = () => { clearTimeout(WIG.t); const li = WIG.li, on = WIG.on; WIG.li = null; WIG.on = false; if (!li || !on) return; li.classList.remove("dragging"); li.style.transform = "";
+const wigEnd = () => { clearTimeout(WIG.t); const li = WIG.li, on = WIG.on; WIG.li = null; WIG.on = false; if (!li || !on) return; li.classList.remove("dragging"); li.style.transform = ""; li.style.pointerEvents = "";
   WIG.justDropped = true; setTimeout(() => WIG.justDropped = false, 350);
   const ul = li.parentNode, id = li.dataset.id, it = S.items[id]; if (!it || !ul?.dataset) return; const ord = x => Number(S.items[x?.dataset?.id]?.order);
   const pv = li.previousElementSibling, nx = li.nextElementSibling, a = pv ? ord(pv) : null, b = nx ? ord(nx) : null;
   const order = a != null && b != null ? (a + b) / 2 : a != null ? a + 1 : b != null ? b - 1 : num0(it.order), cat = ul.dataset.cat, who = ul.dataset.who;
   const upd = {}; if (Math.abs(order - num0(it.order)) > 1e-9 && !(a != null && b != null && num0(it.order) > a && num0(it.order) < b)) upd.order = Math.round(order * 1e6) / 1e6; if (cat && cat !== (it.cat || "その他")) upd.cat = cat; if (who && who !== cwhoOf(it)) upd.who = who;
-  if (!Object.keys(upd).length) return; S.items[id] = {...it, ...upd}; save(() => db.doc("items/" + id).update({...upd, sh: false}), "並べ替えました").then(() => render()); };
+  if (!Object.keys(upd).length){ render(); return; } S.items[id] = {...it, ...upd}; save(() => db.doc("items/" + id).update({...upd, sh: false}), "並べ替えました").then(() => render()); };
 document.addEventListener("pointerup", wigEnd); document.addEventListener("pointercancel", wigEnd);
 /* ---------- boot ---------- */
 // 相手のスマホからの更新で、入力中のフォームが消えないようにする

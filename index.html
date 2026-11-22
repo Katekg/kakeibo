@@ -3564,9 +3564,9 @@ function topMsg(ym){ if (S.ready < 2) return ["", ""];
   const negAge = add => { const k = "__neg" + add; if (GCACHE[k] !== undefined) return GCACHE[k]; let v = null;
     try { const k0 = UI.lifeBr; UI.lifeBr = ""; try { const M0 = add ? lifeModel({}) : null, M = add ? lifeModel({living: M0.living + add}) : lifeModel(), j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth; v = j >= 0 ? (kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) + "歳" : M.yms[j].slice(0, 4) + "年") : null; } finally { UI.lifeBr = k0; } } catch (e) { v = null; }
     return GCACHE[k] = v; };
-  const now = negAge(0); if (now) return ["neg", `⚠️ このままだと${now}で貯金が尽きます`];
+  const now = negAge(0); if (now) return ["neg", `このままだと${now}で貯金が尽きます`];
   if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = ["living", "miho", "kazu"].reduce((t, k) => t + Math.max(0, num0(a.g[k]) - num0(al[k])), 0);   /* 2026-11-23：特別費・イベントは貯蓄から払う予定のお金なので、オーバーに数えない */
-    if (ov > 500){ const m = Math.max(10000, Math.round(ov / 10000) * 10000), ag = negAge(m); return ["neg", ag ? `⚠️ この使い方が続くと${ag}で貯金ゼロ` : `⚠️ 今月は予算を${kY(ov)}万オーバー`]; } } }
+    if (ov > 500){ const m = Math.max(10000, Math.round(ov / 10000) * 10000), ag = negAge(m); return ["neg", ag ? `この使い方が続くと${ag}で貯金ゼロ` : `今月は予算を${kY(ov)}万オーバー`]; } } }
   for (const m of [10000, 20000, 30000, 50000]){ const ag = negAge(m); if (ag) return ["warn", `毎月${m / 10000}万オーバーすると${ag}で貯金ゼロ`]; }
   return ["", ""]; }
 /* 2026-11-21：こづかいの行。金額はトップの予算と同じ（ここでは直さない） */

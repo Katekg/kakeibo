@@ -930,7 +930,7 @@ html.toplock.mjon, html.toplock.mjon body, html.toplock.mjon #app, html.mjon.pgb
 .ios button { all: unset; box-sizing: border-box; cursor: pointer; -webkit-tap-highlight-color: transparent; } .ios button:active { opacity: .55; }
 .ios .num, .ios .ig { font-variant-numeric: tabular-nums; } .ios .neg { color: #ff3b30 !important; } .ios .pos { color: #34c759; }
 .ios .icard { background: #fff; border-radius: 22px; padding: 10px 6px; margin: 0 0 10px; }
-section.ios { display: flex !important; flex-direction: column; overflow: hidden; } section.ios > * { flex: none; } section.ios > .icard.grow { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; min-height: 0; } section.ios > .icard:last-child { margin-bottom: 0; }
+section.ios { display: flex !important; flex-direction: column; overflow: hidden; } section.ios > * { flex: none; } section.ios > .icard.grow { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; min-height: 0; } section.ios > .icard:last-child { margin-bottom: 0; } section.ios > .imsg { margin-top: 0; }
 .ios .iinc { display: grid; justify-items: start; gap: 2px; padding: 12px 18px; width: 100%; } .ios .iinc b { font-size: 2.1rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; } .ios .iinc b small { font-size: .85rem; font-weight: 600; margin-left: 3px; color: var(--mut2); }
 .ios .isub { font-size: .74rem; color: var(--mut2); } .ios .isub em { font-style: normal; font-weight: 600; }
 .ios .ihd { margin: 4px 6px 6px; font-size: 1.15rem; font-weight: 700; display: flex; align-items: baseline; justify-content: space-between; } .ios .ihd small { font-size: .66rem; font-weight: 400; color: var(--mut2); }
@@ -3717,8 +3717,9 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
     <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${spend}</div><div class="isep"></div><div class="ilab">貯蓄へ</div><div class="ig imv">${move}</div></div>
     <h3 class="ihd">貯蓄<small>${Number(ym.slice(5))}月末・万円</small></h3>
     <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div></div>
-    ${msg[1] ? `<div class="icard imsg ${msg[0]}" data-ym="${ym}"><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${esc(msg[1])}</span></div>` : `<div class="icard imsg" style="display:none"><span class="topmsg" data-ym="${ym}"></span></div>`}
+    <h3 class="ihd">合計<small>万円</small></h3>
     <div class="icard"><div class="ig itot"><span><small>収入</small>${kY(a.inc)}</span><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span><span><small>投資</small>${kY(a.inv)}</span>${adv ? `<button data-act="advman"><small>建替中</small>${kY(adv.tot)}</button>` : "<span></span>"}</div></div>
+    <div class="icard imsg ${msg[0]}"${msg[1] ? "" : ' style="display:none"'}><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${msg[1] ? esc(msg[1]) : ""}</span></div>
   </section>`].join(""); }
 function topView(){ if (UI.muji !== false) return topViewMuji();   /* 2026-11-23：iPhoneの純正アプリ風のトップを使う（UI.muji = false で前の画面） */ const html = topView0(), ym = curYm();
   return html.replace(/<section class="fg f5 f4">([\s\S]*?)<\/section>/, (all, body) => {

@@ -925,20 +925,21 @@ section.fg.f5.f4.hd3 .cs, section.fg.f5.f4.hd3 .cs.named, section.fg.f5.f4.hd3 .
 .totwrap.tg .tb b { font-size: clamp(.9rem, 4.3vw, 1.1rem) !important; } .totwrap.tg .tl { font-size: .66rem !important; } .totwrap .advbox { margin-left: 0 !important; border-radius: 14px; }
 
 /* 2026-11-23（試作）：無印良品のようなトップ */
-html.toplock.mjon, html.toplock.mjon body, html.toplock.mjon #app, html.mjon .monthnav.mn2.stk { background: #f7f5f0 !important; }
-.mj { --ink2: #3a3a38; --mut2: #9a968e; --line2: #dcd7cc; color: var(--ink2); display: grid; gap: 0; padding: 4px 2px 0; font-feature-settings: "palt"; }
-.mj button { all: unset; cursor: pointer; -webkit-tap-highlight-color: transparent; } .mj button:active { background: rgba(0,0,0,.04); border-radius: 8px; }
+html.toplock.mjon, html.toplock.mjon body, html.toplock.mjon #app { background: #f7f5f0 !important; }
+html.mjon.pgbud .monthnav.mn2.stk, html.mjon.pgact .monthnav.mn2.stk, html.mjon .monthnav.mn2.stk { background: #f7f5f0 !important; }
+.mj { --ink2: #3a3a38; --mut2: #9a968e; --line2: #dcd7cc; color: var(--ink2); display: flex; flex-direction: column; justify-content: space-between; min-height: calc(var(--visH, 100dvh) - 190px); padding: 6px 2px 0; font-feature-settings: "palt"; }
+.mj button { all: unset; box-sizing: border-box; cursor: pointer; -webkit-tap-highlight-color: transparent; } .mj button:active { background: rgba(0,0,0,.04); border-radius: 8px; }
 .mj .num { font-variant-numeric: tabular-nums; } .mj .neg { color: #b5473a !important; }
-.mjinc { display: grid !important; justify-items: center; padding: 10px 0 14px !important; gap: 2px; } .mjinc .mjl { font-size: .72rem; color: var(--mut2); letter-spacing: .3em; }
-.mjinc b { font-size: 2.3rem; font-weight: 300; letter-spacing: -.02em; line-height: 1.1; } .mjinc b small { font-size: .8rem; margin-left: 3px; color: var(--mut2); font-weight: 400; } .mjinc .mjs { font-size: .7rem; color: var(--mut2); }
-.mjrule { height: 1px; background: var(--line2); margin: 6px 0; }
-.mjg { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); text-align: center; }
-.mjhead { padding: 8px 0 2px; } .mjn { font-size: .66rem; color: var(--mut2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .mjn i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; vertical-align: 1px; }
-.mjsec { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 4px 2px; } .mjsec.sm { padding-top: 4px; } .mjl { font-size: .78rem; color: var(--ink2); letter-spacing: .3em; } .mjl2 { font-size: .64rem; color: var(--mut2); letter-spacing: .15em; } .mju { font-size: .6rem; color: var(--mut2); }
-.mjc { display: grid !important; justify-items: center; padding: 6px 0 !important; gap: 2px; } .mjc b { font-size: 1.3rem; font-weight: 400; letter-spacing: -.02em; line-height: 1.15; } .mjc small { font-size: .58rem; color: var(--mut2); min-height: 1.2em; }
-.mjm { display: grid !important; justify-items: center; font-size: .78rem; color: #8b8170; padding: 2px 0 !important; min-height: 1.3em; } .mjm .z { color: var(--line2); }
-.mjmsg { margin: 2px 0 4px !important; font-size: .7rem !important; }
-.mjtot { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); text-align: center; font-size: .92rem; font-variant-numeric: tabular-nums; padding: 2px 0; } .mjtot > * { display: grid !important; gap: 1px; justify-items: center; } .mjtot small { font-size: .56rem; color: var(--mut2); } .mjtot em { font-style: normal; }
+.mj .mjinc { display: grid; justify-items: center; text-align: center; padding: 8px 0 16px; gap: 3px; width: 100%; } .mj .mjinc .mjl { font-size: .72rem; color: var(--mut2); letter-spacing: .4em; }
+.mj .mjinc b { font-size: 2.6rem; font-weight: 300; letter-spacing: -.02em; line-height: 1.05; } .mj .mjinc b small { font-size: .8rem; margin-left: 4px; color: var(--mut2); font-weight: 400; } .mj .mjinc .mjs { font-size: .7rem; color: var(--mut2); }
+.mj .mjrule { height: 1px; background: var(--line2); margin: 10px 0; }
+.mj .mjg { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); text-align: center; }
+.mj .mjhead { padding: 2px 0 6px; } .mj .mjn { font-size: .66rem; color: var(--mut2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .mj .mjn i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; vertical-align: 1px; }
+.mj .mjsec { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 4px 4px; } .mj .mjsec.sm { padding-top: 8px; } .mj .mjl { font-size: .8rem; color: var(--ink2); letter-spacing: .4em; } .mj .mjl2 { font-size: .64rem; color: var(--mut2); letter-spacing: .2em; } .mj .mju { font-size: .6rem; color: var(--mut2); }
+.mj .mjc { display: grid; justify-items: center; text-align: center; padding: 8px 0; gap: 3px; width: 100%; } .mj .mjc b { font-size: 1.4rem; font-weight: 400; letter-spacing: -.02em; line-height: 1.15; } .mj .mjc small { font-size: .58rem; color: var(--mut2); min-height: 1.2em; }
+.mj .mjm { display: grid; justify-items: center; text-align: center; font-size: .82rem; color: #8b8170; padding: 4px 0; min-height: 1.4em; width: 100%; } .mj .mjm .z { color: var(--line2); }
+.mj .mjmsg { margin: 4px 0 8px !important; font-size: .7rem !important; }
+.mj .mjtot { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); text-align: center; font-size: .95rem; font-variant-numeric: tabular-nums; padding: 4px 0 6px; } .mj .mjtot > * { display: grid; gap: 2px; justify-items: center; text-align: center; width: 100%; } .mj .mjtot small { font-size: .56rem; color: var(--mut2); } .mj .mjtot em { font-style: normal; }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
 .iot2 small { font-size: .66rem; font-weight: 400; opacity: .8; } .iot2.o { background: #ffe1e1; color: #b3261e; } .iot2.i { background: #fff3c4; color: #7a5a00; } .iot2.ro { cursor: default; align-content: center; }

@@ -879,6 +879,8 @@ details.ht { margin: 3px 0 !important; border-radius: 10px !important; } details
 .whand { flex: none; width: 34px; height: 34px; display: grid; place-items: center; font-size: 1.1rem; color: var(--muted); touch-action: none; cursor: grab; margin: -6px -6px -6px 2px; }
 .catl li.dragging { transition: none !important; will-change: transform; }
 .fg .cs .cn2.ovr { color: var(--alert) !important; }   /* 2026-11-21：実績で予算オーバーの支出は赤 */
+.fg .ca .pa.pr, .fg .ca .pa.pr .n, .fg .ca .pa.pr .g { color: #d64545 !important; }
+.fg > i.lane { z-index: 0 !important; width: 4px; border-radius: 2px; opacity: .4; pointer-events: none; align-self: stretch; } .fg > i.lane.lb { background: #1e6fd9; justify-self: start; margin-left: 24%; } .fg > i.lane.ly { background: #e0a800; justify-self: center; } .fg > i.lane.lr { background: #d64545; justify-self: end; margin-right: 24%; }
 .rechelp ul { margin: 0; padding-left: 1.2em; } .rechelp h2 { font-size: .9rem; }
 
 /* 2026-11-22：分配の行き先ごとの上限 */
@@ -3619,10 +3621,12 @@ function advManSheet(){ const ym = curYm(), a = advManOf(ym), y0 = v => v ? num0
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div></form>`); }
 /* 2026-11-21：移行額の矢印の色。赤＝貯蓄から支出へ回した、黄＝予算どおり積立として貯蓄へ、青＝予算より多く貯蓄できた（余り） */
 const planSave = (ym, g) => zanCatsOf(g).filter(n => isSaveGoal(n) && !(goalOf(n)?.start > ym)).reduce((t, n) => t + Math.max(0, num0(zanBud(ym, n)) - num0(spendDef(ym, n))), 0);   // 2026-11-22：積立の分＝予算−その月に払う予定（税保険等の支払い月など）
-const mvArrow = (j, m, p, act, k, nm) => { m = Math.round(m); if (!m) return tArrow(j, 5, 0, act, k, `${nm}の移行額`);
-  if (m < 0) return `<button class="ca up mvr" ${tAt(j, 5)} data-act="${act}" data-id="${k}" aria-label="${nm}：貯蓄から支出へ${kY(-m)}万"><span class="g">↑</span><span class="n num">${kY(-m)}</span><span class="un">万円</span></button>`;
-  const y = Math.min(m, Math.max(0, Math.round(p))), b = m - y, one = (cls, v, u) => `<span class="pa ${cls}"><span class="g">↓</span><span class="n num">${kY(v)}</span><span class="un">${u}</span></span>`;
-  return `<button class="ca down mvc" ${tAt(j, 5)} data-act="${act}" data-id="${k}" aria-label="${nm}：${y ? `積立${kY(y)}万` : ""}${y && b ? "・" : ""}${b ? `余り${kY(b)}万` : ""}を貯蓄へ"><span class="pair">${y ? one("py", y, "積立") : ""}${b ? one("pb", b, y ? "余り" : "万円") : ""}</span></button>`; };
+/* 2026-11-23：移行額は「積立（黄↓）」「余り（青↓）」「貯蓄から使った（赤↑）」を並べて出す。積立がある月に積立より多く使ったら、その分は貯蓄から（赤） */
+const mvParts = (m, p) => { m = Math.round(m); p = Math.max(0, Math.round(p)); return {y: p, b: Math.max(0, m - p), r: Math.max(0, p - m)}; };
+const mvArrow = (j, m, p, act, k, nm) => { const {y, b, r} = mvParts(m, p); if (!y && !b && !r) return tArrow(j, 5, 0, act, k, `${nm}の移行額`);
+  if (!y && !b) return `<button class="ca up mvr" ${tAt(j, 5)} data-act="${act}" data-id="${k}" aria-label="${nm}：貯蓄から支出へ${kY(r)}万"><span class="g">↑</span><span class="n num">${kY(r)}</span><span class="un">万円</span></button>`;
+  const one = (cls, v, u, g = "↓") => `<span class="pa ${cls}"><span class="g">${g}</span><span class="n num">${kY(v)}</span><span class="un">${u}</span></span>`;
+  return `<button class="ca ${r ? "up" : "down"} mvc" ${tAt(j, 5)} data-act="${act}" data-id="${k}" aria-label="${nm}：${[y ? `積立${kY(y)}万` : "", b ? `余り${kY(b)}万` : "", r ? `貯蓄から${kY(r)}万を使った` : ""].filter(Boolean).join("・")}"><span class="pair">${y ? one("py", y, "積立") : ""}${b ? one("pb", b, y ? "余り" : "万円") : ""}${r ? one("pr", r, "貯蓄から", "↑") : ""}</span></button>`; };
 const cnm = c => `<span class="cnm" style="--gc:${c.inv ? GCOL.invest : GCOL[c.k]}">${c.n}</span>`;
 function topNav(ym){ const L = topYms(), i = L.indexOf(ym);
   return `<div class="monthnav mn2 stk pgnav ${TPG()}"><button class="navbtn" data-act="cym" data-ym="${L[i - 1] || ""}" ${i > 0 ? "" : "disabled"} aria-label="前の月">‹</button><strong>${ymLabel(ym)}<span class="pgtag">${isAct(ym) ? "実績" : "予算"}</span>${notices().length ? `<button class="alicon inl" data-act="sysal" aria-label="お知らせ ${notices().length}件">!</button>` : ""}</strong><button class="navbtn" data-act="cym" data-ym="${L[i + 1] || ""}" ${L[i + 1] ? "" : "disabled"} aria-label="次の月">›</button><span class="ckic" aria-hidden="true" style="visibility:hidden"></span>${window.KAKEI_SS ? `<a class="ssbtn" href="${esc(window.KAKEI_SS)}" target="_blank" rel="noopener" aria-label="スプレッドシートを開く" title="スプレッドシートを開く"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M4 9h16M4 15h16M10 9v12"/></svg></a>` : ""}</div>`; }
@@ -3635,6 +3639,10 @@ function topView(){
   // 2026-11-14：特別費の移行額＝特別費の余り＋共通貯蓄へ（非常時用）。予算＝（特別費の分配−カテゴリの予算の合計）＋共通貯蓄への移行額
   const emgMv = num0(all.find(c => c.k === "emergency")?.move), mvBudIrr = p.alloc ? num0(p.alloc.irregular) - zanCatsOf("irregular").reduce((t, n) => t + num0(zanBud(ym, n)), 0) + num0(saveBudOf(ym)) : null;   // 2026-11-12：共通は生活費の予算3か月分をキープ
   const balC = (c, j) => `<button class="cb${c.warn ? " warn" : ""}" ${tAt(j, 6)} data-act="${c.k === "event" ? "goals" : "balset"}" data-id="${c.k === "event" ? "event" : c.b}" aria-label="${BK[c.b]}の残高を合わせる"><span class="ct">${c.n}</span><span class="cn2 num${c.bal < 0 || (c.k === "event" && goalBehind(ym, "event", c.bal)) ? " neg" : ""}">${kY(c.bal)}</span><span class="cu">万円</span>${c.warn ? `<span class="cd">ドコモ${kY(c.act)}</span>` : ""}</button>`;
+  // 2026-11-23：お金の流れの細い線（青＝収入からそのまま使った・黄＝収入から貯蓄へ・赤＝貯蓄から使った）。箱の後ろを通す
+  const lanes = cols.map((c, j) => { if (c.inv) return ""; const mv = c.k === "living" ? c.move + emgMv : c.move, {y, r} = mvParts(mv, c.k === "irregular" || c.k === "event" ? planSave(ym, c.k) : 0), bl = num0(c.spent) - r, g = tGc(j);
+    return `${bl > 500 ? `<i class="lane lb" style="grid-column:${g};grid-row:2 / 5"></i>` : ""}${y > 0 ? `<i class="lane ly" style="grid-column:${g};grid-row:2 / 7"></i>` : ""}${r > 0 ? `<i class="lane lr" style="grid-column:${g};grid-row:4 / 7"></i>` : ""}`; }).join("");
+  void lanes;   /* 2026-11-23：線は箱と数字に重なって読みにくかったので、出さない（矢印の色で流れを見せる） */
   return [topNav(ym), `<section class="fg f5 f4">
     <span class="rl" style="grid-row:1">収入</span>
     ${advBox(ym) ? advBox(ym) : ""}<button class="incbar" style="grid-row:1;grid-column:2 / ${advBox(ym) ? "6" : "-1"}" data-act="incact" aria-label="収入を入れる"><span class="big2 num">${kY(a.inc)}<small>万円</small></span><span class="ips incs"><span class="incm">${Number(prevYmOf(ym).slice(5))}月の収入</span>${!a.incDef ? (ib != null ? `<span>予算 <b class="num">${kY(ib)}</b>万円</span><span>差 <b class="num">${kS(a.inc - ib)}</b></span>` : "") : `<span>${ib == null ? "収入の予算が未入力" : "未入力（予算の額）"}</span>`}</span></button>

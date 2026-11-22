@@ -821,7 +821,7 @@ html.lifefit .lifet th, html.lifefit .lifet td { font-size: var(--lfs, 13px) !im
 
 /* 2026-11-21：ライフ — 表の下の説明を3行＋1行に、上の見出しを詰める、▸を押しやすく */
 .nmkl { display: grid !important; gap: 0 !important; font-size: .7rem; line-height: 1.4; margin: 2px 0 0 !important; padding: 0 !important; }
-html.lifelock #view { row-gap: 4px !important; } .lifet td.actm, .lifet th.mo.actm { background: #fdeef3 !important; } .lifet td.evs .evn, .lifet td .evn { color: var(--muted); opacity: .75; font-weight: 400; } html.lifelock, html.lifelock body, html.lifelock #app { background: #fff !important; }   /* 2026-11-21：ライフの「今の計画」・見出し・表・説明のあいだを詰める */
+html.lifelock #view { row-gap: 4px !important; } .lifet td.actm, .lifet th.mo.actm { background: #fdeef3 !important; } .lifet .yb { border-left: 1px solid rgba(120, 110, 150, .35) !important; } .lifet td.evs .evn, .lifet td .evn { color: var(--muted); opacity: .75; font-weight: 400; } html.lifelock, html.lifelock body, html.lifelock #app { background: #fff !important; }   /* 2026-11-21：ライフの「今の計画」・見出し・表・説明のあいだを詰める */
 .lifet .lh .lbl.lsm { font-size: .74em; letter-spacing: -.03em; }
 .lifet .lh { text-overflow: clip !important; } .lifet .lh .lbl { display: inline-block !important; max-width: 86px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
 /* 2026-11-21：ライフの一番上に、白い背景の止まる帯（iPhoneの上のもや対策：上に固定の帯があると、ステータスバーがその色になる） */
@@ -3417,17 +3417,18 @@ function lifeView(){
   const M = lifeModel(), {L, yms, rows, V, net, bal, nv} = M, years = [...new Set(yms.map(ym => ym.slice(0, 4)))], open = UI.lifeOpen || (UI.lifeOpen = new Set());
   // 列：年（開いている年は1〜12月）
   const cols = []; years.forEach(y => { const ix = yms.map((ym, j) => ym.startsWith(y) ? j : -1).filter(j => j >= 0); if (lifeYOpen(y)) ix.forEach(j => cols.push({key: yms[j], label: `${Number(yms[j].slice(5))}月`, ix: [j], m: true, y})); else cols.push({key: y, label: y, ix, y}); });
+  cols.forEach((c, i) => { const p = cols[i - 1]; c.yb = !!p && ((c.m && c.label === "1月") || (p.m && p.label === "12月")); });   // 2026-11-22：開いた年の境目に薄い線
   const sum = (arr, c) => c.ix.reduce((t, j) => t + arr[j], 0), endOf = c => bal[c.ix[c.ix.length - 1]];
   const age = c => L.people.kazu.birth ? Number(c.y) - Number(L.people.kazu.birth.slice(0, 4)) : null;
   const AF = null, af = () => "";
-  const head = `<tr><th class="lh">万円</th>${cols.map(c => `<th class="${c.m ? "mo" : "yr"}${lifeYOpen(c.y) ? " on" : ""}${c.m && isAct(c.key) ? " actm" : ""}" data-act="lifeY" data-y="${c.m ? "" : c.y}" data-ym="${c.key}">${c.m ? `<small class="myr">${c.y}年</small><b>${c.label}</b>` : `<b>${c.label}</b><small>${age(c) == null ? "" : age(c) + "歳"}</small>`}</th>`).join("")}</tr>`;
+  const head = `<tr><th class="lh">万円</th>${cols.map(c => `<th class="${c.m ? "mo" : "yr"}${lifeYOpen(c.y) ? " on" : ""}${c.m && isAct(c.key) ? " actm" : ""}${c.yb ? " yb" : ""}" data-act="lifeY" data-y="${c.m ? "" : c.y}" data-ym="${c.key}">${c.m ? `<small class="myr">${c.y}年</small><b>${c.label}</b>` : `<b>${c.label}</b><small>${age(c) == null ? "" : age(c) + "歳"}</small>`}</th>`).join("")}</tr>`;
   // 2026-11-20：NISAの大事なところに色（緑＝余りをNISAへ、黄＝積立を減らす・止める、赤＝NISAを売る）
   const nisaMk = (r, c) => { if (r.id === "nisaout" || r.id === "nisas") return sum(V[r.id], c) > 0 ? " nmk-sell" : ""; if (r.id !== "nisa" || !L.nisa) return "";
     const k = c2 => { const n = c2.ix.filter(j => yms[j] < (M.a65k || "9999")).length; if (!n) return ""; const v = sum(V.nisa, c2), base = c2.ix.filter(j => yms[j] < (M.a65k || "9999")).reduce((t, j) => t + (M.nisaBaseAt ? M.nisaBaseAt(yms[j]) : L.nisa), 0); return v > base + 1000 ? " nmk-up" : v < base - 1000 ? " nmk-down" : "base"; };
     // 変わり目だけ色をつける（前の列と同じ種類が続くところは塗らない）
     const i = cols.indexOf(c), now = k(c), prev = i > 0 ? k(cols[i - 1]) : "base"; return now && now !== "base" && now !== prev ? now : ""; };
   const actC = c => c.m && isAct(c.key);   // 2026-11-22：実績の月（トップで実績にした月）は薄いピンク
-  const cell = (r, c, cls = "") => { cls = (cls + (actC(c) ? " actm" : "")).trim(); const v = sum(V[r.id], c), mk = r.mark ? c.ix.map(j => r.mark(yms[j])).find(x => x != null) : null;
+  const cell = (r, c, cls = "") => { cls = (cls + (actC(c) ? " actm" : "") + (c.yb ? " yb" : "")).trim(); const v = sum(V[r.id], c), mk = r.mark ? c.ix.map(j => r.mark(yms[j])).find(x => x != null) : null;
     if (r.id === "goalev" || r.id === "lvg-event"){ const use = r.mark && c.ix.some(j => r.mark(yms[j]) != null);   // 使う月は📅、積立の額は薄い文字
       return `<td class="${cls} gevc evs${use ? " ev" : ""}" data-col="${c.key}" data-act="lifeGoalEv" data-ym="${c.key}">${use ? "📅" : ""}<span class="evn">${lifeK(v)}</span></td>`; }
     const ic = (r.micon ? c.ix.map(j => r.micon(yms[j])).find(Boolean) : null) || r.icon || "🚗", nk = nisaMk(r, c);
@@ -3447,14 +3448,14 @@ function lifeView(){
   let lastSign = 0; const body = rows.filter(r => !NX.has(r.id)).map(r => { const sec = r.sign !== lastSign ? secRow(r.sign) : ""; lastSign = r.sign; return sec + line(r).replace('<tr class="', `<tr class="${r.sign > 0 ? "rin " : "rout "}`) + (r.kids && open.has(r.id) ? r.kids.map(k => line(k, true).replace('<tr class="', `<tr class="${r.sign > 0 ? "rin " : "rout "}`)).join("") : ""); }).join("");
   const foot = `<tr class="sum"><th class="lh">収支</th>${cols.map(c => { const v = flow(c); return `<td class="${v < 0 ? "neg" : "pos"}">${lifeK(v) || "0"}</td>`; }).join("")}${AF ? `<td class="af">${lifeK(AF.sum) || "0"}</td>` : ""}</tr>
     ${nisaLines ? `<tr class="lsec nx"><th class="lh">⇄ 貯蓄とNISA</th>${cols.map(() => `<td></td>`).join("")}</tr>${nisaLines}` : ""}
-    <tr class="fundr"><th class="lh">　自由に使える貯蓄</th>${cols.map(c => { const v = M.free[c.ix[c.ix.length - 1]]; return `<td class="${v < 0 ? "negb" : ""}">${lifeK(v) || "0"}</td>`; }).join("")}</tr>
+    <tr class="fundr"><th class="lh">　🛡️ 生活防衛資金</th>${cols.map(c => { const v = M.free[c.ix[c.ix.length - 1]]; return `<td class="${v < 0 ? "negb" : ""}">${lifeK(v) || "0"}</td>`; }).join("")}</tr>
     <tr class="fundr"><th class="lh">　使う予定の貯蓄</th>${cols.map(c => `<td><span class="evn">${lifeK(M.plan[c.ix[c.ix.length - 1]]) || ""}</span></td>`).join("")}</tr>
     <tr class="bal"><th class="lh"><button type="button" class="lbl" data-act="lifeEdit" data-id="bal">貯蓄の合計</button></th>${cols.map(c => { const v = endOf(c); return `<td class="${v < 0 ? "negb" : ""}" data-act="lifeBal" data-col="${c.key}">${lifeK(v) || "0"}</td>`; }).join("")}${af("bal")}</tr>
     ${L.nisa || L.nisa0 ? `<tr class="nisa"><th class="lh"><button type="button" class="lbl" data-act="lifeEdit" data-id="nisa">NISA評価額</button></th>${cols.map(c => `<td>${lifeK(nv[c.ix[c.ix.length - 1]]) || "0"}</td>`).join("")}${af("nisaV")}</tr>` : ""}`;
   // 65歳からの取り崩し
   return `<div class="lifetop">${lifeTree()}</div><div class="lifehead"><button type="button" class="linkbtn lhelp" data-act="lifeHelp">📖 見方</button><span class="lt">${yms[0].slice(0, 4)}〜${L.endY}年<small>万円</small>${info(`${L.endAge}歳（${L.endY}年）までの見通しです。<br>・左の項目名をタップ → その項目の入力。▸をタップ → 内訳<br>・年をタップ → その年の1〜12月。月をタップ → 年に戻る<br>・🚗（車の購入）・👶（生まれる月）・💼（次の会社に入る月）・📌（1回だけの予定）・🏥（老人ホームに入る月）は長押しして横に動かすと、時期が変わり、費用や収入・税金も一緒にずれます<br>・項目はFPのキャッシュフロー表の分け方（基本生活費・住居関連費・車両費・教育費・保険料・税・社会保険料・一時的な支出・その他の支出）です<br>・収入は額面（税・社会保険料を引く前）。税・社会保険料は別の行で引きます。会社にいる間は健康保険・厚生年金・雇用保険（額面の約15%）・所得税・住民税、退職して次の会社に入るまでは国保・国民年金・住民税、65歳からは年金から国保（75歳から後期高齢者医療）・介護保険・所得税・住民税（どれも目安）<br>・貯蓄残高がマイナスの年は赤くなります<br>・NISAは退職するまで積み立て、そのあとも年${num0(L.nisaR)}%で運用。貯蓄が生活費の${L.bufM}か月分を下回る月だけ、足りない分を売って貯蓄に入れます（売る年は、その年の積立を止めます）${L.infl ? `<br>・支出は毎年${L.infl}%ずつ上がる計算` : ""}`)}</span><button class="sbtn ghost2" data-act="lifeSet">⚙ 設定</button></div>
   <div class="lifewrap"><table class="lifet"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
-  ${L.nisa || L.nisa0 ? `<p class="note nmkl"><span><i class="nmk-up"></i>余りをNISAへ</span><span><i class="nmk-down"></i>積立を減らす・止める（色は変わり目の年だけ）</span><span><i class="nmk-sell"></i>NISAを売る</span><span class="nmkh">「NISAへ積立」をタップ → 毎月の積立額をくらべる</span></p>` : ""}
+  ${L.nisa || L.nisa0 ? `<p class="note nmkl"><span><i class="nmk-up"></i>余りをNISAへ</span><span><i class="nmk-down"></i>積立を減らす・止める（色は変わり目の年だけ）</span><span><i class="nmk-sell"></i>NISAを売る</span><span class="nmkh">「NISAへ積立」をタップ → 毎月の積立額をくらべる</span>${(k => k ? `<span class="nmkh">🛡️ 生活防衛資金の目安：生活費などの${k.m}か月分 ≈ ${Math.round(k.keep / 10000)}万（急な出費の時以外は使わない）</span>` : "")(M.kp?.[yms.indexOf(TODAY.slice(0, 7))])}</p>` : ""}
 `;
 }
 /* 2026-11-20：NISAのタイミング（積立額が変わる年・止める年・売り始める年・赤字になる年）を表の上にまとめる */
@@ -3502,7 +3503,7 @@ function topMsg(ym){ if (S.ready < 2) return ["", ""];
   const now = negAge(0); if (now) return ["neg", `⚠️ このままだと${now}で貯金が尽きます`];
   if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = MAIN4.reduce((t, k) => t + Math.max(0, num0(a.g[k]) - num0(al[k])), 0);
     if (ov > 500){ const m = Math.max(10000, Math.round(ov / 10000) * 10000), ag = negAge(m); return ["neg", ag ? `⚠️ この使い方が続くと${ag}で貯金ゼロ` : `⚠️ 今月は予算を${kY(ov)}万オーバー`]; } } }
-  for (const m of [10000, 20000, 30000, 50000]){ const ag = negAge(m); if (ag) return ["warn", `毎月あと${m / 10000}万使うと${ag}で貯金ゼロ`]; }
+  for (const m of [10000, 20000, 30000, 50000]){ const ag = negAge(m); if (ag) return ["warn", `毎月${m / 10000}万オーバーすると${ag}で貯金ゼロ`]; }
   return ["", ""]; }
 /* 2026-11-21：こづかいの行。金額はトップの予算と同じ（ここでは直さない） */
 function lifeKozSheet(){ const ym = TODAY.slice(0, 7), ks = (typeof zanCats === "function" ? zanCats() : []).filter(n => n.includes("こづかい")).map(n => [n, num0(zanBud(ym, n))]), L = lifeDoc();
@@ -3524,7 +3525,9 @@ function consHelp(){ openSheet(`<h3>消耗品の見方</h3><div class="helpb">
   <p><b>品目のボタン</b><br>・<b>買った</b>：買ったら押して、値段と量を入れます。次になくなる日が自動で出ます。<br>・<b>比べる</b>：ネットの値段を比べます。<br>・<b>まだ少し持ちそう</b>：思ったより減っていないときに押すと、なくなる日がのびます。<br>・一番上の<b>「買うもの」</b>に出ているものが、そろそろなくなるものです。</p>
   <p class="note">店の欄に「概算」とあるものは、まだ買った記録がなく、だいたいの値段で入れています。買ったら「買った」で正しい値段に変わります。</p></div>
   <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
-function fitLife(){ const w = document.querySelector(".lifewrap"), t = document.querySelector(".lifet"); if (!w || !t) return; const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), avail = tb - 10 - (document.querySelector(".nmkl")?.offsetHeight || 0) - 6 - w.getBoundingClientRect().top;   // 2026-11-21：表の下の色の説明がタブに隠れないように
+function fitLife(){ const w = document.querySelector(".lifewrap"), t = document.querySelector(".lifet"); if (!w || !t) return;
+  { const ix = [...t.querySelectorAll("thead tr:first-child > *")].map((c, i) => c.classList.contains("yb") ? i : -1).filter(i => i >= 0); if (ix.length) t.querySelectorAll("tbody tr, tfoot tr").forEach(tr => ix.forEach(i => tr.children[i]?.classList.add("yb"))); }   /* 2026-11-22：年の境目の線を、表の下の行まで通す */
+  const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), avail = tb - 10 - (document.querySelector(".nmkl")?.offsetHeight || 0) - 6 - w.getBoundingClientRect().top;   // 2026-11-21：表の下の色の説明がタブに隠れないように
   const n = t.querySelectorAll("tr").length || 1;
   if (lifeWide()){ w.style.maxHeight = avail + "px"; let h = Math.min(90, Math.floor(avail / (n + .6)));
     const set = () => { const fs = Math.max(9, Math.min(15, Math.round(h * .55))); t.style.setProperty("--lrh", h + "px"); t.style.setProperty("--lhd", Math.max(Math.round(h * 1.6), fs * 2 + 4) + "px"); t.style.setProperty("--lfs", fs + "px"); t.style.setProperty("--lcw", Math.round(fs * 3) + "px"); };

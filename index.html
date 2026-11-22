@@ -930,7 +930,7 @@ html.toplock.mjon, html.toplock.mjon body, html.toplock.mjon #app, html.mjon.pgb
 .ios button { all: unset; box-sizing: border-box; cursor: pointer; -webkit-tap-highlight-color: transparent; } .ios button:active { opacity: .55; }
 .ios .num, .ios .ig { font-variant-numeric: tabular-nums; } .ios .neg { color: #ff3b30 !important; } .ios .pos { color: #34c759; }
 .ios .icard { background: #fff; border-radius: 22px; padding: 10px 6px; margin: 0 0 10px; }
-section.ios { display: flex !important; flex-direction: column; overflow: hidden; } section.ios > * { flex: none; } section.ios > .icard.grow { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; min-height: 0; } section.ios > .icard:last-child { margin-bottom: 0; } section.ios > .imsg { margin-top: 0; }
+section.ios { display: flex !important; flex-direction: column; overflow: hidden; } section.ios > * { flex: none; } section.ios > .icard.grow { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; min-height: 0; } section.ios > .icard:last-child { margin-bottom: 0; } section.ios > .imsg { margin: 0 0 6px; } .ios .mjm .mpl { font-size: .54rem; color: var(--mut2); }
 .ios .iinc { display: grid; justify-items: start; gap: 2px; padding: 12px 18px; width: 100%; } .ios .iinc b { font-size: 2.1rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; } .ios .iinc b small { font-size: .85rem; font-weight: 600; margin-left: 3px; color: var(--mut2); }
 .ios .isub { font-size: .74rem; color: var(--mut2); } .ios .isub em { font-style: normal; font-weight: 600; }
 .ios .ihd { margin: 4px 6px 6px; font-size: 1.15rem; font-weight: 700; display: flex; align-items: baseline; justify-content: space-between; } .ios .ihd small { font-size: .66rem; font-weight: 400; color: var(--mut2); }
@@ -946,6 +946,7 @@ section.ios { display: flex !important; flex-direction: column; overflow: hidden
 .ios .imsg .topmsg { margin: 0 !important; text-align: left; white-space: normal; font-size: .78rem !important; font-weight: 600; color: var(--ink2) !important; }
 html.mjon .monthnav .navbtn, html.mjon .monthnav .tbtn, html.mjon .monthnav > button { border-radius: 50% !important; background: rgba(255,255,255,.85) !important; box-shadow: 0 1px 6px rgba(0,0,0,.08) !important; border: 0 !important; }
 html.mjon .monthnav strong { font-weight: 700; }
+html.mjon .monthnav .navbtn, html.mjon .monthnav .ssbtn { width: 38px !important; height: 38px !important; border-radius: 50% !important; background: rgba(255,255,255,.9) !important; box-shadow: 0 1px 8px rgba(0,0,0,.08) !important; border: 0 !important; display: grid !important; place-items: center; corner-shape: round !important; }
 .ios .itot > * { padding: 2px 0; font-size: .98rem; font-weight: 600; } .ios .itot small { font-size: .58rem; color: var(--mut2); font-weight: 400; } .ios .itot em { font-style: normal; }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
@@ -3703,14 +3704,17 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
   const svBal = c => c.inv ? c.bal : c.k === "living" ? num0(bal.common) + num0(bal.emergency) : num0(bal[c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.k]);
   const head = cols.map(c => `<span class="mjn"><i style="background:${colC(c)}"></i>${esc(c.n)}</span>`).join("");
   const spend = cols.map(c => { const sb = c.inv ? (invB == null ? null : num0(invB)) : c.bud == null ? null : num0(c.bud) - (isG(c) ? planSave(ym, c.k) : 0), ov = !c.inv && act && sb != null && num0(c.spent) > sb + 500;
-    return `<button class="mjc" data-act="catact" data-id="${c.inv ? "invest" : c.k}"><b class="num${ov ? " neg" : ""}">${kY(c.spent)}</b><small>${sb == null ? "" : `予算 ${kY(sb)}`}</small></button>`; }).join("");
-  const move = cols.map(c => { if (c.inv) return `<span class="mjm"></span>`; const {y, b, r} = mvParts(c.k === "living" ? c.move + emgMv : c.move, isG(c) ? planSave(ym, c.k) : 0);
-    const t = [y ? `<span>+${kY(y)}</span>` : "", b ? `<span>+${kY(b)}</span>` : "", r ? `<span class="neg">−${kY(r)}</span>` : ""].filter(Boolean).join("") || `<span class="z">0</span>`;
+    return `<button class="mjc" data-act="catact" data-id="${c.inv ? "invest" : c.k}"><b class="num${ov ? " neg" : ""}">${kY(c.spent)}</b><small>${sb == null || !act ? "" : `予算 ${kY(sb)}`}</small></button>`; }).join("");   /* 2026-11-23：予算の月は数字そのものが予算なので出さない */
+  // 2026-11-23：積立（予定）がある列は、実際に貯蓄に回った額を出し、予定より少なければ赤字にして下に「予定 +○」
+  const move = cols.map(c => { if (c.inv) return `<span class="mjm"></span>`; const m = Math.round(c.k === "living" ? c.move + emgMv : c.move), pl = isG(c) ? Math.round(planSave(ym, c.k)) : 0, {y, b, r} = mvParts(m, pl);
+    const t = pl > 0 ? (m < pl - 500 ? `<span class="neg">${m >= 0 ? "+" : "−"}${kY(Math.abs(m))}</span><small class="mpl">予定 +${kY(pl)}</small>` : `<span>+${kY(m)}</span>`)
+      : [y ? `<span>+${kY(y)}</span>` : "", b ? `<span>+${kY(b)}</span>` : "", r ? `<span class="neg">−${kY(r)}</span>` : ""].filter(Boolean).join("") || `<span class="z">0</span>`;
     return `<button class="mjm" data-act="${isG(c) ? "goals" : "allocrule"}" data-id="${c.k}">${t}</button>`; }).join("");
   const save = cols.map(c => { const v = svBal(c), behind = isG(c) && goalBehind(ym, c.k, v);
     return `<button class="mjc" data-act="${c.inv ? "invlist" : c.k === "event" ? "goals" : c.k === "irregular" ? "goals" : "balset"}" data-id="${c.inv ? "" : c.k === "living" ? "__liv" : c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.b}"><b class="num${v < 0 || behind ? " neg" : ""}">${kY(v)}</b><small>${c.k === "living" && keep ? `目標 ${kY(keep)}` : ""}</small></button>`; }).join("");
   const msg = GCACHE["__msg" + ym] || (setTimeout(() => fillTopMsg(ym), 60), ["", ""]), adv = advBox(ym, 1) ? advManOf(ym) : null;
   return [topNav(ym), `<section class="ios">
+    <div class="icard imsg ${msg[0]}"${msg[1] ? "" : ' style="display:none"'}><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${msg[1] ? esc(msg[1]) : ""}</span></div>
     <h3 class="ihd">収入<small>万円</small></h3>
     <button class="icard iinc" data-act="incact"><span class="isub">${Number(prevYmOf(ym).slice(5))}月に入った分</span><b class="num">${kY(a.inc)}<small>万円</small></b>${!a.incDef && ib != null ? `<span class="isub">予算 ${kY(ib)}万 ・ <em class="${a.inc - ib < 0 ? "neg" : "pos"}">${kS(a.inc - ib)}</em></span>` : ""}</button>
     <h3 class="ihd">支出<small>万円</small></h3>
@@ -3718,8 +3722,7 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
     <h3 class="ihd">貯蓄<small>${Number(ym.slice(5))}月末・万円</small></h3>
     <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div></div>
     <h3 class="ihd">合計<small>万円</small></h3>
-    <div class="icard"><div class="ig itot"><span><small>収入</small>${kY(a.inc)}</span><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span><span><small>投資</small>${kY(a.inv)}</span>${adv ? `<button data-act="advman"><small>建替中</small>${kY(adv.tot)}</button>` : "<span></span>"}</div></div>
-    <div class="icard imsg ${msg[0]}"${msg[1] ? "" : ' style="display:none"'}><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${msg[1] ? esc(msg[1]) : ""}</span></div>
+    <div class="icard"><div class="ig itot"><span><small>収入</small>${kY(a.inc)}</span><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span><span><small>証券</small>${kY(num0(cols.find(c => c.inv)?.bal))}</span>${adv ? `<button data-act="advman"><small>建替中</small>${kY(adv.tot)}</button>` : "<span></span>"}</div></div>
   </section>`].join(""); }
 function topView(){ if (UI.muji !== false) return topViewMuji();   /* 2026-11-23：iPhoneの純正アプリ風のトップを使う（UI.muji = false で前の画面） */ const html = topView0(), ym = curYm();
   return html.replace(/<section class="fg f5 f4">([\s\S]*?)<\/section>/, (all, body) => {

@@ -3526,7 +3526,8 @@ function consHelp(){ openSheet(`<h3>消耗品の見方</h3><div class="helpb">
   <p class="note">店の欄に「概算」とあるものは、まだ買った記録がなく、だいたいの値段で入れています。買ったら「買った」で正しい値段に変わります。</p></div>
   <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
 function fitLife(){ const w = document.querySelector(".lifewrap"), t = document.querySelector(".lifet"); if (!w || !t) return;
-  { const ix = [...t.querySelectorAll("thead tr:first-child > *")].map((c, i) => c.classList.contains("yb") ? i : -1).filter(i => i >= 0); if (ix.length) t.querySelectorAll("tbody tr, tfoot tr").forEach(tr => ix.forEach(i => tr.children[i]?.classList.add("yb"))); }   // 2026-11-22：年の境目の線を、表の下の行まで通す const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), avail = tb - 10 - (document.querySelector(".nmkl")?.offsetHeight || 0) - 6 - w.getBoundingClientRect().top;   // 2026-11-21：表の下の色の説明がタブに隠れないように
+  { const ix = [...t.querySelectorAll("thead tr:first-child > *")].map((c, i) => c.classList.contains("yb") ? i : -1).filter(i => i >= 0); if (ix.length) t.querySelectorAll("tbody tr, tfoot tr").forEach(tr => ix.forEach(i => tr.children[i]?.classList.add("yb"))); }   /* 2026-11-22：年の境目の線を、表の下の行まで通す */
+  const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), avail = tb - 10 - (document.querySelector(".nmkl")?.offsetHeight || 0) - 6 - w.getBoundingClientRect().top;   // 2026-11-21：表の下の色の説明がタブに隠れないように
   const n = t.querySelectorAll("tr").length || 1;
   if (lifeWide()){ w.style.maxHeight = avail + "px"; let h = Math.min(90, Math.floor(avail / (n + .6)));
     const set = () => { const fs = Math.max(9, Math.min(15, Math.round(h * .55))); t.style.setProperty("--lrh", h + "px"); t.style.setProperty("--lhd", Math.max(Math.round(h * 1.6), fs * 2 + 4) + "px"); t.style.setProperty("--lfs", fs + "px"); t.style.setProperty("--lcw", Math.round(fs * 3) + "px"); };

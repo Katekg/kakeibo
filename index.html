@@ -891,6 +891,16 @@ details.ht { margin: 3px 0 !important; border-radius: 10px !important; } details
 .capc { display: flex; flex-wrap: nowrap; gap: 4px; margin-top: 3px; align-items: center; white-space: nowrap; } .capa { display: inline-flex; align-items: center; gap: 1px; font-size: .68rem; color: var(--muted); border: 1.5px solid var(--line); border-radius: 999px; padding: 0 6px; flex: none; }
 .capa.on { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); } .capa input { width: 2.6em; border: 0; background: none; font: inherit; text-align: right; padding: 2px 0; color: var(--ink); }
 .capb { font-size: .68rem; border: 1.5px solid var(--line); border-radius: 999px; padding: 1px 7px; flex: none; white-space: nowrap; background: var(--surface); color: var(--muted); } .capb.on { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); font-weight: 700; }
+
+/* 2026-11-23：トップ — 横の見出し（収入・支出・貯蓄）と、列の縁のカテゴリー色（真ん中へ溶ける） */
+.fg.f5.f4.hd3 { grid-template-columns: 0 repeat(6, minmax(0, 1fr)) !important; margin-left: -6px; }
+.fg.hd3 > .rl { display: none !important; }
+.fg.hd3 > .sech { display: flex; align-items: center; gap: 8px; font-size: .72rem; font-weight: 800; color: var(--muted); letter-spacing: .3em; z-index: 2 !important; pointer-events: none; }
+.fg.hd3 > .sech::before, .fg.hd3 > .sech::after { content: ""; flex: 1; height: 1px; background: color-mix(in srgb, var(--muted) 35%, transparent); }
+.fg.hd3 > .sech span { padding: 0 8px; background: color-mix(in srgb, var(--bg) 85%, transparent); border-radius: 8px; line-height: 15px; }
+.fg.hd3 > i.cband { z-index: 0 !important; margin: 0 -3px; border-radius: 14px; pointer-events: none; opacity: .5;
+  background: linear-gradient(90deg, var(--gc) 0, var(--gc) 3px, color-mix(in srgb, var(--gc) 35%, transparent) 3px, transparent 32%, transparent 68%, color-mix(in srgb, var(--gc) 35%, transparent) calc(100% - 3px), var(--gc) calc(100% - 3px), var(--gc) 100%); }
+.totwrap.tg { grid-template-columns: 0 repeat(5, minmax(0, 1fr)) !important; margin-left: -9px !important; } .totwrap.tg.hasadv { grid-template-columns: 0 repeat(5, minmax(0, 1fr)) minmax(0, .8fr) !important; margin-left: -7px !important; } .totwrap.tg > .rl { display: none !important; }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
 .iot2 small { font-size: .66rem; font-weight: 400; opacity: .8; } .iot2.o { background: #ffe1e1; color: #b3261e; } .iot2.i { background: #fff3c4; color: #7a5a00; } .iot2.ro { cursor: default; align-content: center; }
@@ -3634,7 +3644,17 @@ const mvArrow = (j, m, p, act, k, nm) => { const {y, b, r} = mvParts(m, p); if (
 const cnm = c => `<span class="cnm" style="--gc:${c.inv ? GCOL.invest : GCOL[c.k]}">${c.n}</span>`;
 function topNav(ym){ const L = topYms(), i = L.indexOf(ym);
   return `<div class="monthnav mn2 stk pgnav ${TPG()}"><button class="navbtn" data-act="cym" data-ym="${L[i - 1] || ""}" ${i > 0 ? "" : "disabled"} aria-label="前の月">‹</button><strong>${ymLabel(ym)}<span class="pgtag">${isAct(ym) ? "実績" : "予算"}</span>${notices().length ? `<button class="alicon inl" data-act="sysal" aria-label="お知らせ ${notices().length}件">!</button>` : ""}</strong><button class="navbtn" data-act="cym" data-ym="${L[i + 1] || ""}" ${L[i + 1] ? "" : "disabled"} aria-label="次の月">›</button><span class="ckic" aria-hidden="true" style="visibility:hidden"></span>${window.KAKEI_SS ? `<a class="ssbtn" href="${esc(window.KAKEI_SS)}" target="_blank" rel="noopener" aria-label="スプレッドシートを開く" title="スプレッドシートを開く"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M4 9h16M4 15h16M10 9v12"/></svg></a>` : ""}</div>`; }
-function topView(){
+/* 2026-11-23：トップの見た目。左の縦の名前（収入・分配・支出・移行額・貯蓄）はやめて、「収入」「支出」「貯蓄」を横いっぱいの見出しにする。
+   見出しの行を足すため、topView0 が作った行の番号を付けかえる（1収入→2、3分配→4、4支出→6、5移行額→7、6貯蓄→9）。
+   各列は、カテゴリーの色で左右の縁を太めに塗り、真ん中に向かって背景に溶けるようにする（数字の後ろは背景のまま） */
+const TOPROW = {1: 2, 2: 3, 3: 4, 4: 6, 5: 7, 6: 9, 7: 10, 8: 11};
+function topView(){ const html = topView0(), ym = curYm();
+  return html.replace(/<section class="fg f5 f4">([\s\S]*?)<\/section>/, (all, body) => {
+    const rm = body.replace(/grid-row:\s*(\d+)(\s*\/\s*(\d+))?/g, (m, a, b2, e) => `grid-row:${TOPROW[a] || a}${e ? ` / ${(TOPROW[e - 1] || e - 1) + 1}` : ""}`).replace(/data-row="(\d+)"/g, (m, a) => `data-row="${TOPROW[a] || a}"`);
+    const hd = (r, t) => `<div class="sech" style="grid-row:${r};grid-column:2 / -1"><span>${t}</span></div>`;
+    const bands = TCOLS.filter(c => MAIN4.includes(c.k) || c.inv).map((c, j) => `<i class="cband" style="grid-column:${j + 2};grid-row:3 / 10;--gc:${c.inv ? GCOL.invest : GCOL[c.k]}"></i>`).join("");
+    return `<section class="fg f5 f4 hd3">${bands}${hd(1, "収入")}${hd(5, "支出")}${hd(8, "貯蓄")}${rm}</section>`; }); }
+function topView0(){
   const L = ymList(); if (!L.length) return noTx();
   const ym = curYm(), a = monthAgg(ym), all = colsOf(ym), cols = all.filter(c => c.k !== "emergency"), sv = snapsArr().slice(-1)[0]?.values || {}, nowYm = TODAY.slice(0, 7), p = planOf(ym), act = isAct(ym);
   const bal = bucketBal(ym), mb = MB.reduce((t, b) => t + num0(bal[b]), 0), savTot = Object.keys(BK).reduce((t, b) => t + num0(bal[b]), 0), mvTot = all.filter(c => !c.inv).reduce((s, c) => s + c.move, 0);
@@ -4478,10 +4498,10 @@ function fitTop(){
   const H = visH();
   const se = document.scrollingElement || document.documentElement, st = se.scrollTop, top = fg.getBoundingClientRect().top + st, tb = ((document.querySelector(".totwrap") || document.querySelector(".totbar"))?.offsetHeight || 0) + 36;
   const tbt = document.querySelector(".tabs")?.getBoundingClientRect().top, bottom = (tbt > 100 ? Math.min(tbt, H - 40) - 14 : H - 86) + st;   // 下のタブの上まで（実際のタブの位置で）
-  const f4 = fg.classList.contains("f4"), w = f4 ? [1, 0, .85, 1.4, .85, 1.25, 0, 0] : [1.45, .55, .9, 1.1, .9, 1.1, .45, .9], sum = w.reduce((x, y) => x + y, 0), u = Math.max(30, Math.min(110, (bottom - top - 16 - tb) / sum));
+  const f4 = fg.classList.contains("f4"), hd3 = fg.classList.contains("hd3"), HH = 15, w = hd3 ? ["H", 1, 0, .85, "H", 1.4, .85, "H", 1.25, 0, 0] : f4 ? [1, 0, .85, 1.4, .85, 1.25, 0, 0] : [1.45, .55, .9, 1.1, .9, 1.1, .45, .9], sum = w.reduce((x, y) => x + (y === "H" ? 0 : y), 0), hx = w.filter(y => y === "H").length * (HH + 6), u = Math.max(30, Math.min(110, (bottom - top - 16 - tb - hx) / sum));
   // 2026-11-21：収入の箱の下と、貯蓄と計のあいだが空きすぎないように（空の行のすき間を詰める）
   if (f4){ fg.style.setProperty("margin-bottom", "-12px"); const tw = document.querySelector(".totwrap"); if (tw) tw.style.setProperty("margin-top", "0px", "important"); }
-  const set = u => { fg.style.setProperty("grid-template-rows", w.map(v => `${Math.floor(v * u)}px`).join(" "), "important"); fg.style.setProperty("--incH", `${Math.floor(u)}px`); };
+  const set = u => { fg.style.setProperty("grid-template-rows", w.map(v => v === "H" ? `${HH}px` : `${Math.floor(v * u)}px`).join(" "), "important"); fg.style.setProperty("--incH", `${Math.floor(u)}px`); };
   set(u);
   // 実際の位置で、合計欄が見える範囲からはみ出していたら縮める
   const bar = document.querySelector(".totwrap") || document.querySelector(".totbar"); if (!bar) return; const over = bar.getBoundingClientRect().bottom + st - bottom;

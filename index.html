@@ -881,6 +881,10 @@ details.ht { margin: 3px 0 !important; border-radius: 10px !important; } details
 .fg .cs .cn2.ovr { color: var(--alert) !important; }   /* 2026-11-21：実績で予算オーバーの支出は赤 */
 .fg .ca .pa.pr, .fg .ca .pa.pr .n, .fg .ca .pa.pr .g { color: #d64545 !important; }
 .fg > i.lane { z-index: 0 !important; width: 4px; border-radius: 2px; opacity: .4; pointer-events: none; align-self: stretch; } .fg > i.lane.lb { background: #1e6fd9; justify-self: start; margin-left: 24%; } .fg > i.lane.ly { background: #e0a800; justify-self: center; } .fg > i.lane.lr { background: #d64545; justify-self: end; margin-right: 24%; }
+/* 2026-11-23：建替中は、下の計（貯蓄・投資）の右に小さく */
+.totwrap.tg.hasadv { grid-template-columns: 1.3rem repeat(5, minmax(0, 1fr)) minmax(0, .8fr) !important; column-gap: 7px !important; }
+.totwrap .advbox { border: 1.5px solid color-mix(in srgb, var(--muted) 45%, transparent); border-radius: 12px; background: rgba(255,255,255,.55); font: inherit; color: var(--ink); display: grid; align-content: center; justify-items: center; gap: 0; padding: 2px 1px; cursor: pointer; min-width: 0; margin-left: 4px; }
+.totwrap .advbox .at { font-size: .58rem; color: var(--muted); font-weight: 700; } .totwrap .advbox .av { font-size: .92rem; font-weight: 800; line-height: 1.1; } .totwrap .advbox .av small { font-size: .5rem; } .totwrap .advbox .am { display: none; } .totwrap.tg.hasadv .tb b { font-size: clamp(.9rem, 4.3vw, 1.1rem) !important; } .totwrap.tg.hasadv .tl { font-size: .66rem !important; }
 .rechelp ul { margin: 0; padding-left: 1.2em; } .rechelp h2 { font-size: .9rem; }
 
 /* 2026-11-22：分配の行き先ごとの上限 */
@@ -3611,8 +3615,8 @@ const tArrow = (j, row, n, act, k, lab, cls = "", sub = "") => { const dir = n >
    monthin/<月>.advMan = {tot: 建替中の合計, mon: そのうち今月の建替}。その月に入れていなければ、前の月の合計を引き継ぐ（今月の分は0） */
 const advManOf = ym => { const own = S.monthin?.[ym]?.advMan; if (own && (own.tot != null || own.mon != null)) return {tot: num0(own.tot), mon: num0(own.mon), own: true};
   for (let y = prevYmOf(ym), i = 0; i < 12; i++, y = prevYmOf(y)){ const o = S.monthin?.[y]?.advMan; if (o && o.tot != null) return {tot: num0(o.tot), mon: 0, own: false, from: y}; } return {tot: 0, mon: 0, own: false}; };
-const advBox = ym => { const now = TODAY.slice(0, 7); if (ym !== now && ym !== prevYmOf(now)) return ""; const a = advManOf(ym);
-  return `<button class="advbox" style="grid-row:1;grid-column:6 / -1" data-act="advman" aria-label="建替（手入力）"><span class="at">建替中</span><span class="av num">${kY(a.tot)}<small>万円</small></span><span class="am">うち今月 ${kY(a.mon)}万</span>${!a.own && a.from ? `<span class="am">${Number(a.from.slice(5))}月から</span>` : ""}</button>`; };
+const advBox = (ym, tot) => { const now = TODAY.slice(0, 7); if (ym !== now && ym !== prevYmOf(now)) return ""; const a = advManOf(ym);
+  return `<button class="advbox" style="${tot ? "grid-row:1;grid-column:7" : "grid-row:1;grid-column:6 / -1"}" data-act="advman" aria-label="建替（手入力）"><span class="at">建替中</span><span class="av num">${kY(a.tot)}<small>万円</small></span><span class="am">うち今月 ${kY(a.mon)}万</span>${!a.own && a.from ? `<span class="am">${Number(a.from.slice(5))}月から</span>` : ""}</button>`; };
 function advManSheet(){ const ym = curYm(), a = advManOf(ym), y0 = v => v ? num0(v).toLocaleString("ja-JP") : "";
   openSheet(`<h3>建替（${ymLabel(ym)}）</h3><form data-form="advman" style="display:grid;gap:10px">
     <div class="field"><label for="am_t">建替中の合計（まだ返ってきていない額）</label><input id="am_t" class="yenin3 num" inputmode="numeric" value="${y0(a.tot)}" placeholder="0"></div>
@@ -3645,7 +3649,7 @@ function topView(){
   void lanes;   /* 2026-11-23：線は箱と数字に重なって読みにくかったので、出さない（矢印の色で流れを見せる） */
   return [topNav(ym), `<section class="fg f5 f4">
     <span class="rl" style="grid-row:1">収入</span>
-    ${advBox(ym) ? advBox(ym) : ""}<button class="incbar" style="grid-row:1;grid-column:2 / ${advBox(ym) ? "6" : "-1"}" data-act="incact" aria-label="収入を入れる"><span class="big2 num">${kY(a.inc)}<small>万円</small></span><span class="ips incs"><span class="incm">${Number(prevYmOf(ym).slice(5))}月の収入</span>${!a.incDef ? (ib != null ? `<span>予算 <b class="num">${kY(ib)}</b>万円</span><span>差 <b class="num">${kS(a.inc - ib)}</b></span>` : "") : `<span>${ib == null ? "収入の予算が未入力" : "未入力（予算の額）"}</span>`}</span></button>
+    <button class="incbar" style="grid-row:1;grid-column:2 / -1" data-act="incact" aria-label="収入を入れる"><span class="big2 num">${kY(a.inc)}<small>万円</small></span><span class="ips incs"><span class="incm">${Number(prevYmOf(ym).slice(5))}月の収入</span>${!a.incDef ? (ib != null ? `<span>予算 <b class="num">${kY(ib)}</b>万円</span><span>差 <b class="num">${kS(a.inc - ib)}</b></span>` : "") : `<span>${ib == null ? "収入の予算が未入力" : "未入力（予算の額）"}</span>`}</span></button>
     <span class="rl" style="grid-row:3">分配</span>${cols.map((c, j) => { const v = c.inv ? (invB == null ? null : num0(invB) + num0(adj.add.invest)) : p.alloc ? c.alloc : null, plus = num0(adj.add[c.inv ? "invest" : c.k]), cut = c.inv ? 0 : num0(adj.cut[c.k]);
       return `<button class="ca ${v ? "down" : "none"}${c.inv ? " inv" : ""}${cut > 0 ? " red" : ""}" ${tAt(j, 3)} data-act="allocrule" data-id="${c.k}" aria-label="${c.n}の分配（決まりの説明）">${(() => { const sv = !c.inv && (c.k === "event" || c.k === "irregular") && v != null ? Math.min(Math.max(0, planSave(ym, c.k)), v - Math.max(0, plus)) : 0, pl = plus > 0 && cut <= 0 && v != null ? plus : 0, bs = v == null ? 0 : v - sv - pl;
       // 2026-11-21：分配を色分け。ふつう＝使うつもりの予算、黄＝積み立てる予算（車・子ども・期限のあるイベント）、青＝余り
@@ -3660,7 +3664,7 @@ function topView(){
     ${cols.map((c, j) => c.inv ? (() => { const g = invGain(ym); return `<button class="cb inv" ${tAt(j, 6)} data-act="invlist" aria-label="証券の評価額と投資先の一覧"><span class="ct">証券</span><span class="cn2 num">${kY(c.bal)}</span><span class="cu">万円</span>${g ? `<span class="gain ${g.g < 0 ? "neg" : "pos"}">損益<br>${kS(g.g)}万<br>(${g.g >= 0 ? "+" : "−"}${Math.abs(g.pct).toFixed(1)}%)</span>` : ""}</button>`; })() : j >= 2 ? balC(c, j) : "").join("")}
   </section>
   ${(([c, t]) => `<p class="topmsg ${c}" data-ym="${ym}">${t ? esc(t) : "&nbsp;"}</p>`)(GCACHE["__msg" + ym] || (setTimeout(() => fillTopMsg(ym), 60), ["", ""]))}
-  <div class="totwrap tg"><span class="rl" style="grid-column:1">計</span><span class="tfr" style="grid-column:2 / 5"></span><span class="tfr tfr2" style="grid-column:5 / 7"><span class="asof">${Number(ym.slice(5))}月末時点</span></span>
+  <div class="totwrap tg${advBox(ym, 1) ? " hasadv" : ""}"><span class="rl" style="grid-column:1">計</span>${advBox(ym, 1)}<span class="tfr" style="grid-column:2 / 5"></span><span class="tfr tfr2" style="grid-column:5 / 7"><span class="asof">${Number(ym.slice(5))}月末時点</span></span>
     <button class="tb" style="grid-column:2" data-act="incact"><span class="tl">収入</span><b class="num">${kY(a.inc)}</b><small class="tu">万円</small></button>
     <button class="tb" style="grid-column:3" data-act="mval" data-id="spend"><span class="tl">支出</span><b class="num">${kY(a.spend)}</b><small class="tu">万円</small></button>
     <button class="tb" style="grid-column:4" data-act="grp" data-id="sav"><span class="tl">移行額</span><b class="num ${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</b><small class="tu">万円</small></button>

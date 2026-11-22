@@ -923,6 +923,30 @@ section.fg.f5.f4.hd3 .cs, section.fg.f5.f4.hd3 .cs.named, section.fg.f5.f4.hd3 .
 /* 下の計：6つを上の6列にそろえる */
 .totwrap.tg, .totwrap.tg.hasadv { grid-template-columns: 0 repeat(6, minmax(0, 1fr)) !important; column-gap: 6px !important; margin-left: -6px !important; }
 .totwrap.tg .tb b { font-size: clamp(.9rem, 4.3vw, 1.1rem) !important; } .totwrap.tg .tl { font-size: .66rem !important; } .totwrap .advbox { margin-left: 0 !important; border-radius: 14px; }
+
+/* 2026-11-23（試作）：iPhoneの純正アプリ（リマインダー・メモ）のようなトップ。グレーの背景に白い角丸のカード、左寄せの太字の見出し */
+html.toplock.mjon, html.toplock.mjon body, html.toplock.mjon #app, html.mjon.pgbud .monthnav.mn2.stk, html.mjon.pgact .monthnav.mn2.stk, html.mjon .monthnav.mn2.stk { background: #f2f2f7 !important; }
+.ios { --ink2: #1c1c1e; --mut2: #8e8e93; --sep: #e5e5ea; color: var(--ink2); display: grid; gap: 0; padding: 2px 0 0; font-family: -apple-system, "SF Pro Text", "Hiragino Sans", sans-serif; }
+.ios button { all: unset; box-sizing: border-box; cursor: pointer; -webkit-tap-highlight-color: transparent; } .ios button:active { opacity: .55; }
+.ios .num, .ios .ig { font-variant-numeric: tabular-nums; } .ios .neg { color: #ff3b30 !important; } .ios .pos { color: #34c759; }
+.ios .icard { background: #fff; border-radius: 22px; padding: 10px 6px; margin: 0 0 10px; }
+section.ios { display: flex !important; flex-direction: column; overflow: hidden; } section.ios > * { flex: none; } section.ios > .icard.grow { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; min-height: 0; } section.ios > .icard:last-child { margin-bottom: 0; }
+.ios .iinc { display: grid; justify-items: start; gap: 2px; padding: 12px 18px; width: 100%; } .ios .iinc b { font-size: 2.1rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; } .ios .iinc b small { font-size: .85rem; font-weight: 600; margin-left: 3px; color: var(--mut2); }
+.ios .isub { font-size: .74rem; color: var(--mut2); } .ios .isub em { font-style: normal; font-weight: 600; }
+.ios .ihd { margin: 4px 6px 6px; font-size: 1.15rem; font-weight: 700; display: flex; align-items: baseline; justify-content: space-between; } .ios .ihd small { font-size: .66rem; font-weight: 400; color: var(--mut2); }
+.ios .ig { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); text-align: center; }
+.ios .ig > * { position: relative; display: grid; justify-items: center; gap: 2px; width: 100%; min-width: 0; }
+.ios .ig > * + *::before { content: ""; position: absolute; left: 0; top: 22%; height: 56%; width: 1px; background: var(--sep); }
+.ios .ihead > * + *::before { display: none; }
+.ios .mjn { font-size: .64rem; color: var(--mut2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-bottom: 2px; } .ios .mjn i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; vertical-align: 0; }
+.ios .mjc { padding: 4px 0; } .ios .mjc b { font-size: 1.22rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; } .ios .mjc small { font-size: .56rem; color: var(--mut2); min-height: 1.15em; }
+.ios .isep { height: 1px; background: var(--sep); margin: 6px 10px 2px; } .ios .ilab { font-size: .62rem; color: var(--mut2); padding: 0 12px; }
+.ios .mjm { font-size: .8rem; color: #ff9500; padding: 2px 0; min-height: 1.3em; font-weight: 500; } .ios .mjm .z { color: #c7c7cc; } .ios .mjm .neg { color: #ff3b30; }
+.ios .imsg { display: flex; align-items: center; gap: 10px; padding: 10px 14px; } .ios .imsg i { flex: none; width: 24px; height: 24px; border-radius: 50%; background: #ff9500; color: #fff; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: .8rem; } .ios .imsg.neg i { background: #ff3b30; }
+.ios .imsg .topmsg { margin: 0 !important; text-align: left; white-space: normal; font-size: .78rem !important; font-weight: 600; color: var(--ink2) !important; }
+html.mjon .monthnav .navbtn, html.mjon .monthnav .tbtn, html.mjon .monthnav > button { border-radius: 50% !important; background: rgba(255,255,255,.85) !important; box-shadow: 0 1px 6px rgba(0,0,0,.08) !important; border: 0 !important; }
+html.mjon .monthnav strong { font-weight: 700; }
+.ios .itot > * { padding: 2px 0; font-size: .98rem; font-weight: 600; } .ios .itot small { font-size: .58rem; color: var(--mut2); font-weight: 400; } .ios .itot em { font-style: normal; }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
 .iot2 small { font-size: .66rem; font-weight: 400; opacity: .8; } .iot2.o { background: #ffe1e1; color: #b3261e; } .iot2.i { background: #fff3c4; color: #7a5a00; } .iot2.ro { cursor: default; align-content: center; }
@@ -1551,6 +1575,7 @@ function render(){
   { const tc = document.querySelector('meta[name="theme-color"]'), op = c => c && !/^rgba\(.*,\s*0\)$/.test(c) && c !== "transparent", hex = c => { const m = String(c).match(/\d+(\.\d+)?/g); return m && m.length >= 3 ? "#" + m.slice(0, 3).map(x => Math.round(+x).toString(16).padStart(2, "0")).join("") : c; },
       bg = hex([document.getElementById("app"), document.body, document.documentElement].map(e => e && getComputedStyle(e).backgroundColor).find(op) || "#ffffff"); /* 2026-11-21：背景が透明の画面では白（透明のままだとiPhoneが灰色のぼかしを出す） */
     if (tc && bg && tc.content !== bg){ const nm = document.createElement("meta"); nm.name = "theme-color"; nm.content = bg; tc.replaceWith(nm); } }   // 2026-11-21：上のステータスバーの色をページの色に合わせる（ほかのタブで上がもやっと見えないように）
+  document.documentElement.classList.toggle("mjon", UI.muji !== false && UI.tab === "top");
   document.documentElement.classList.toggle("wigon", !!UI.wig && UI.tab === "cons" && UI.sub === "items" && !UI.nav.length);
   placeTabs(); if (UI.tab === "top" && !UI.nav.length && 1) fitTop(); if (UI.tab === "life" && !UI.nav.length) fitLife();
   if (typeof sqSoon === "function") sqSoon();
@@ -3531,7 +3556,7 @@ function taxSelfSheet(){ let M; { const k = UI.lifeBr; UI.lifeBr = ""; try { M =
 /* 2026-11-21：トップの貯蓄と計のあいだの一言。①ライフプランで赤字になる年齢 ②実績の月で予算オーバーの枠 ③生活費の貯蓄が目標に足りない */
 let TMSG = {k: null, v: null};
 /* 計算は少し重いので、画面を出したあとで入れる */
-function fillTopMsg(ym){ const el = document.querySelector(`.topmsg[data-ym="${ym}"]`); if (!el || S.ready < 2) return; const r = GCACHE["__msg" + ym] = topMsg(ym); el.className = "topmsg " + r[0]; el.textContent = r[1] || "\u00a0"; }
+function fillTopMsg(ym){ const el = document.querySelector(`.topmsg[data-ym="${ym}"]`); if (!el || S.ready < 2) return; const r = GCACHE["__msg" + ym] = topMsg(ym); el.className = "topmsg " + r[0]; el.textContent = r[1] || "\u00a0"; const card = el.closest(".imsg"); if (card){ card.style.display = r[1] ? "" : "none"; card.className = "icard imsg " + r[0]; } }
 function topMsg(ym){ if (S.ready < 2) return ["", ""];
   // 2026-11-21：焦らせる一言（短く）。①このままで赤字になる年齢 ②実績の月で予算オーバー → その額を毎月使い続けたら何歳で赤字か
   // ③どちらもない時は、毎月いくら多く使うと何歳で赤字になるか（1〜5万円で探す）。計算はデータが変わるまで覚えておく（GCACHE）
@@ -3670,7 +3695,32 @@ function topNav(ym){ const L = topYms(), i = L.indexOf(ym);
    見出しの行を足すため、topView0 が作った行の番号を付けかえる（1収入→2、3分配→4、4支出→6、5移行額→7、6貯蓄→9）。
    各列は、カテゴリーの色で左右の縁を太めに塗り、真ん中に向かって背景に溶けるようにする（数字の後ろは背景のまま） */
 const TOPROW = {1: 2, 2: 3, 3: 4, 4: 6, 5: 7, 6: 9, 7: 10, 8: 11};
-function topView(){ const html = topView0(), ym = curYm();
+/* 2026-11-23（試作）：無印良品のようなシンプルなトップ。色は名前の横の小さな丸だけ。区切りは細い線1本。名前は1回だけ、数字が主役 */
+function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
+  const ym = curYm(), a = monthAgg(ym), all = colsOf(ym), cols = all.filter(c => c.k !== "emergency"), p = planOf(ym), act = isAct(ym), bal = bucketBal(ym), ib = incBudSum(ym), invB = p.alloc?.invest;
+  const emgMv = num0(all.find(c => c.k === "emergency")?.move), savTot = Object.keys(BK).reduce((t, b) => t + num0(bal[b]), 0), mvTot = all.filter(c => !c.inv).reduce((t, c) => t + c.move, 0), keep = p.alloc?.living ? num0(p.alloc.living) * keepM(ym) : 0;
+  const colC = c => c.inv ? GCOL.invest : GCOL[c.k], isG = c => c.k === "irregular" || c.k === "event";
+  const svBal = c => c.inv ? c.bal : c.k === "living" ? num0(bal.common) + num0(bal.emergency) : num0(bal[c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.k]);
+  const head = cols.map(c => `<span class="mjn"><i style="background:${colC(c)}"></i>${esc(c.n)}</span>`).join("");
+  const spend = cols.map(c => { const sb = c.inv ? (invB == null ? null : num0(invB)) : c.bud == null ? null : num0(c.bud) - (isG(c) ? planSave(ym, c.k) : 0), ov = !c.inv && act && sb != null && num0(c.spent) > sb + 500;
+    return `<button class="mjc" data-act="catact" data-id="${c.inv ? "invest" : c.k}"><b class="num${ov ? " neg" : ""}">${kY(c.spent)}</b><small>${sb == null ? "" : `予算 ${kY(sb)}`}</small></button>`; }).join("");
+  const move = cols.map(c => { if (c.inv) return `<span class="mjm"></span>`; const {y, b, r} = mvParts(c.k === "living" ? c.move + emgMv : c.move, isG(c) ? planSave(ym, c.k) : 0);
+    const t = [y ? `<span>+${kY(y)}</span>` : "", b ? `<span>+${kY(b)}</span>` : "", r ? `<span class="neg">−${kY(r)}</span>` : ""].filter(Boolean).join("") || `<span class="z">0</span>`;
+    return `<button class="mjm" data-act="${isG(c) ? "goals" : "allocrule"}" data-id="${c.k}">${t}</button>`; }).join("");
+  const save = cols.map(c => { const v = svBal(c), behind = isG(c) && goalBehind(ym, c.k, v);
+    return `<button class="mjc" data-act="${c.inv ? "invlist" : c.k === "event" ? "goals" : c.k === "irregular" ? "goals" : "balset"}" data-id="${c.inv ? "" : c.k === "living" ? "__liv" : c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.b}"><b class="num${v < 0 || behind ? " neg" : ""}">${kY(v)}</b><small>${c.k === "living" && keep ? `目標 ${kY(keep)}` : ""}</small></button>`; }).join("");
+  const msg = GCACHE["__msg" + ym] || (setTimeout(() => fillTopMsg(ym), 60), ["", ""]), adv = advBox(ym, 1) ? advManOf(ym) : null;
+  return [topNav(ym), `<section class="ios">
+    <h3 class="ihd">収入<small>万円</small></h3>
+    <button class="icard iinc" data-act="incact"><span class="isub">${Number(prevYmOf(ym).slice(5))}月に入った分</span><b class="num">${kY(a.inc)}<small>万円</small></b>${!a.incDef && ib != null ? `<span class="isub">予算 ${kY(ib)}万 ・ <em class="${a.inc - ib < 0 ? "neg" : "pos"}">${kS(a.inc - ib)}</em></span>` : ""}</button>
+    <h3 class="ihd">支出<small>万円</small></h3>
+    <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${spend}</div><div class="isep"></div><div class="ilab">貯蓄へ</div><div class="ig imv">${move}</div></div>
+    <h3 class="ihd">貯蓄<small>${Number(ym.slice(5))}月末・万円</small></h3>
+    <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div></div>
+    ${msg[1] ? `<div class="icard imsg ${msg[0]}" data-ym="${ym}"><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${esc(msg[1])}</span></div>` : `<div class="icard imsg" style="display:none"><span class="topmsg" data-ym="${ym}"></span></div>`}
+    <div class="icard"><div class="ig itot"><span><small>収入</small>${kY(a.inc)}</span><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span><span><small>投資</small>${kY(a.inv)}</span>${adv ? `<button data-act="advman"><small>建替中</small>${kY(adv.tot)}</button>` : "<span></span>"}</div></div>
+  </section>`].join(""); }
+function topView(){ if (UI.muji !== false) return topViewMuji();   /* 2026-11-23：iPhoneの純正アプリ風のトップを使う（UI.muji = false で前の画面） */ const html = topView0(), ym = curYm();
   return html.replace(/<section class="fg f5 f4">([\s\S]*?)<\/section>/, (all, body) => {
     const rm = body.replace(/grid-row:\s*(\d+)(\s*\/\s*(\d+))?/g, (m, a, b2, e) => `grid-row:${TOPROW[a] || a}${e ? ` / ${(TOPROW[e - 1] || e - 1) + 1}` : ""}`).replace(/data-row="(\d+)"/g, (m, a) => `data-row="${TOPROW[a] || a}"`);
     // 2026-11-23：収入・支出・貯蓄は、それぞれ全体を1つの角の丸い枠で囲み、枠の上に名前。列ごとの色（--gc）を各マスに付ける
@@ -4518,7 +4568,9 @@ function placeTabs(){ const t = document.querySelector(".tabs"); if (!t || !matc
   if (STANDALONE){ t.style.top = ""; t.style.bottom = ""; ["--fabTop", "--hidB", "--visH"].forEach(k => document.documentElement.style.removeProperty(k)); return; } const top = visH() - t.offsetHeight - Math.min(16, Math.max(8, Math.round(t.getBoundingClientRect().left)));   /* 下のすき間を横のすき間と同じに */ if (top < innerHeight - t.offsetHeight - 10){ t.style.top = `${top}px`; t.style.bottom = "auto";
   // 右下の＋ボタンと、下から出るシートも、見えている範囲に合わせる
   const r = document.documentElement.style; r.setProperty("--fabTop", `${top - 70}px`); r.setProperty("--hidB", `${innerHeight - visH()}px`); r.setProperty("--visH", `${visH()}px`); } else { t.style.top = ""; t.style.bottom = ""; ["--fabTop", "--hidB", "--visH"].forEach(k => document.documentElement.style.removeProperty(k)); } }
-function fitTop(){
+/* 2026-11-23：iPhone風のトップは、下のタブの上までの高さにして、支出と貯蓄のカードで余白を分け合う */
+function fitIOS(){ const el = document.querySelector("section.ios"); if (!el) return false; const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), h = Math.floor(tb - el.getBoundingClientRect().top - 10); if (h > 200) el.style.height = h + "px"; return true; }
+function fitTop(){ if (fitIOS()) return;
   const fg = document.querySelector(".fg.f5"); if (!fg) return;
   const H = visH();
   const se = document.scrollingElement || document.documentElement, st = se.scrollTop, top = fg.getBoundingClientRect().top + st, tb = ((document.querySelector(".totwrap") || document.querySelector(".totbar"))?.offsetHeight || 0) + 36;

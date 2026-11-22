@@ -3417,6 +3417,7 @@ function lifeView(){
   const M = lifeModel(), {L, yms, rows, V, net, bal, nv} = M, years = [...new Set(yms.map(ym => ym.slice(0, 4)))], open = UI.lifeOpen || (UI.lifeOpen = new Set());
   // 列：年（開いている年は1〜12月）
   const cols = []; years.forEach(y => { const ix = yms.map((ym, j) => ym.startsWith(y) ? j : -1).filter(j => j >= 0); if (lifeYOpen(y)) ix.forEach(j => cols.push({key: yms[j], label: `${Number(yms[j].slice(5))}月`, ix: [j], m: true, y})); else cols.push({key: y, label: y, ix, y}); });
+  cols.forEach((c, i) => { const p = cols[i - 1]; c.yb = !!p && ((c.m && c.label === "1月") || (p.m && p.label === "12月")); });   // 2026-11-22：開いた年の境目に薄い線
   const sum = (arr, c) => c.ix.reduce((t, j) => t + arr[j], 0), endOf = c => bal[c.ix[c.ix.length - 1]];
   const age = c => L.people.kazu.birth ? Number(c.y) - Number(L.people.kazu.birth.slice(0, 4)) : null;
   const AF = null, af = () => "";
@@ -3426,8 +3427,7 @@ function lifeView(){
     const k = c2 => { const n = c2.ix.filter(j => yms[j] < (M.a65k || "9999")).length; if (!n) return ""; const v = sum(V.nisa, c2), base = c2.ix.filter(j => yms[j] < (M.a65k || "9999")).reduce((t, j) => t + (M.nisaBaseAt ? M.nisaBaseAt(yms[j]) : L.nisa), 0); return v > base + 1000 ? " nmk-up" : v < base - 1000 ? " nmk-down" : "base"; };
     // 変わり目だけ色をつける（前の列と同じ種類が続くところは塗らない）
     const i = cols.indexOf(c), now = k(c), prev = i > 0 ? k(cols[i - 1]) : "base"; return now && now !== "base" && now !== prev ? now : ""; };
-  const actC = c => c.m && isAct(c.key);
-  cols.forEach((c, i) => { const p = cols[i - 1]; c.yb = !!p && ((c.m && c.label === "1月") || (p.m && p.label === "12月")); });   // 2026-11-22：開いた年の境目に薄い線   // 2026-11-22：実績の月（トップで実績にした月）は薄いピンク
+  const actC = c => c.m && isAct(c.key);   // 2026-11-22：実績の月（トップで実績にした月）は薄いピンク
   const cell = (r, c, cls = "") => { cls = (cls + (actC(c) ? " actm" : "") + (c.yb ? " yb" : "")).trim(); const v = sum(V[r.id], c), mk = r.mark ? c.ix.map(j => r.mark(yms[j])).find(x => x != null) : null;
     if (r.id === "goalev" || r.id === "lvg-event"){ const use = r.mark && c.ix.some(j => r.mark(yms[j]) != null);   // 使う月は📅、積立の額は薄い文字
       return `<td class="${cls} gevc evs${use ? " ev" : ""}" data-col="${c.key}" data-act="lifeGoalEv" data-ym="${c.key}">${use ? "📅" : ""}<span class="evn">${lifeK(v)}</span></td>`; }

@@ -934,7 +934,7 @@ section.ios { display: flex !important; flex-direction: column; overflow: hidden
 .ios .iinc { display: grid; justify-items: start; gap: 2px; padding: 12px 18px; width: 100%; } .ios .iinc b { font-size: 2.1rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; } .ios .iinc b small { font-size: .85rem; font-weight: 600; margin-left: 3px; color: var(--mut2); }
 .ios .isub { font-size: .74rem; color: var(--mut2); } .ios .isub em { font-style: normal; font-weight: 600; }
 .ios .ihd { margin: 4px 6px 6px; font-size: 1.15rem; font-weight: 700; display: flex; align-items: baseline; justify-content: space-between; } .ios .ihd small { font-size: .66rem; font-weight: 400; color: var(--mut2); }
-.ios .ig { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); text-align: center; }
+.ios .ig { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); text-align: center; } .ios .ig.itot { grid-template-columns: repeat(6, minmax(0, 1fr)); } .ios .itot .isv { font-size: .5rem !important; color: var(--mut2); }
 .ios .ig > * { position: relative; display: grid; justify-items: center; gap: 2px; width: 100%; min-width: 0; }
 .ios .ig > * + *::before { content: ""; position: absolute; left: 0; top: 22%; height: 56%; width: 1px; background: var(--sep); }
 .ios .ihead > * + *::before { display: none; }
@@ -3698,7 +3698,7 @@ function topNav(ym){ const L = topYms(), i = L.indexOf(ym);
 const TOPROW = {1: 2, 2: 3, 3: 4, 4: 6, 5: 7, 6: 9, 7: 10, 8: 11};
 /* 2026-11-23（試作）：無印良品のようなシンプルなトップ。色は名前の横の小さな丸だけ。区切りは細い線1本。名前は1回だけ、数字が主役 */
 function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
-  const ym = curYm(), a = monthAgg(ym), all = colsOf(ym), cols = all.filter(c => c.k !== "emergency"), p = planOf(ym), act = isAct(ym), bal = bucketBal(ym), ib = incBudSum(ym), invB = p.alloc?.invest;
+  const ym = curYm(), a = monthAgg(ym), all = colsOf(ym), cols = all.filter(c => c.k !== "emergency" && !c.inv), invC = all.find(c => c.inv), p = planOf(ym), act = isAct(ym), bal = bucketBal(ym), ib = incBudSum(ym), invB = p.alloc?.invest;   /* 2026-11-23：支出・貯蓄は5列（投資は合計の証券へ） */
   const emgMv = num0(all.find(c => c.k === "emergency")?.move), savTot = Object.keys(BK).reduce((t, b) => t + num0(bal[b]), 0), mvTot = all.filter(c => !c.inv).reduce((t, c) => t + c.move, 0), keep = p.alloc?.living ? num0(p.alloc.living) * keepM(ym) : 0;
   const colC = c => c.inv ? GCOL.invest : GCOL[c.k], isG = c => c.k === "irregular" || c.k === "event";
   const svBal = c => c.inv ? c.bal : c.k === "living" ? num0(bal.common) + num0(bal.emergency) : num0(bal[c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.k]);
@@ -3722,7 +3722,7 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
     <h3 class="ihd">貯蓄<small>${Number(ym.slice(5))}月末・万円</small></h3>
     <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div></div>
     <h3 class="ihd">合計<small>万円</small></h3>
-    <div class="icard"><div class="ig itot"><span><small>収入</small>${kY(a.inc)}</span><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span><span><small>証券</small>${kY(num0(cols.find(c => c.inv)?.bal))}</span>${adv ? `<button data-act="advman"><small>建替中</small>${kY(adv.tot)}</button>` : "<span></span>"}</div></div>
+    <div class="icard"><div class="ig itot"><span><small>収入</small>${kY(a.inc)}</span><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span><button data-act="invlist"><small>証券</small>${kY(num0(invC?.bal))}<small class="isv">積立 ${kY(a.inv)}</small></button>${adv ? `<button data-act="advman"><small>建替中</small>${kY(adv.tot)}</button>` : "<span></span>"}</div></div>
   </section>`].join(""); }
 function topView(){ if (UI.muji !== false) return topViewMuji();   /* 2026-11-23：iPhoneの純正アプリ風のトップを使う（UI.muji = false で前の画面） */ const html = topView0(), ym = curYm();
   return html.replace(/<section class="fg f5 f4">([\s\S]*?)<\/section>/, (all, body) => {

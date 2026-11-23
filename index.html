@@ -1611,7 +1611,7 @@ function render(){
     if (tc && bg && tc.content !== bg){ const nm = document.createElement("meta"); nm.name = "theme-color"; nm.content = bg; tc.replaceWith(nm); } }   // 2026-11-21：上のステータスバーの色をページの色に合わせる（ほかのタブで上がもやっと見えないように）
   document.documentElement.classList.toggle("mjon", UI.muji !== false && UI.tab === "top");
   document.documentElement.classList.toggle("wigon", !!UI.wig && UI.tab === "cons" && UI.sub === "items" && !UI.nav.length);
-  placeTabs(); if (UI.tab === "top" && !UI.nav.length && 1) fitTop(); if (UI.tab === "life" && !UI.nav.length) fitLife();
+  placeTabs(); if (UI.tab === "top" && !UI.nav.length && 1) fitTop(); if (UI.tab === "life" && !UI.nav.length){ fitLife(); lifeScrollBack(); }
   if (typeof sqSoon === "function") sqSoon();
 }
 
@@ -3272,7 +3272,7 @@ function lifeModel(ov){
     return lifeModel({}); }
   // 2026-11-22：表は2026年1月から。今月より前の月（と実績にした月）は、トップの実績（手取りの収入・枠ごとの支出・投資・貯蓄の残高）を使う
   const m0 = TODAY.slice(0, 7), L = {...lifeDoc(), ...ov}, start = LIFE_ACT0 < m0 && S.monthin ? LIFE_ACT0 : m0, end = `${L.endY}-12`, yms = []; for (let ym = start; ym <= end; ym = ymAdd(ym, 1)) yms.push(ym);
-  const i0 = Math.max(0, yms.indexOf(m0)), isTop = ym => ym < m0 || (ym === m0 && isAct(ym)), AGGL = {}, A = ym => AGGL[ym] ??= monthAgg(ym), bTot = ym => Object.keys(BK).filter(k => k !== "adv").reduce((t, k) => t + num0(bucketBal(ym)[k]), 0);   /* 2026-11-23：ライフに建替は入れない */
+  const i0 = Math.max(0, yms.indexOf(m0)), isTop = ym => ym <= m0,   /* 2026-11-23：今月もトップの数字（予算の月も）。生活防衛資金などがトップと同じになる */ AGGL = {}, A = ym => AGGL[ym] ??= monthAgg(ym), bTot = ym => Object.keys(BK).filter(k => k !== "adv").reduce((t, k) => t + num0(bucketBal(ym)[k]), 0);   /* 2026-11-23：ライフに建替は入れない */
   const T = typeof taxDoc === "function" ? taxDoc() : null, R = T?.rates || {}, titems = T?.items || [];
   const itemCost = (it, ym) => { const ms = String(it.months || "").split(/[,、\s]+/).map(Number).filter(n => n >= 1 && n <= 12); return ms.includes(Number(ym.slice(5))) ? num0(it.annual) / ms.length : 0; };
   const nowYm0 = TODAY.slice(0, 7), lvCats = (typeof zanCats === "function" ? zanCats() : []).map(n => [n, num0(zanBud(nowYm0, n))]).filter(([n, v]) => v > 0 && !L.lvEx.includes(n) && zanGrp(n) !== "invest" && !(goalOf(n)?.due && goalGrp(goalOf(n)) === "event") && !goalOf(n)?.auto);   // 2026-11-21：車・子どもの積立は現金のまま（費用は車・子どもの行で数える）   // 2026-11-20：期限のあるイベントは「イベント」の行で、その月にまとめて出す   // 2026-11-14：投資（証券）はNISA積立で数えるので生活費に入れない
@@ -3631,6 +3631,9 @@ function consHelp(){ openSheet(`<h3>消耗品の見方</h3><div class="helpb">
   <p><b>品目のボタン</b><br>・<b>買った</b>：買ったら押して、値段と量を入れます。次になくなる日が自動で出ます。<br>・<b>比べる</b>：ネットの値段を比べます。<br>・<b>まだ少し持ちそう</b>：思ったより減っていないときに押すと、なくなる日がのびます。<br>・一番上の<b>「買うもの」</b>に出ているものが、そろそろなくなるものです。</p>
   <p class="note">店の欄に「概算」とあるものは、まだ買った記録がなく、だいたいの値段で入れています。買ったら「買った」で正しい値段に変わります。</p></div>
   <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
+/* 2026-11-23：ライフの表のスクロール位置を覚えて、トップから戻った時も同じ所を出す */
+document.addEventListener("scroll", e => { const t = e.target; if (t?.classList?.contains("lifewrap") && !t.dataset.rs){ UI.lifeSX = t.scrollLeft; UI.lifeSY = t.scrollTop; } }, true);
+function lifeScrollBack(){ const w = document.querySelector(".lifewrap"); if (!w || UI.lifeSX == null) return; w.dataset.rs = 1; const go = () => { w.scrollLeft = UI.lifeSX; w.scrollTop = UI.lifeSY || 0; }; go(); requestAnimationFrame(() => { go(); setTimeout(() => { delete w.dataset.rs; }, 50); }); }
 function fitLife(){ const w = document.querySelector(".lifewrap"), t = document.querySelector(".lifet"); if (!w || !t) return;
   { const ix = [...t.querySelectorAll("thead tr:first-child > *")].map((c, i) => c.classList.contains("yb") ? i : -1).filter(i => i >= 0); if (ix.length) t.querySelectorAll("tbody tr, tfoot tr").forEach(tr => ix.forEach(i => tr.children[i]?.classList.add("yb"))); }   /* 2026-11-22：年の境目の線を、表の下の行まで通す */
   const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), avail = tb - 10 - (document.querySelector(".nmkl")?.offsetHeight || 0) - 6 - w.getBoundingClientRect().top;   // 2026-11-21：表の下の色の説明がタブに隠れないように

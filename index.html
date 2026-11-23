@@ -3039,8 +3039,12 @@ function zanNet(ym, used){ const r = {}; if (!used || !Object.keys(used).length)
 /* 2026-11-10：収入は🧑🏻・👩🏼に分けて入れる（monthin.zan の「収入🧑🏻」「収入👩🏼」。合計は「収入」にも入れてトップで使う）。
    収入の予定：plans/<月>.incBud = {kazu, miho}。「来月からも」なら settings/plan.baseInc（incFrom の月から） */
 /* 枠の中のカテゴリの並び：こづかい → 貯金から → ローン の順（ほかはその前に今の順で）。入力の画面と予算の一覧で同じ */
-const zanCatsOf = g => { if (g === "irregular" || g === "event"){ const gn = goalsOn().filter(x => goalGrp(x) === g).map(x => x.name); return [...gn, ...zanCats().filter(n => zanGrp(n) === g && !gn.includes(n))]; }   // 2026-11-21：目標は自分の枠にだけ出す   // 2026-11-11：特別費は一覧の順（こづかい・税保険等・医療・建替）
+const zanCatsOf0 = g => { if (g === "irregular" || g === "event"){ const gn = goalsOn().filter(x => goalGrp(x) === g).map(x => x.name); return [...gn, ...zanCats().filter(n => zanGrp(n) === g && !gn.includes(n))]; }   // 2026-11-21：目標は自分の枠にだけ出す   // 2026-11-11：特別費は一覧の順（こづかい・税保険等・医療・建替）
   const ord = n => ["こづかい", "貯金から", "ローン", "奨学金", "矯正"].findIndex(w => n.includes(w)); return zanCats().filter(n => zanGrp(n) === g).map((n, i) => [n, i]).sort((a, b) => ord(a[0]) - ord(b[0]) || a[1] - b[1]).map(([n]) => n); };
+/* 2026-11-23：終わったカテゴリ（settings/zancats.ended = {名前: {first, last, note, at}}）。最後に払った月より後の月の一覧には出さない（その月に支出が入っていれば出す）。前の月の記録・予算はそのまま */
+const zEnded = () => S.zancats?.ended || {};
+const zHide = (n, ym) => { const e = zEnded()[n]; if (!e || !e.last || !(ym > e.last)) return false; const u = S.monthin?.[ym]?.used?.[n]; return u === undefined || u === null || u === ""; };
+const zanCatsOf = (g, ym = curYm()) => zanCatsOf0(g).filter(n => !zHide(n, ym));
 const INCP = [["kazu", "収入🧑🏻", "🧑🏻収入"], ["miho", "収入👩🏼", "👩🏼収入"], ["adv", "収入👬建替返還分", "👬建替返還分"]];   // 2026-11-12：建替返還分を追加
 /* 2026-11-14（4回目）：予算は支出だけ。収入の予算＝支出の予算の合計（投資を含む）で、🧑🏻・👩🏼が半分ずつ。建替返還分の予算はなし */
 const budTot = ym => { const p = planOf(ym); return p.alloc ? GRP5.reduce((t, k) => t + num0(p.alloc[k]), 0) : null; };
@@ -3732,7 +3736,7 @@ function advManSheet(){ const ym = curYm(), a = advManOf(ym), y0 = v => v ? num0
     ${!a.own && a.from ? `<p class="note">${ymLabel(a.from)}の合計を引き継いでいます。保存すると${ymLabel(ym)}の記録になります。</p>` : ""}
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div></form>`); }
 /* 2026-11-21：移行額の矢印の色。赤＝貯蓄から支出へ回した、黄＝予算どおり積立として貯蓄へ、青＝予算より多く貯蓄できた（余り） */
-const planSave = (ym, g) => zanCatsOf(g).filter(n => isSaveGoal(n) && !(goalOf(n)?.start > ym)).reduce((t, n) => t + Math.max(0, num0(zanBud(ym, n)) - num0(spendDef(ym, n))), 0);   // 2026-11-22：積立の分＝予算−その月に払う予定（税保険等の支払い月など）
+const planSave = (ym, g) => zanCatsOf(g, ym).filter(n => isSaveGoal(n) && !(goalOf(n)?.start > ym)).reduce((t, n) => t + Math.max(0, num0(zanBud(ym, n)) - num0(spendDef(ym, n))), 0);   // 2026-11-22：積立の分＝予算−その月に払う予定（税保険等の支払い月など）
 /* 2026-11-23：移行額は「積立（黄↓）」「余り（青↓）」「貯蓄から使った（赤↑）」を並べて出す。積立がある月に積立より多く使ったら、その分は貯蓄から（赤） */
 const mvParts = (m, p) => { m = Math.round(m); p = Math.max(0, Math.round(p)); return {y: p, b: Math.max(0, m - p), r: Math.max(0, p - m)}; };
 const mvArrow = (j, m, p, act, k, nm) => { const {y, b, r} = mvParts(m, p); if (!y && !b && !r) return tArrow(j, 5, 0, act, k, `${nm}の移行額`);
@@ -4076,7 +4080,7 @@ function goalsSheet(){ const ym = curYm(), gb = goalBase(ym), ge = goalEnd(ym), 
 function chartYms(){ const S0 = [...Object.keys(S.monthin || {}), ...Object.keys(S.plans || {})].filter(y => /^\d{4}-\d{2}$/.test(y)).sort();
   const last = [TODAY.slice(0, 7), curYm()].sort().pop(), first = [S0[0] || last, curYm()].sort()[0], out = []; for (let y = first; y <= last && out.length < 120; y = nextYm(y)) out.push(y); return out; }
 const chCatVal = (y, n) => { const has = v => v !== undefined && v !== null && v !== "", m = S.monthin?.[y] || {}, u = m.used || {}, pl = !!planOf(y).alloc; return pl && m.mode !== "act" ? num0(zanBud(y, n)) : has(u[n]) ? num0(u[n]) : pl ? num0(zanBud(y, n)) : 0; };
-function grpDetail(g, y){ const cs = zanCatsOf(g), pl = !!planOf(y).alloc, act = S.monthin?.[y]?.mode === "act";
+function grpDetail(g, y){ const cs = zanCatsOf(g, y), pl = !!planOf(y).alloc, act = S.monthin?.[y]?.mode === "act";
   const rows = cs.map(n => { const v = chCatVal(y, n), b = pl ? zanBud(y, n) : null, over = b != null && v > num0(b); return `<div class="bar gd3"><button type="button" class="n cnb" data-act="catchart" data-g="${g}" data-n="${esc(n)}">${esc(n)}</button><span class="num ${over ? "neg" : ""}">${yen(v)}</span><span class="num gdb">${b == null ? "－" : yen(num0(b))}</span></div>`; }).join("");
   const tv = cs.reduce((t, n) => t + chCatVal(y, n), 0), tb = pl ? cs.reduce((t, n) => t + num0(zanBud(y, n)), 0) : null;
   return `<h4 class="gdh">${ymLabel(y)}の内訳<span class="pgtag ${act ? "act" : "bud"}">${act ? "実績" : "予算"}</span></h4>
@@ -4121,6 +4125,7 @@ function catActSheet(g){
   <form data-form="catact" data-ym="${ym}" data-g="${g}" style="display:grid;gap:8px">
     <button type="button" class="btn ghost gchart" data-act="catchart" data-g="${g}" data-n="">📊 ${GN[g]}の合計の月別グラフ</button>
     <section class="bag" style="--zc:${GCOL[g]}"><div class="bar act3 act4 hd"><span class="n">カテゴリ</span><span class="hb">予算</span><span class="hb">支出</span><span class="hb">貯蓄増減</span></div>${rows}<div class="bar act3 act4 ft"><span class="n">合計</span><b class="num" id="ca-b"></b><b class="num" id="ca-t"></b><b class="num cdv" id="ca-d"></b></div></section>
+    <button type="button" class="btn ghost" data-act="catend" data-g="${g}">カテゴリーを終わりにする（払い終わり など）</button>
     <p class="note">貯蓄増減＝予算−支出。<span class="cy">黄</span>＝予定の積立、<span class="cg">緑</span>＝予算より少なく使って増えた分、<span class="cr">赤</span>＝予算より多く使った分。名前をタップで月別グラフ、予算をタップで予算の一覧。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
   </form>`); calcCatAct(); }
@@ -4548,6 +4553,15 @@ function allocSheet3(k){
 /* 2026-11-23：前の月の予算を変える時は「この月だけ」（はじめから選ばれている）か「この月から先も」を選ぶ。この月だけ＝次の月から元の額に戻す記録も入れる */
 const budScopeUI = ym => ym < TODAY.slice(0, 7) ? `<div class="bscope"><span>この変更は</span><label><input type="radio" name="bscope" value="only" checked>${Number(ym.slice(5))}月だけ</label><label><input type="radio" name="bscope" value="fwd">${Number(ym.slice(5))}月から先も</label></div>` : "";
 const budOnly = f => f.querySelector('input[name="bscope"]:checked')?.value === "only";
+/* 2026-11-23：カテゴリを終わりにする（ローン・奨学金・矯正の払い終わりなど）。最後に払う月の次の月から予算0（budChg に endMark 付きで記録）。いつからいつまで払ったかを残す */
+function catEndSheet(g){ const ym = curYm(), cs = zanCatsOf(g).filter(n => !goalOf(n)), past = Object.entries(zEnded()).filter(([n]) => zanGrp(n) === g);
+  openSheet(`<h3>${GN[g]}：カテゴリーを終わりにする</h3><form data-form="catend" data-g="${g}" style="display:grid;gap:10px">
+    ${cs.length ? `<div class="field"><label for="ce_n">カテゴリー</label><select id="ce_n">${cs.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join("")}</select></div>
+    <div class="field"><label for="ce_l">最後に払う（払った）月</label><input id="ce_l" type="month" value="${ym}"></div>
+    <div class="field"><label for="ce_m">メモ（なくてもよい）</label><input id="ce_m" placeholder="例：繰り上げ返済で完済"></div>
+    <p class="note">次の月から予算が0になり、その月より後の一覧には出なくなります。前の月の予算・支出の記録はそのまま残ります。</p>` : `<p class="note">終わりにできるカテゴリーはありません（積立の目標は、目標の画面で消します）。</p>`}
+    ${past.length ? `<section class="bag" style="--zc:${GCOL[g]}"><div class="bah"><span>終わったカテゴリー</span></div>${past.map(([n, x]) => `<div class="cmid tot"><span class="n">${esc(n)}<small class="gsub">${x.first ? ymLabel(x.first) : "はじめから"}〜${ymLabel(x.last)}まで払った${x.note ? "・" + esc(x.note) : ""}</small></span><button type="button" class="badge bbtn" data-act="catunend" data-n="${esc(n)}" data-g="${g}">元に戻す</button></div>`).join("")}</section>` : ""}
+    <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">閉じる</button>${cs.length ? `<button class="btn" type="submit">終わりにする</button>` : ""}</div></form>`); }
 function budChgSave(ym, mids, only = false){ const P = S.plan || {}, now = new Date().toISOString(), add = [], nx = nextYm(ym);
   Object.values(mids).forEach(m => Object.entries(m || {}).forEach(([n, v]) => { if (n === "__rest") return; const go = goalOf(n); if (go && go.start && ym >= go.start) return;
     const nv = Math.round(num0(v)); if (nv === Math.round(num0(zanBud(ym, n)))) return; add.push({from: ym, name: n, v: nv, note: now.slice(0, 10) + " 予算の画面で変更" + (only ? "（この月だけ）" : "")});
@@ -4895,6 +4909,10 @@ document.addEventListener("click", e => {
     case "goalDel": goalDelSheet(b.dataset.id); break;
     case "gozan": closeSheet(); UI.pg = "act"; render(); toTop(); break;
     case "catact": catActSheet(id); break;
+    case "catend": catEndSheet(b.dataset.g); break;
+    case "catunend": { const n = b.dataset.n, e = zEnded()[n]; if (!e || !confirm(`「${n}」を元に戻しますか？（${ymLabel(nextYm(e.last))}からの予算0の記録を消します）`)) break;
+      const P = S.plan || {}, Z = S.zancats || {}, en = {...zEnded()}; delete en[n]; const at = new Date().toISOString();
+      save(async () => { await db.doc("settings/plan").set({...P, budChg: (P.budChg || []).filter(c => !(c && c.name === n && c.endMark)), updatedAt: at}); await db.doc("settings/zancats").set({...Z, ended: en, updatedAt: at}); }, `「${n}」を元に戻しました`).then(ok => ok && setTimeout(() => catEndSheet(b.dataset.g), 250)); break; }
     case "incact": incActSheet(); break;
     case "allocrule": allocRuleSheet(); break;
     case "rulemv": { const l = b.dataset.l, i = Number(b.dataset.i), d = Number(b.dataset.d), L = l === "plus" ? rulePlus() : ruleMinus(), k = i + d; if (k < 0 || k >= L.length) break; [L[i], L[k]] = [L[k], L[i]];
@@ -5283,6 +5301,14 @@ async function submitBody(e, f){
     const rec = {d: TODAY, c: "不明金（残高の修正）", raw: "不明金（残高の修正）", rawD: TODAY, rawAcc: CASH_ACC[key], a: diff, acc: CASH_ACC[key], l: "未分類", m: "不明金", memo: `残高を${yen(n)}に修正`, t: true, src: "app", synced: false, createdAt: new Date().toISOString()};
     let ref = null; ok = await save(async () => { ref = await db.collection("txapp").add(rec); }, `不明金 ${sYen(diff)} を記録しました`);
     if (ok && ref?.id) syncTxSoon(["app-" + ref.id]);
+  } else if (kind === "catend"){   // 2026-11-23：カテゴリを終わりにする
+    const n = $("ce_n")?.value, last = $("ce_l")?.value, note = ($("ce_m")?.value || "").trim(); if (!n || !/^\d{4}-\d{2}$/.test(last || "")){ toast("カテゴリーと月を選んでください"); return; }
+    if (!confirm(`「${n}」を${ymLabel(last)}で終わりにしますか？（${ymLabel(nextYm(last))}から予算0）`)) return;
+    const first = ymList().find(y => y <= last && (num0(S.monthin?.[y]?.used?.[n]) > 0 || num0(zanBud(y, n)) > 0)) || "", at = new Date().toISOString(), P = S.plan || {}, Z = S.zancats || {};
+    const bc = (P.budChg || []).filter(c => !(c && c.name === n && (c.from > last || c.endMark)));
+    ok = await save(async () => { await db.doc("settings/plan").set({...P, budChg: [...bc, {from: nextYm(last), name: n, v: 0, endMark: true, note: `${at.slice(0, 10)} ${ymLabel(last)}で終わり${note ? "（" + note + "）" : ""}`}], updatedAt: at});
+      await db.doc("settings/zancats").set({...Z, ended: {...zEnded(), [n]: {first, last, note, at}}, updatedAt: at}); }, `「${n}」を${ymLabel(last)}で終わりにしました`);
+    if (ok){ setTimeout(() => catEndSheet(f.dataset.g), 250); return; }
   } else if (kind === "advman"){   // 2026-11-21：建替の手入力
     const ym = curYm(), k = numOrNull(val("am_k")) ?? 0, w = numOrNull(val("am_w")) ?? 0, pt = advManOf(prevYmOf(ym)).tot;   /* 2026-11-23：2人別。mon（今月の分）は先月からの増えた分 */
     ok = await save(() => db.doc("monthin/" + ym).update({advMan: {k, m: w, tot: k + w, mon: Math.max(0, k + w - pt)}, updatedAt: new Date().toISOString()}), "建替を保存しました");

@@ -959,6 +959,10 @@ html.mjon .monthnav .navbtn, html.mjon .monthnav .ssbtn { width: 38px !important
 /* 2026-11-23：増減の色（黄＝予定どおりの積立、緑＝収入増・支出減で増えた分、赤＝届かない・取り崩し）。証券は評価額と積立を分けてタップ */
 .ios .yl { color: #e0a000 !important; } .ios .gr { color: #34c759 !important; } .ios .mjm { display: grid; justify-items: center; gap: 0; }
 .ios .isec { display: grid; gap: 4px; align-content: center; box-sizing: border-box; width: 100%; min-width: 0; } .ios .isecv, .ios .isecm { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; } .ios .isecv, .ios .isecm { display: grid; justify-items: start; gap: 1px; } .ios .isecm { grid-auto-flow: column; align-items: baseline; gap: 4px; font-size: .9rem; font-weight: 600; } .ios .isecm small { font-size: .62rem; color: var(--mut2); font-weight: 400; }
+.ios .iht { display: inline-flex; align-items: baseline; gap: 6px; } .ios .ihv { font-size: 1.15rem; font-weight: 700; } .ios .iht small { font-size: .66rem; font-weight: 400; color: var(--mut2); margin-left: -3px; }
+.ios .ip { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); box-sizing: border-box; width: 100%; padding-top: 10px; padding-bottom: 10px; } .ios .ipw { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); width: 100%; }
+.ios .ipc { display: grid; justify-items: center; gap: 1px; min-width: 0; } .ios .ipc > small { font-size: .7rem; color: var(--mut2); } .ios .ipc b { font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; } .ios .ipc em { font-style: normal; font-size: .68rem; font-weight: 600; } .ios .ipc em.z { color: var(--mut2); font-weight: 400; }
+.ios .isec2 { grid-auto-flow: row; gap: 6px; } .ios .isec2 .isecm { justify-self: center; } .ios .ir11 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .ios .icard { padding-left: 11px; padding-right: 11px; } .ios .mjm .mpl { font-size: .52rem; color: var(--mut2); font-weight: 400; letter-spacing: 0; }   /* iPhoneで数字が枠の端に近すぎたので内側の余白を広げる */
 
 /* 2026-11-23：もしもの計画のポップアップと計算中の印 */
@@ -3699,14 +3703,17 @@ const tArrow = (j, row, n, act, k, lab, cls = "", sub = "") => { const dir = n >
   return `<button class="ca ${dir}${cls}" ${tAt(j, row)} data-act="${act}" data-id="${k}" aria-label="${lab}"><span class="g">${g}</span><span class="n num">${kY(Math.abs(n))}</span><span class="un">万円</span>${sub ? `<span class="mvb">${sub}</span>` : ""}</button>`; };
 /* 2026-11-21：建替（立て替えていて、まだ返ってきていないお金）。直近2か月（今月と先月）だけトップの収入の右に出す。手入力。
    monthin/<月>.advMan = {tot: 建替中の合計, mon: そのうち今月の建替}。その月に入れていなければ、前の月の合計を引き継ぐ（今月の分は0） */
-const advManOf = ym => { const own = S.monthin?.[ym]?.advMan; if (own && (own.tot != null || own.mon != null)) return {tot: num0(own.tot), mon: num0(own.mon), own: true};
-  for (let y = prevYmOf(ym), i = 0; i < 12; i++, y = prevYmOf(y)){ const o = S.monthin?.[y]?.advMan; if (o && o.tot != null) return {tot: num0(o.tot), mon: 0, own: false, from: y}; } return {tot: 0, mon: 0, own: false}; };
+/* 2026-11-23：2人別（k＝🧑🏻、m＝👩🏼。どちらも建替中の累計）。前の形（合計だけ）の月は k・m が null */
+const advPick = o => ({tot: o.k != null || o.m != null ? num0(o.k) + num0(o.m) : num0(o.tot), mon: num0(o.mon), k: o.k ?? null, m: o.m ?? null});
+const advManOf = ym => { const own = S.monthin?.[ym]?.advMan; if (own && (own.tot != null || own.mon != null || own.k != null || own.m != null)) return {...advPick(own), own: true};
+  for (let y = prevYmOf(ym), i = 0; i < 12; i++, y = prevYmOf(y)){ const o = S.monthin?.[y]?.advMan; if (o && (o.tot != null || o.k != null || o.m != null)) return {...advPick(o), mon: 0, own: false, from: y}; } return {tot: 0, mon: 0, k: null, m: null, own: false}; };
 const advBox = (ym, tot) => { const now = TODAY.slice(0, 7); if (ym !== now && ym !== prevYmOf(now)) return ""; const a = advManOf(ym);
   return `<button class="advbox" style="${tot ? "grid-row:1;grid-column:7" : "grid-row:1;grid-column:6 / -1"}" data-act="advman" aria-label="建替（手入力）"><span class="at">建替中</span><span class="av num">${kY(a.tot)}<small>万円</small></span><span class="am">うち今月 ${kY(a.mon)}万</span>${!a.own && a.from ? `<span class="am">${Number(a.from.slice(5))}月から</span>` : ""}</button>`; };
 function advManSheet(){ const ym = curYm(), a = advManOf(ym), y0 = v => v ? num0(v).toLocaleString("ja-JP") : "";
   openSheet(`<h3>建替（${ymLabel(ym)}）</h3><form data-form="advman" style="display:grid;gap:10px">
-    <div class="field"><label for="am_t">建替中の合計（まだ返ってきていない額）</label><input id="am_t" class="yenin3 num" inputmode="numeric" value="${y0(a.tot)}" placeholder="0"></div>
-    <div class="field"><label for="am_m">そのうち今月立て替えた額</label><input id="am_m" class="yenin3 num" inputmode="numeric" value="${y0(a.mon)}" placeholder="0"></div>
+    <p class="note">まだ返ってきていない額の累計を、立て替えた人ごとに入れます。トップには先月からの増減が出ます。</p>
+    <div class="field"><label for="am_k">🧑🏻 建替中</label><input id="am_k" class="yenin3 num" inputmode="numeric" value="${y0(a.k ?? (a.m == null ? a.tot : 0))}" placeholder="0"></div>
+    <div class="field"><label for="am_w">👩🏼 建替中</label><input id="am_w" class="yenin3 num" inputmode="numeric" value="${y0(a.m)}" placeholder="0"></div>
     ${!a.own && a.from ? `<p class="note">${ymLabel(a.from)}の合計を引き継いでいます。保存すると${ymLabel(ym)}の記録になります。</p>` : ""}
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div></form>`); }
 /* 2026-11-21：移行額の矢印の色。赤＝貯蓄から支出へ回した、黄＝予算どおり積立として貯蓄へ、青＝予算より多く貯蓄できた（余り） */
@@ -3742,18 +3749,30 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
   const save = cols.map(c => { const v = svBal(c), behind = isG(c) && goalBehind(ym, c.k, v);
     return `<button class="mjc" data-act="${c.inv ? "invlist" : c.k === "event" ? "goals" : c.k === "irregular" ? "goals" : "balset"}" data-id="${c.inv ? "" : c.k === "living" ? "__liv" : c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.b}"><b class="num${v < 0 || behind ? " neg" : ""}">${kY(v)}</b><small>${c.k === "living" && keep ? `目標 ${kY(keep)}` : ""}</small></button>`; }).join("");
   const msg = GCACHE["__msg" + ym] || (setTimeout(() => fillTopMsg(ym), 60), ["", ""]), adv = advBox(ym, 1) ? advManOf(ym) : null;
+  /* 2026-11-23：見出しの右に合計、枠の中は内訳（🧑🏻・👩🏼）。合計の枠はやめて、貯蓄の増減は貯蓄の枠の下に（「増減」の文字なし） */
+  const hv = (t, v) => `<span class="iht">${t}<b class="ihv num">${kY(v)}</b><small>万円</small></span>`;
+  const pc = (e, v, sub = "") => `<span class="ipc"><small>${e}</small><b class="num">${v == null ? "—" : kY(v)}</b>${sub}</span>`, sg = (d, cls) => `<em class="${cls}">${kS(d)}</em>`;
+  const zi = zanOf(prevYmOf(ym)) || {}, hz = v => v !== undefined && v !== null && v !== "", half = ib == null ? null : ib / 2;
+  const incCells = a.incDef ? pc("🧑🏻", half, `<em class="z">予算</em>`) + pc("👩🏼", half, `<em class="z">予算</em>`)
+    : !hz(zi["収入🧑🏻"]) && !hz(zi["収入👩🏼"]) ? pc("👬", a.inc)
+    : [["🧑🏻", "収入🧑🏻"], ["👩🏼", "収入👩🏼"]].map(([e, n]) => { const v = num0(zi[n]), d = half == null ? null : v - half; return pc(e, v, d == null ? "" : sg(d, Math.abs(d) < 500 ? "z" : d < 0 ? "neg" : "gr")); }).join("") + (num0(zi["収入👬建替返還分"]) ? pc("建替返還", num0(zi["収入👬建替返還分"]), `<em class="z">予算なし</em>`) : "");
+  let isrc = ym; for (let i = 0; i < 24 && !invHOf(isrc); i++) isrc = prevYmOf(isrc); const ih = invHOf(isrc) || {};
+  const iw = w => INV_FUNDS.filter(f => f[1] === w).reduce((t, [k]) => ({v: t.v + num0(ih[k]?.v), g: t.g + num0(ih[k]?.g)}), {v: 0, g: 0});
+  const secTot = invHOf(isrc) ? iw("🧑🏻").v + iw("👩🏼").v : num0(invC?.bal);
+  const secCells = invHOf(isrc) ? ["🧑🏻", "👩🏼"].map(w => { const x = iw(w); return pc(w, x.v, sg(x.g, x.g < 0 ? "neg" : "gr")); }).join("") : pc("👬", secTot);
+  const advP = adv ? advManOf(prevYmOf(ym)) : null, advD = (c, p) => c == null || p == null ? "" : `<em class="z">先月${Math.abs(c - p) < 500 ? "±0" : kS(c - p)}</em>`;
+  const advCells = !adv ? "" : adv.k == null && adv.m == null && adv.tot ? pc("👬", adv.tot, advD(adv.tot, advP.tot)) : pc("🧑🏻", num0(adv.k), advD(num0(adv.k), advP.k == null && advP.m == null ? (advP.tot ? null : 0) : num0(advP.k))) + pc("👩🏼", num0(adv.m), advD(num0(adv.m), advP.k == null && advP.m == null ? (advP.tot ? null : 0) : num0(advP.m)));
   return [topNav(ym), `<section class="ios">
     <div class="icard imsg ${msg[0]}"${msg[1] ? "" : ' style="display:none"'}><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${msg[1] ? esc(msg[1]) : ""}</span></div>
-    <div class="irow2"><div class="icol"><h3 class="ihd">収入<small>万円</small></h3>
-    <button class="icard iinc" data-act="incact"><span class="isub">${Number(prevYmOf(ym).slice(5))}月に入った分</span><b class="num">${kY(a.inc)}</b>${!a.incDef && ib != null ? `<span class="isub">予算 ${kY(ib)} ・ <em class="${a.inc - ib < 0 ? "neg" : "pos"}">${kS(a.inc - ib)}</em></span>` : ""}</button></div>
-    <div class="icol"><h3 class="ihd">証券<small>万円</small></h3><div class="icard iinc isec"><button class="isecv" data-act="invlist"><span class="isub">評価額</span><b class="num">${kY(num0(invC?.bal))}</b></button><button class="isecm" data-act="allocrule" data-id="invest"><span class="yl">+${kY(Math.max(num0(a.inv), num0(invB)))}</span><small>積立</small></button></div></div></div>
-    <h3 class="ihd">支出<small>万円</small></h3>
+    <h3 class="ihd">${hv("収入", a.inc)}<small>${Number(prevYmOf(ym).slice(5))}月に入った分</small></h3>
+    <button class="icard ip" data-act="incact">${incCells}</button>
+    <h3 class="ihd">${hv("支出", a.spend)}</h3>
     <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${spend}</div></div>
-    <h3 class="ihd">貯蓄<small>${Number(ym.slice(5))}月末・万円</small></h3>
-    <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div><div class="isep"></div><div class="ilab">増減</div><div class="ig imv">${move}</div></div>
-    <div class="irow2"><div class="icol"><h3 class="ihd">合計<small>万円</small></h3>
-    <div class="icard"><div class="ig itot"><span><small>支出</small>${kY(a.spend)}</span><span><small>増減</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span></div></div></div>
-    ${adv ? `<div class="icol"><h3 class="ihd">建替中<small>万円</small></h3><button class="icard iadv" data-act="advman"><b class="num">${kY(adv.tot)}</b></button></div>` : ""}</div>
+    <h3 class="ihd">${hv("貯蓄", savTot)}<small>${Number(ym.slice(5))}月末</small></h3>
+    <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div><div class="isep"></div><div class="ig imv">${move}</div></div>
+    <div class="irow2 ir11"><div class="icol"><h3 class="ihd">${hv("証券", secTot)}<small>評価額</small></h3>
+    <div class="icard ip isec2"><button class="ipw" data-act="invlist">${secCells}</button><button class="isecm" data-act="allocrule" data-id="invest"><span class="yl">+${kY(Math.max(num0(a.inv), num0(invB)))}</span><small>今月の積立（2人）</small></button></div></div>
+    ${adv ? `<div class="icol"><h3 class="ihd">${hv("建替中", adv.tot)}</h3><button class="icard ip" data-act="advman">${advCells}</button></div>` : ""}</div>
   </section>`].join(""); }
 function topView(){ if (UI.muji !== false) return topViewMuji();   /* 2026-11-23：iPhoneの純正アプリ風のトップを使う（UI.muji = false で前の画面） */ const html = topView0(), ym = curYm();
   return html.replace(/<section class="fg f5 f4">([\s\S]*?)<\/section>/, (all, body) => {
@@ -5224,8 +5243,8 @@ async function submitBody(e, f){
     let ref = null; ok = await save(async () => { ref = await db.collection("txapp").add(rec); }, `不明金 ${sYen(diff)} を記録しました`);
     if (ok && ref?.id) syncTxSoon(["app-" + ref.id]);
   } else if (kind === "advman"){   // 2026-11-21：建替の手入力
-    const ym = curYm(), t = numOrNull(val("am_t")), mo = numOrNull(val("am_m"));
-    ok = await save(() => db.doc("monthin/" + ym).update({advMan: {tot: t ?? 0, mon: mo ?? 0}, updatedAt: new Date().toISOString()}), "建替を保存しました");
+    const ym = curYm(), k = numOrNull(val("am_k")) ?? 0, w = numOrNull(val("am_w")) ?? 0, pt = advManOf(prevYmOf(ym)).tot;   /* 2026-11-23：2人別。mon（今月の分）は先月からの増えた分 */
+    ok = await save(() => db.doc("monthin/" + ym).update({advMan: {k, m: w, tot: k + w, mon: Math.max(0, k + w - pt)}, updatedAt: new Date().toISOString()}), "建替を保存しました");
   } else if (kind === "goaledit"){   // 2026-11-21：目標を1つ足す・直す
     const id = f.dataset.id, G = f.dataset.g === "event" ? "event" : "irregular", name = val("ge_n"), tg = numOrNull(val("ge_t")), due = G === "event" ? ($("ge_d")?.value || "") : "", mo = numOrNull(val("ge_m"));
     if (!name){ toast("名前を入れてください"); return; } if (due && !(tg > 0)){ toast("目標額を入れてください"); return; }

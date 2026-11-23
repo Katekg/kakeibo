@@ -741,6 +741,7 @@ input[type="date"] { -webkit-appearance: none; appearance: none; min-height: 0; 
 /* 2026-11-23：消耗品の購入履歴（一覧の中に開いた時）は、白い1枚のカードに線で区切って並べる */
 .iexp .hlist { gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; } .iexp .hlist li + li { border-top: 1px solid var(--line); } .iexp .hl { background: transparent; border-radius: 0; padding: 7px 10px; }
 #subnav .subtabs[style*="--n"] { grid-template-columns: repeat(var(--n), minmax(0, 1fr)) !important; }
+.ios .mjc .mjn { display: grid; justify-items: center; gap: 3px; } .ios .mjc .mjn i { margin: 0; }   /* 名前の上に色の丸（前と同じ見た目） */
 button.ival { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: right; }
 .sheet-grip { position: relative; touch-action: none; } .sheet-grip::after { content: ""; position: absolute; inset: -14px -80px; }
 .hl { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; text-align: left; font: inherit; color: inherit; background: var(--bg); border: 0; border-radius: var(--r-sm); padding: 8px 12px; cursor: pointer; }

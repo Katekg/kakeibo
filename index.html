@@ -5012,7 +5012,7 @@ const DRAG = {used: false};
     const t = e.touches[0]; sx = t.clientX; sy = t.clientY;
     const sheetOpen = !$("sheetWrap").hidden, m4 = UI.modal && MAIN4.includes(UI.modal), catTop = UI.nav[UI.nav.length - 1]?.s === "cat";
     if (sheetOpen && m4){ const i = MAIN4.indexOf(UI.modal); canL = i > 0; canR = i < MAIN4.length - 1; getEl = () => $("sheet").querySelector(".mview"); go = d => modalGo(d); }
-    else if (!sheetOpen && !UI.nav.length && UI.tab === "top"){ { const L = ymList(), i = L.indexOf(curYm()); canL = i > 0; canR = i < L.length - 1; } getEl = () => $("view"); go = d => { const L = ymList(), n = L[L.indexOf(curYm()) + (d > 0 ? 1 : -1)]; if (n){ UI.cym = n; render(); } }; }
+    else if (!sheetOpen && !UI.nav.length && UI.tab === "top"){ { const L = topYms(), i = L.indexOf(curYm()); canL = i > 0; canR = i >= 0 && i < L.length - 1; } getEl = () => $("view"); go = d => { const L = topYms(), n = L[L.indexOf(curYm()) + (d > 0 ? 1 : -1)]; if (n){ UI.cym = n; render(); } }; }
     else return;
     el = getEl(); DRAG.used = !!el;
   }, {passive: true});
@@ -5022,7 +5022,7 @@ const DRAG = {used: false};
     if (!el) return; const t = e.touches[0], mx = t.clientX - sx, my = t.clientY - sy;
     if (!on){ if (Math.abs(mx) < 8 || Math.abs(mx) < Math.abs(my) * 1.2){ if (Math.abs(my) > 12) { el = null; DRAG.used = false; } return; } on = true; el.style.transition = "none"; }
     if (e.cancelable) e.preventDefault();
-    dx = (mx > 0 && !canL) || (mx < 0 && !canR) ? mx * .25 : mx;
+    dx = (mx > 0 && !canL) || (mx < 0 && !canR) ? 0 : mx;   /* 2026-11-23：その先に月がない時は動かさない */
     el.style.transform = `translateX(${dx}px)`; if (el.isTop) tpillDrag(dx);
   }, {passive: false});
   const settle = () => {

@@ -958,11 +958,15 @@ html.mjon .monthnav .navbtn, html.mjon .monthnav .ssbtn { width: 38px !important
 
 /* 2026-11-23：増減の色（黄＝予定どおりの積立、緑＝収入増・支出減で増えた分、赤＝届かない・取り崩し）。証券は評価額と積立を分けてタップ */
 .ios .yl { color: #e0a000 !important; } .ios .gr { color: #34c759 !important; } .ios .mjm { display: grid; justify-items: center; gap: 0; }
-.ios .isec { display: grid; gap: 4px; align-content: center; } .ios .isecv, .ios .isecm { display: grid; justify-items: start; gap: 1px; } .ios .isecm { grid-auto-flow: column; align-items: baseline; gap: 4px; font-size: .9rem; font-weight: 600; } .ios .isecm small { font-size: .62rem; color: var(--mut2); font-weight: 400; }
+.ios .isec { display: grid; gap: 4px; align-content: center; box-sizing: border-box; width: 100%; min-width: 0; } .ios .isecv, .ios .isecm { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; } .ios .isecv, .ios .isecm { display: grid; justify-items: start; gap: 1px; } .ios .isecm { grid-auto-flow: column; align-items: baseline; gap: 4px; font-size: .9rem; font-weight: 600; } .ios .isecm small { font-size: .62rem; color: var(--mut2); font-weight: 400; }
 .ios .icard { padding-left: 11px; padding-right: 11px; } .ios .mjm .mpl { font-size: .52rem; color: var(--mut2); font-weight: 400; letter-spacing: 0; }   /* iPhoneで数字が枠の端に近すぎたので内側の余白を広げる */
 
 /* 2026-11-23：もしもの計画のポップアップと計算中の印 */
-.ltsheet { position: relative; min-height: 120px; } .ltsheet .ltree .root { max-width: none; } .ltsheet .ltree .lnode { padding: 5px 7px; }
+.ltsheet { position: relative; min-height: 120px; } .ltsheet .ltree { flex-direction: column; gap: 6px; } .ltsheet .ltree .root { flex: none; max-width: none; padding: 5px 8px; }
+.ltsheet .ltree .root ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8px; font-size: .62rem; line-height: 1.3; } .ltsheet .ltree .root li span { min-width: 2.4em; }
+.ltsheet .ltree .lbrs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding-left: 0; } .ltsheet .ltree .lbrs > p, .ltsheet .ltree .lbrs > .note { grid-column: 1 / -1; margin: 0; }
+.ltsheet .ltree .lbrs::before, .ltsheet .ltree .lbr::before { display: none !important; } .ltsheet .ltree .lbr { display: flex; } .ltsheet .ltree .lbr .lnode { padding: 4px 7px; }
+.ltsheet .ltree .lnode b { font-size: .7rem; } .ltsheet .ltree .lres { font-size: .6rem; line-height: 1.3; } .ltsheet .ltnote { font-size: .6rem; margin: 4px 0 0; } .ltsheet .ltop { margin: 0 0 4px; }
 .ltsheet.busy > *:not(.lspin) { opacity: .35; pointer-events: none; } .ltsheet.busy::after { content: ""; position: absolute; left: 50%; top: 40%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; border: 3px solid #d1d1d6; border-top-color: var(--accent); animation: lspin .8s linear infinite; }
 .ltsheet .lspin { display: grid; justify-items: center; gap: 10px; padding: 90px 0 30px; color: var(--muted); font-size: .85rem; } .ltsheet .lspin i { display: none; } .ltsheet:has(.lspin)::after { top: 50px; }
 .lnode.lbusy { border-color: var(--accent) !important; } @keyframes lspin { to { transform: rotate(360deg); } }
@@ -3485,7 +3489,7 @@ function lifeBrSheet(id){ const br = (S.life?.branches || []).find(b => b.id ===
     <h4>予定を足す</h4>${lifeAddBtns()}
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="lifeBrDel" data-id="${id}">この案を消す</button><button type="submit" class="btn">保存</button></div></form>`); }
 /* 2026-11-23：「案をくらべる」は表の上に重ねて出す（iPhoneで後ろの画面がスクロールできないため）。押したら計算中の印を出してから計算する */
-function lifeTreeSheet(){ openSheet(`<div class="ltsheet">${lifeTree(true)}</div>`); $("sheet").classList.add("h23"); }
+function lifeTreeSheet(){ openSheet(`<div class="ltsheet">${lifeTree(true)}</div>`); }
 function lifeBusy(on, el){ const w = document.querySelector(".ltsheet"); if (w) w.classList.toggle("busy", on); if (el) el.classList.add("lbusy"); }
 const lifeYOpen = y => (UI.lifeYs || []).includes(y);
 /* 2026-11-21：NISAの毎月の積立額をくらべる（今の設定額から1万円ずつ下げて）。働いている間（パートになるまで）に積立を減らす・NISAを売る最初の年と、最後の貯蓄＋NISA */

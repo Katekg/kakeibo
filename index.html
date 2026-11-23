@@ -927,7 +927,7 @@ section.fg.f5.f4.hd3 .cs, section.fg.f5.f4.hd3 .cs.named, section.fg.f5.f4.hd3 .
 /* 2026-11-23（試作）：iPhoneの純正アプリ（リマインダー・メモ）のようなトップ。グレーの背景に白い角丸のカード、左寄せの太字の見出し */
 html.toplock.mjon, html.toplock.mjon body, html.toplock.mjon #app, html.mjon.pgbud .monthnav.mn2.stk, html.mjon.pgact .monthnav.mn2.stk, html.mjon .monthnav.mn2.stk { background: #f2f2f7 !important; }
 .ios { --ink2: #1c1c1e; --mut2: #8e8e93; --sep: #e5e5ea; color: var(--ink2); display: grid; gap: 0; padding: 2px 0 0; font-family: -apple-system, "SF Pro Text", "Hiragino Sans", sans-serif; }
-.ios button { all: unset; box-sizing: border-box; cursor: pointer; -webkit-tap-highlight-color: transparent; } .ios button:active { opacity: .55; }
+.ios button { all: unset; corner-shape: squircle; box-sizing: border-box; cursor: pointer; -webkit-tap-highlight-color: transparent; } .ios button:active { opacity: .55; }
 .ios .num, .ios .ig { font-variant-numeric: tabular-nums; } .ios .neg { color: #ff3b30 !important; } .ios .pos { color: #34c759; }
 .ios .icard { background: #fff; border-radius: 22px; padding: 10px 6px; margin: 0 0 10px; }
 section.ios { display: flex !important; flex-direction: column; overflow: hidden; } section.ios > * { flex: none; } section.ios > .icard.grow { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-evenly; min-height: 0; } section.ios > .icard:last-child { margin-bottom: 0; } section.ios > .imsg { margin: 0 0 6px; } .ios .mjm .mpl { font-size: .54rem; color: var(--mut2); }
@@ -3375,7 +3375,7 @@ function lifeModel(ov){
     evFundAt = ym => evG.reduce((t, g) => ym >= m0 && ym < g.due ? t + num0(g.target) * (ymDiff(m0, ym) + 1) / (ymDiff(m0, g.due) + 1) : t, 0);   // イベントの積立の残り（使う月に0）
     evRowL = ({id: "lvg-event", label: GN.event, sign: -1, icon: "📅", fixed: true, f: ym => evG.reduce((t, g) => t + evSave(g, ym), 0) + (inNH(ym) ? 0 : evOther.reduce((t, [, v]) => t + v, 0)), mark: ym => evG.some(g => g.due === ym) ? "goalev" : null, evAmt: ym => evG.filter(g => g.due === ym).reduce((t, g) => t + num0(g.target), 0)});   // 2026-11-21：イベントは子どもの下に出す
     // こづかい（2人の分・👩🏼・🧑🏻）は1つにまとめてたたむ
-    const kz = lvCats.filter(([n]) => isKoz(n)).map(([n, v]) => ({...catKid([n, v]), label: n}));
+    const kz = lvCats.filter(([n]) => isKoz(n)).map(([n, v]) => ({...catKid([n, v]), label: n, fixed: true}));   /* 2026-11-23：こづかいは物価で上げない（固定） */
     if (kz.length) rows.push(grp("lvg-koz", "こづかい", -1, kz));
     ["miho", "kazu"].forEach(g => { const ks = grpKids(g).filter(k => !isKoz(k.label)); if (ks.length) rows.push(grp("lvg-" + g, GN[g], -1, ks)); }); }
   const house = reps("house").map(repKid);   // 2026-11-20：固定資産税は税・社会保険料の行へ

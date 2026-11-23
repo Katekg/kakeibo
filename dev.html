@@ -3437,7 +3437,7 @@ function lifeModel(ov){
     const keepParts = j => ({living: num0(V.living?.[j]), irregular: num0(V["lvg-irregular"]?.[j]) - num0(V["irr-tax"]?.[j]), house: num0(V.house?.[j]), ins: num0(V.ins?.[j]), rep: repOut(j)});
     const fixLiv = j => Object.values(keepParts(j)).reduce((t, v) => t + v, 0); const KP = yms.map(() => null);
     yms.forEach((ym, j) => { nisaIn[j] = nisaIn0[j]; nisaS[j] = 0; }); let v = L.nisa0, bb = sav0, basis = L.nisa0, yUsed = 0, yCur = "";
-    yms.forEach((ym, j) => { if (j < i0 || isTop(ym)){ bb = bTot(ym); v = num0(invBalOf(ym)); nisaVal[j] = v; if (j === i0 - 1 || isTop(ym)) basis = Math.max(basis, 0); return; }   // 実績の月：トップの残高
+    yms.forEach((ym, j) => { if (j < i0 || isTop(ym)){ bb = bTot(ym) - (fundCC[j] + evFundAt(ym)); v = num0(invBalOf(ym)); nisaVal[j] = v; if (j === i0 - 1 || isTop(ym)) basis = Math.max(basis, 0); return; }   // 実績の月：トップの残高
       if (j === i0 && i0 > 0) v = L.nisa0 || v;
       if (ym < a65k) v = v * (1 + mrN) + nisaIn[j]; else v = v * (1 + mrN);
       const nj = base[j] + nisaV[j]; bb += nj; const buf = livAll(j) * L.bufM; let c = 0;   // 止める・売るは、積立の分も含めた貯蓄全体で見る（積立の現金があるのにNISAを売らない）
@@ -3457,7 +3457,8 @@ function lifeModel(ov){
     rows.forEach(r => add(r, r)); }
   // 2026-11-22：貯蓄＝自由に使える貯蓄＋使う予定の貯蓄（税保険等・車・子ども・イベントの積立の残り）。合計はトップの貯蓄の合計と同じ考え方
   const net = netOf(), bal = [], free = [], plan = []; let b = sav0, carry = null; const bkNow = bucketBal(TODAY.slice(0, 7)), othNow = ["irregular", "event", "miho", "kazu"].reduce((t, k) => t + num0(bkNow[k]), 0); let pk = num0(bkNow.miho) + num0(bkNow.kazu);   /* 先の月の👩🏼・🧑🏻の貯蓄は、今の額のまま */ net.forEach((n, j) => { const ym = yms[j];
-    if (isTop(ym)){ b = bTot(ym); const bk = bucketBal(ym), pl = num0(bk.irregular) + num0(bk.event) + num0(bk.miho) + num0(bk.kazu); pk = num0(bk.miho) + num0(bk.kazu); bal.push(b); plan.push(pl); free.push(b - pl); return; }   /* 2026-11-23：生活防衛資金＝トップの生活費の貯蓄。使う予定＝特別費・イベント・👩🏼・🧑🏻 */
+    if (isTop(ym)){ const bt = bTot(ym), ccT = fundCC[j] + evFundAt(ym), bk = bucketBal(ym), pl = num0(bk.irregular) + num0(bk.event) + num0(bk.miho) + num0(bk.kazu); pk = num0(bk.miho) + num0(bk.kazu);
+      b = bt - ccT; carry = pl - (num0(M_FUND?.[j]) + ccT + pk); bal.push(bt); plan.push(pl); free.push(bt - pl); return; }   /* 2026-11-23：トップの残高から続ける。積立の現金（ccT）は次の月で足すので、ここで引いておく（二重に数えない） */   /* 2026-11-23：生活防衛資金＝トップの生活費の貯蓄。使う予定＝特別費・イベント・👩🏼・🧑🏻 */
     b += n; const cc = fundCC[j] + evFundAt(ym), pl0 = num0(M_FUND?.[j]) + cc + pk; if (carry == null) carry = othNow - pl0; const pl = Math.max(0, pl0 + carry);   /* 特別費・イベントの、積立の計算に入っていない分（今の額のまま持ち越す） */ bal.push(b + cc); plan.push(pl); free.push(b + cc - pl); });
   return {L, yms, rows, V, net, bal, living, nv: nisaVal, a65k, nisaBase: L.nisa + num0(L.kozCut), nisaBaseAt: nisaAtYm, isTop, free, plan, fund: M_FUND, kp: M_KP, taxLumps};
 }

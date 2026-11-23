@@ -2718,7 +2718,17 @@ function goalBase(ym){ const k = "b" + ym; if (GCACHE[k]) return GCACHE[k]; cons
     else if (g.due && tg > 0){ const left = ymDiff(ym, g.due) + 1; m = left >= 1 && tg > b ? Math.ceil((tg - b) / left / 1000) * 1000 : 0; }
     else { m = num0(g.monthly); if (tg > 0){ m = Math.max(m, 5000); m = Math.max(0, Math.min(m, tg - b)); } }   // 2026-11-17：目標額だけのときは最低5千円
     r.m[g.id] = m; });
+  /* 2026-11-23：イベントの、使う月が決まっている積立（ライフの子ども・車、期限のあるイベント）は、使う年が同じものを合わせて月1万円になるまで積み立てない
+     （何年も先の分をちまちま積み立てない。小さく分けたイベントも、同じ年のものは合わせて考える）。1万円以上になった月から、どれもそれぞれの額で積み立てる。
+     遅れた分は、残りの月で割って取り戻す。ガソリン・駐車場のような、その月にかかるお金はそのまま */
+  const D = gs.filter(g => goalGrp(g) === "event" && g.start && ym >= g.start && (g.auto || (g.due && num0(g.target) > 0))), grp = {};
+  D.forEach(g => { const ls = g.auto ? (autoInfo().lumps[g.auto] || []) : [], run = ls.filter(x => x.run && x.ym === ym).reduce((t, x) => t + x.amt, 0), key = useYm(g, ym, r.bal[g.id]).slice(0, 4);
+    (grp[key] = grp[key] || []).push([g, run]); });
+  Object.values(grp).forEach(a => { if (a.reduce((t, [g, run]) => t + Math.max(0, num0(r.m[g.id]) - run), 0) < EV_MIN) a.forEach(([g, run]) => { r.m[g.id] = Math.min(num0(r.m[g.id]), run); }); });
   return GCACHE[k] = r; }
+const EV_MIN = 10000;
+/* 積立の額を決めている「使う月」（ライフの予定は、いちばん厳しい支払いの月。イベントは期限の月） */
+const useYm = (g, ym, b) => { if (!g.auto) return g.due || ""; let cum = 0, best = -Infinity, at = ""; for (const x of (autoInfo().lumps[g.auto] || [])){ if (x.ym < ym || x.run) continue; cum += x.amt; const v = (cum - num0(b)) / (ymDiff(ym, x.ym) + 1); if (v > best){ best = v; at = x.ym; } if (x.stop) break; } return at; };
 function goalEnd(ym){ const k = "e" + ym; if (GCACHE[k]) return GCACHE[k]; const gb = goalBase(ym), j = adjOf(ym), r = {};
   const gm = (S.plans[ym]?.goalMoves || []), ba = (S.plans[ym]?.balAdj || []), mvOf = id => gm.reduce((t, x) => t + (x.to === id ? num0(x.amount) : 0) - (x.from === id ? num0(x.amount) : 0), 0) + ba.reduce((t, x) => t + (x.goal === id ? num0(x.amount) : 0), 0);   // 2026-11-21：目標どうしの移動
   goalsOn().forEach(g => { r[g.id] = !g.start || ym < g.start ? 0 : gb.bal[g.id] + gb.m[g.id] + num0(j.gadd?.[g.id]) - catSpent(ym, g.name) + mvOf(g.id); });
@@ -4007,7 +4017,7 @@ function goalEditSheet(id, grp){ if (String(id).startsWith("grp:")){ const ids =
   { const ga = goalsAll().find(x => x.id === id); if (ga?.auto){ const all = (autoInfo().lumps[ga.auto] || []).filter(x => x.ym >= curYm()), mo = all.filter(x => x.what === "ガソリン" || x.what === "駐車場"), ls = all.filter(x => !mo.includes(x)).slice(0, 6), mo1 = mo.length ? mo.filter(x => x.ym === mo[0].ym).reduce((t, x) => t + x.amt, 0) : 0;
     openSheet(`<h3>${esc(ga.name)}</h3><p class="note">ライフプランの予定から自動で作っている積立です。この先の予定のどれにも間に合うよう、毎月の額を決めています。金額や時期を変えるときは、ライフプランの予定を直してください。使ったときは「${esc(ga.name)}」のカテゴリで支出を入れます。</p>
     <section class="cgrp" style="--zc:${GCOL.event}">${ls.map(x => `<div class="cmid tot"><span class="n">${esc(x.what)}<small class="gsub">${ymLabel(x.ym)}</small></span><span class="num">${yen(x.amt)}</span><span></span></div>`).join("")}${mo1 ? `<div class="cmid tot"><span class="n">ガソリン・駐車場<small class="gsub">${ymLabel(mo[0].ym)}から毎月</small></span><span class="num">${yen(mo1)}</span><span></span></div>` : ""}</section>
-    <div class="sheet-actions"><button type="button" class="btn ghost" data-act="goalDel" data-id="${esc(id)}">使わない</button><button type="button" class="btn" data-act="close">閉じる</button></div>`); return; } }
+    <p class="note">この積立をやめる時は、ライフプランの予定を消してください（積立も一緒に消えます）。</p><div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); return; } }
   const g = goalsAll().find(x => x.id === id) || {grp}, G = goalGrp(g), yen0 = v => v == null || v === "" ? "" : num0(v).toLocaleString("ja-JP"), usedB = g.name && Object.values(S.monthin || {}).some(m => m?.used && m.used[g.name] != null && m.used[g.name] !== "");
   openSheet(`<h3>${id ? "直す" : "足す"}（${GN[G]}）</h3><form data-form="goaledit" data-id="${esc(id)}" data-g="${G}" style="display:grid;gap:10px">
     <div class="field"><label for="ge_n">名前</label><input id="ge_n" value="${esc(g.name || "")}" placeholder="${G === "event" ? "例：👬旅行（北海道）" : "例：👩🏼医療"}" ${id && usedB ? "readonly" : ""}></div>
@@ -4125,7 +4135,7 @@ function catActSheet(g){
   <form data-form="catact" data-ym="${ym}" data-g="${g}" style="display:grid;gap:8px">
     <button type="button" class="btn ghost gchart" data-act="catchart" data-g="${g}" data-n="">📊 ${GN[g]}の合計の月別グラフ</button>
     <section class="bag" style="--zc:${GCOL[g]}"><div class="bar act3 act4 hd"><span class="n">カテゴリ</span><span class="hb">予算</span><span class="hb">支出</span><span class="hb">貯蓄増減</span></div>${rows}<div class="bar act3 act4 ft"><span class="n">合計</span><b class="num" id="ca-b"></b><b class="num" id="ca-t"></b><b class="num cdv" id="ca-d"></b></div></section>
-    <button type="button" class="btn ghost" data-act="catend" data-g="${g}">カテゴリーを終わりにする（払い終わり など）</button>
+    ${g === "irregular" ? `<button type="button" class="btn ghost" data-act="catend" data-g="${g}">カテゴリーを終わりにする（払い終わり など）</button>` : ""}
     <p class="note">貯蓄増減＝予算−支出。<span class="cy">黄</span>＝予定の積立、<span class="cg">緑</span>＝予算より少なく使って増えた分、<span class="cr">赤</span>＝予算より多く使った分。名前をタップで月別グラフ、予算をタップで予算の一覧。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
   </form>`); calcCatAct(); }

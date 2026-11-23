@@ -738,6 +738,12 @@ input[type="date"] { -webkit-appearance: none; appearance: none; min-height: 0; 
 .acch .t { font-weight: 700; } .acch .num { font-size: .8rem; color: var(--muted); } .chev2 { color: var(--muted); }
 .hhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .hlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+/* 2026-11-23：消耗品の購入履歴（一覧の中に開いた時）は、白い1枚のカードに線で区切って並べる */
+.iexp .hlist { gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; } .iexp .hlist li + li { border-top: 1px solid var(--line); } .iexp .hl { background: transparent; border-radius: 0; padding: 7px 10px; }
+#subnav .subtabs[style*="--n"] { grid-template-columns: repeat(var(--n), minmax(0, 1fr)) !important; }
+.ios .mjc .mjn { display: grid; justify-items: center; gap: 3px; } .ios .mjc .mjn i { margin: 0; }   /* 名前の上に色の丸（前と同じ見た目） */
+button.ival { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: right; }
+.sheet-grip { position: relative; touch-action: none; } .sheet-grip::after { content: ""; position: absolute; inset: -14px -80px; }
 .hl { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; text-align: left; font: inherit; color: inherit; background: var(--bg); border: 0; border-radius: var(--r-sm); padding: 8px 12px; cursor: pointer; }
 .hl .d { color: var(--muted); font-size: .85rem; } .hl .pr { font-weight: 700; text-align: right; } .hl .q { font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .hl .u { font-size: .8rem; color: var(--accent); text-align: right; }
 .later { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -1603,7 +1609,7 @@ function render(){
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === UI.tab ? "page" : "false"));
   if (S.ready < 2) return;
   const SUBS = [["items", "月平均と品目"], ["howto", "使い道"]];   /* 2026-11-23：月平均と品目を1つの画面に（上に月平均、下に品目の一覧） */ if (UI.sub === "avg") UI.sub = "items";   // 2026-11-21：見直しのタブはやめた   // 2026-11-16：お店のタブはやめて、使い道のタブに
-  $("subnav").innerHTML = UI.tab === "cons" && !UI.nav.length ? `<nav class="subtabs" aria-label="消耗品の画面">${SUBS.map(([k, l]) => `<button data-act="sub" data-k="${k}" aria-current="${UI.sub === k ? "page" : "false"}">${l}</button>`).join("")}</nav>` : "";
+  $("subnav").innerHTML = UI.tab === "cons" && !UI.nav.length ? `<nav class="subtabs" aria-label="消耗品の画面" style="--n:${SUBS.length}">${SUBS.map(([k, l]) => `<button data-act="sub" data-k="${k}" aria-current="${UI.sub === k ? "page" : "false"}">${l}</button>`).join("")}</nav>` : "";
   document.getElementById("app").classList.toggle("hassub", UI.tab === "cons");
   $("view").innerHTML = UI.nav.length ? navView() : UI.tab === "cons" ? ({avg: consMainView, items: consMainView, review: itemsView, howto: howtoView, shops: howtoView})[UI.sub]() : ({tx: txView, cf: cfView, bal: balView, top: topView, tax: taxView, life: lifeView})[UI.tab]();
   { const alEl = $("sysAlert"), n = notices().length; alEl.hidden = !n || !!document.querySelector("#view .monthnav"); if (!alEl.hidden) alEl.innerHTML = `<button class="alicon" data-act="sysal" aria-label="お知らせ ${n}件">!</button>`; }
@@ -1650,7 +1656,7 @@ function itemRow(it, soon = false, mode = ""){
   const low = !soon && (gone || (l && l.dOut <= SOON_DAYS));
   return `<li class="${mk ? "mk" : ""}${soon ? " wbar" : ""}${opn ? " iopen" : ""}${low ? " lowst" : ""}" data-id="${it.id}" style="--wc:${whoCol(cwhoOf(it))}"><div class="irow">
     <button class="ibtn" data-act="hist" data-id="${it.id}" data-s="${soon ? 1 : ""}" aria-expanded="${opn}"><span class="nm">${esc(it.name)}</span><span class="sub">${esc(sub) || "&nbsp;"}</span></button>
-    <span class="ival">${m != null ? `${yen(m)}<small>／月</small>` : `<span class="badge warn">未入力</span>`}</span>${UI.wig && !soon ? `<span class="whand" aria-label="つかんで動かす">☰</span>` : ""}
+    <button class="ival" data-act="hist" data-id="${it.id}" data-s="${soon ? 1 : ""}" tabindex="-1" aria-hidden="true">${m != null ? `${yen(m)}<small>／月</small>` : `<span class="badge warn">未入力</span>`}</button>${UI.wig && !soon ? `<span class="whand" aria-label="つかんで動かす">☰</span>` : ""}
   </div>${opn ? `<div class="iexp">${histBody(it, true)}</div>` : ""}${soon && !opn ? `<div class="ibtns">${mode === "sale" ? "" : gone ? `<button class="sbtn ghost2" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button class="sbtn ghost2" data-act="later" data-id="${it.id}">まだ少し持ちそう</button>`}${btns}</div>` : ""}</li>`;
 }
 const daysLeft = it => { const n = nextDate(it); return n ? Math.round((parse(n) - parse(TODAY)) / 864e5) : null; };
@@ -2386,6 +2392,15 @@ function autoMoveSheet(ym){
 const getSY = () => (document.scrollingElement?.scrollTop || 0) || document.body.scrollTop || window.scrollY || 0;
 const setSY = v => { try { if (document.scrollingElement) document.scrollingElement.scrollTop = v; document.body.scrollTop = v; window.scrollTo(0, v); } catch (e) {} };
 function openSheet(html, opt = {}){ if ($("sheetWrap").hidden){ UI.sheetSY = getSY(); document.documentElement.style.setProperty("--lockY", `${-UI.sheetSY}px`); } $("sheet").innerHTML = `<div class="sheet-grip"></div>` + html; $("sheetWrap").hidden = false; $("sheetWrap").classList.toggle("top", !!opt.top); document.documentElement.classList.add("lock"); requestAnimationFrame(() => { const sh = $("sheet"); sh.style.overflowY = sh.scrollHeight > sh.clientHeight + 1 ? "auto" : "hidden"; }); requestAnimationFrame(() => applySquircles($("sheet"))); const f = $("sheet").querySelector("input"); if (f && !matchMedia("(pointer: coarse)").matches) f.focus(); }
+/* 2026-11-23：下から出る画面は、上のバー（またはいちばん上の辺り）を下に引っぱると閉じる */
+(() => { let y0 = 0, dy = 0, on = false, sh = null;
+  document.addEventListener("touchstart", e => { on = false; const w = $("sheetWrap"); if (!w || w.hidden || w.classList.contains("top") || e.touches.length !== 1) return; sh = $("sheet"); const t = e.touches[0], r = sh.getBoundingClientRect();
+    if (!(e.target.closest?.(".sheet-grip") || (t.clientY - r.top < 30 && sh.scrollTop <= 0 && !e.target.closest?.("input,select,textarea,button,a")))) return; on = true; y0 = t.clientY; dy = 0; sh.style.transition = "none"; }, {passive: true});
+  document.addEventListener("touchmove", e => { if (!on) return; dy = Math.max(0, e.touches[0].clientY - y0); sh.style.transform = `translateY(${dy}px)`; if (e.cancelable) e.preventDefault(); }, {passive: false});
+  const end = () => { if (!on) return; on = false; const s = sh;
+    if (dy > 70){ s.style.transition = "transform .18s ease-in"; s.style.transform = "translateY(110%)"; setTimeout(() => { s.style.transition = ""; s.style.transform = ""; closeSheet(); }, 180); }
+    else { s.style.transition = "transform .18s ease-out"; s.style.transform = ""; setTimeout(() => { s.style.transition = ""; }, 200); } };
+  document.addEventListener("touchend", end, {passive: true}); document.addEventListener("touchcancel", end, {passive: true}); })();
 function fitSheet(){ const sh = $("sheet"); if (sh) sh.style.overflowY = sh.scrollHeight > sh.clientHeight + 1 ? "auto" : "hidden"; }
 function closeSheet(){ $("sheet").classList.remove("trbig"); if (UI.backModal && !$("sheetWrap").hidden){ const g = UI.backModal, sy = UI.backSY || 0; UI.backModal = null; grpModal(g); requestAnimationFrame(() => { $("sheet").scrollTop = sy; }); return; }
   $("sheetWrap").hidden = true; $("sheetWrap").classList.remove("top"); document.documentElement.classList.remove("lock"); $("sheet").innerHTML = ""; UI.modal = null; $("sheet").classList.remove("h23"); if (pending){ pending = false; render(); } const y = UI.sheetSY || 0; requestAnimationFrame(() => setSY(y)); setTimeout(() => setSY(y), 120); }
@@ -3775,9 +3790,9 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
   const emgMv = num0(all.find(c => c.k === "emergency")?.move), savTot = Object.keys(BK).reduce((t, b) => t + num0(bal[b]), 0), mvTot = all.filter(c => !c.inv).reduce((t, c) => t + c.move, 0), keep = p.alloc?.living ? num0(p.alloc.living) * keepM(ym) : 0;
   const colC = c => c.inv ? GCOL.invest : GCOL[c.k], isG = c => c.k === "irregular" || c.k === "event";
   const svBal = c => c.inv ? c.bal : c.k === "living" ? num0(bal.common) + num0(bal.emergency) : num0(bal[c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.k]);
-  const head = cols.map(c => `<span class="mjn"><i style="background:${colC(c)}"></i>${esc(c.n)}</span>`).join("");
+  const nm = c => `<span class="mjn"><i style="background:${colC(c)}"></i>${esc(c.n)}</span>`;   /* 2026-11-23：名前も数字と同じボタンの中に（列のどこを押しても開く） */
   const spend = cols.map(c => { const sb = c.inv ? (invB == null ? null : num0(invB)) : c.bud == null || c.k === "adv" ? null : num0(c.bud) - (isG(c) ? planSave(ym, c.k) : 0), ov = !c.inv && act && sb != null && num0(c.spent) > sb + 500;
-    return `<button class="mjc" data-act="catact" data-id="${c.inv ? "invest" : c.k}"><b class="num${ov ? " neg" : ""}">${kY(c.spent)}</b><small>${sb == null || !act ? "" : `予算 ${kY(sb)}`}</small></button>`; }).join("");   /* 2026-11-23：予算の月は数字そのものが予算なので出さない */
+    return `<button class="mjc" data-act="catact" data-id="${c.inv ? "invest" : c.k}">${nm(c)}<b class="num${ov ? " neg" : ""}">${kY(c.spent)}</b><small>${sb == null || !act ? "" : `予算 ${kY(sb)}`}</small></button>`; }).join("");   /* 2026-11-23：予算の月は数字そのものが予算なので出さない */
   // 2026-11-23：貯蓄の「増減」。黄＝予算どおりの積立、緑＝収入が多い・支出が少ないことで増えた分、赤＝予定の積立に届かなかった・貯蓄から使った。
   // 積立の予定が先月より増えた列は、黄の下に「先月+○」。タップで分配（行き先の順番）の画面
   const pym = prevYmOf(ym), move = cols.map(c => { const m = Math.round(c.k === "living" ? c.move + emgMv : c.move), pl = isG(c) ? Math.round(planSave(ym, c.k)) : 0, plp = isG(c) && planOf(pym).alloc ? Math.round(planSave(pym, c.k)) : 0, up = pl - plp;
@@ -3786,7 +3801,7 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
     else t = m >= 500 ? `<span class="gr">+${kY(m)}</span>` : m <= -500 ? `<span class="neg">−${kY(-m)}</span>` : `<span class="z">0</span>`;
     return `<button class="mjm" data-act="allocrule" data-id="${c.k}">${t}</button>`; }).join("");
   const save = cols.map(c => { const v = svBal(c), behind = isG(c) && goalBehind(ym, c.k, v);
-    return `<button class="mjc" data-act="${c.inv ? "invlist" : c.k === "adv" ? "balset" : c.k === "event" ? "goals" : c.k === "irregular" ? "goals" : "balset"}" data-id="${c.inv ? "" : c.k === "adv" ? "adv" : c.k === "living" ? "__liv" : c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.b}"><b class="num${v < 0 || behind ? " neg" : ""}">${kY(v)}</b><small>${c.k === "living" && keep ? `目標 ${kY(keep)}` : ""}</small></button>`; }).join("");
+    return `<button class="mjc" ${""}data-act="${c.inv ? "invlist" : c.k === "adv" ? "balset" : c.k === "event" ? "goals" : c.k === "irregular" ? "goals" : "balset"}" data-id="${c.inv ? "" : c.k === "adv" ? "adv" : c.k === "living" ? "__liv" : c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.b}">${nm(c)}<b class="num${v < 0 || behind ? " neg" : ""}">${kY(v)}</b><small>${c.k === "living" && keep ? `目標 ${kY(keep)}` : ""}</small></button>`; }).join("");
   const msg = GCACHE["__msg" + ym] || (setTimeout(() => fillTopMsg(ym), 60), ["", ""]), adv = null;   /* 2026-11-23：建替中の枠はやめて、支出・貯蓄の「建替」の列に */
   /* 2026-11-23：見出しの右に合計、枠の中は内訳（🧑🏻・👩🏼）。合計の枠はやめて、貯蓄の増減は貯蓄の枠の下に（「増減」の文字なし） */
   const hv = (t, v) => `<span class="iht">${t}<b class="ihv num">${kY(v)}</b><small>万円</small></span>`;
@@ -3807,9 +3822,9 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
     <h3 class="ihd">${hv("収入", a.inc)}<small>${Number(prevYmOf(ym).slice(5))}月に入った分</small></h3>
     <button class="icard ip icl" style="--n:${(incCells.match(/class="ipc"/g) || []).length}" data-act="incact">${incCells}</button>
     <h3 class="ihd">${hv("支出", a.spend)}</h3>
-    <div class="icard grow icl" style="--n:${cols.length}"><div class="ig ihead">${head}</div><div class="ig">${spend}</div></div>
+    <div class="icard grow icl" style="--n:${cols.length}"><div class="ig">${spend}</div></div>
     <h3 class="ihd">${hv("貯蓄", savTot)}<small>${Number(ym.slice(5))}月末</small></h3>
-    <div class="icard grow icl" style="--n:${cols.length}"><div class="ig ihead">${head}</div><div class="ig">${save}</div><div class="ig imv">${move}</div></div>
+    <div class="icard grow icl" style="--n:${cols.length}"><div class="ig">${save}</div><div class="ig imv">${move}</div></div>
     <div class="irow2 ir11"><div class="icol"><h3 class="ihd">${hv("証券", secTot)}<small>評価額</small></h3>
     <div class="icard ip isec2 icl" style="--n:${(secCells.match(/class="ipc"/g) || []).length}"><button class="ipw" data-act="invlist">${secCells}</button>${tj("🧑🏻") || tj("👩🏼") ? "" : `<button class="isecm" data-act="allocrule" data-id="invest"><span class="yl">+${kY(Math.max(num0(a.inv), num0(invB)))}</span><small>今月の積立（2人）</small></button>`}</div></div>
     ${adv ? `<div class="icol"><h3 class="ihd">${hv("建替中", adv.tot)}</h3><button class="icard ip" data-act="advman">${advCells}</button></div>` : ""}</div>

@@ -5596,8 +5596,9 @@ const wigEnd = () => { clearTimeout(WIG.t); const li = WIG.li, on = WIG.on; WIG.
   if (!Object.keys(upd).length){ render(); return; } S.items[id] = {...it, ...upd}; save(() => db.doc("items/" + id).update({...upd, sh: false}), "並べ替えました").then(() => render()); };
 document.addEventListener("pointerup", wigEnd); document.addEventListener("pointercancel", wigEnd);
 /* 2026-11-21：開いた直後に画面の高さが変わったら（iPhoneのホーム画面アプリ）、トップとライフの高さを合わせ直す */
-{ const refit = () => { if (UI.nav.length) return; if (UI.tab === "top") fitTop(); if (UI.tab === "life") fitLife(); };
-  try { visualViewport.addEventListener("resize", refit); } catch (e) {} addEventListener("resize", refit); addEventListener("pageshow", refit);
+{ const refit = () => { if (UI.nav.length) return; if (UI.tab === "top"){ if ($("sheetWrap").hidden) setSY(0); fitTop(); } if (UI.tab === "life") fitLife(); };   /* 2026-11-23：トップは画面ごと上にそろえる（横向きから戻した時に、上の年月が隠れたままにならないように） */
+  const later = () => { refit(); [150, 400, 800].forEach(t => setTimeout(refit, t)); };   /* iPhoneは向きを変えた後、少しして大きさが決まるので何回か合わせ直す */
+  try { visualViewport.addEventListener("resize", refit); } catch (e) {} addEventListener("resize", refit); addEventListener("pageshow", refit); addEventListener("orientationchange", later); try { screen.orientation?.addEventListener("change", later); } catch (e) {}
   [300, 900, 2000].forEach(ms => setTimeout(refit, ms)); }
 /* ---------- boot ---------- */
 // 相手のスマホからの更新で、入力中のフォームが消えないようにする

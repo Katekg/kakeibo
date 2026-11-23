@@ -4649,7 +4649,7 @@ function placeTabs(){ const t = document.querySelector(".tabs"); if (!t || !matc
   const r = document.documentElement.style; r.setProperty("--fabTop", `${top - 70}px`); r.setProperty("--hidB", `${innerHeight - visH()}px`); r.setProperty("--visH", `${visH()}px`); } else { t.style.top = ""; t.style.bottom = ""; ["--fabTop", "--hidB", "--visH"].forEach(k => document.documentElement.style.removeProperty(k)); } }
 /* 2026-11-23：iPhone風のトップは、下のタブの上までの高さにして、支出と貯蓄のカードで余白を分け合う */
 function fitIOS(){ const el = document.querySelector("section.ios"); if (!el) return false; const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), h = Math.floor(tb - el.getBoundingClientRect().top - 10); if (h > 200) el.style.height = h + "px";
-  el.classList.remove("cmp", "cmp2"); if (el.scrollHeight > el.clientHeight + 1 || !el.dataset.fx){ el.dataset.fx = 1; setTimeout(fitIOS, 350); } if (el.scrollHeight > el.clientHeight + 1){ el.classList.add("cmp"); if (el.scrollHeight > el.clientHeight + 1) el.classList.add("cmp2"); } return true; }   /* 2026-11-23：入りきらない時は、余白→文字の順に詰める */
+  el.classList.remove("cmp", "cmp2"); if (!el.dataset.fx){ el.dataset.fx = 1; setTimeout(fitIOS, 350); } if (el.scrollHeight > el.clientHeight + 1){ el.classList.add("cmp"); if (el.scrollHeight > el.clientHeight + 1) el.classList.add("cmp2"); } return true; }   /* 2026-11-23：入りきらない時は、余白→文字の順に詰める */
 function fitTop(){ if (fitIOS()) return;
   const fg = document.querySelector(".fg.f5"); if (!fg) return;
   const H = visH();

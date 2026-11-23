@@ -955,6 +955,21 @@ html.mjon .monthnav .navbtn, html.mjon .monthnav .ssbtn { width: 38px !important
 .ios .ig.itot { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 .ios .iadv { display: grid; place-items: center; align-content: center; gap: 0; width: 100%; } .ios .iadv b { font-size: 1.3rem; font-weight: 600; } .ios .iadv small { font-size: .6rem; color: var(--mut2); }
 .ios .mjm { font-size: clamp(.66rem, 3.4vw, .8rem) !important; letter-spacing: -.03em; white-space: nowrap; overflow: hidden; } .ios .mjc b { font-size: clamp(1rem, 5.4vw, 1.22rem) !important; }
+
+/* 2026-11-23：増減の色（黄＝予定どおりの積立、緑＝収入増・支出減で増えた分、赤＝届かない・取り崩し）。証券は評価額と積立を分けてタップ */
+.ios .yl { color: #e0a000 !important; } .ios .gr { color: #34c759 !important; } .ios .mjm { display: grid; justify-items: center; gap: 0; }
+.ios .isec { display: grid; gap: 4px; align-content: center; box-sizing: border-box; width: 100%; min-width: 0; } .ios .isecv, .ios .isecm { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; } .ios .isecv, .ios .isecm { display: grid; justify-items: start; gap: 1px; } .ios .isecm { grid-auto-flow: column; align-items: baseline; gap: 4px; font-size: .9rem; font-weight: 600; } .ios .isecm small { font-size: .62rem; color: var(--mut2); font-weight: 400; }
+.ios .icard { padding-left: 11px; padding-right: 11px; } .ios .mjm .mpl { font-size: .52rem; color: var(--mut2); font-weight: 400; letter-spacing: 0; }   /* iPhoneで数字が枠の端に近すぎたので内側の余白を広げる */
+
+/* 2026-11-23：もしもの計画のポップアップと計算中の印 */
+.ltsheet { position: relative; min-height: 120px; } .ltsheet .ltree { flex-direction: column; gap: 6px; } .ltsheet .ltree .root { flex: none; max-width: none; padding: 5px 8px; }
+.ltsheet .ltree .root ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8px; font-size: .62rem; line-height: 1.3; } .ltsheet .ltree .root li span { min-width: 2.4em; }
+.ltsheet .ltree .lbrs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding-left: 0; } .ltsheet .ltree .lbrs > p, .ltsheet .ltree .lbrs > .note { grid-column: 1 / -1; margin: 0; }
+.ltsheet .ltree .lbrs::before, .ltsheet .ltree .lbr::before { display: none !important; } .ltsheet .ltree .lbr { display: flex; } .ltsheet .ltree .lbr .lnode { padding: 4px 7px; }
+.ltsheet .ltree .lnode b { font-size: .7rem; } .ltsheet .ltree .lres { font-size: .6rem; line-height: 1.3; } .ltsheet .ltnote { font-size: .6rem; margin: 4px 0 0; } .ltsheet .ltop { margin: 0 0 4px; }
+.ltsheet.busy > *:not(.lspin) { opacity: .35; pointer-events: none; } .ltsheet.busy::after { content: ""; position: absolute; left: 50%; top: 40%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; border: 3px solid #d1d1d6; border-top-color: var(--accent); animation: lspin .8s linear infinite; }
+.ltsheet .lspin { display: grid; justify-items: center; gap: 10px; padding: 90px 0 30px; color: var(--muted); font-size: .85rem; } .ltsheet .lspin i { display: none; } .ltsheet:has(.lspin)::after { top: 50px; }
+.lnode.lbusy { border-color: var(--accent) !important; } @keyframes lspin { to { transform: rotate(360deg); } }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
 .iot2 small { font-size: .66rem; font-weight: 400; opacity: .8; } .iot2.o { background: #ffe1e1; color: #b3261e; } .iot2.i { background: #fff3c4; color: #7a5a00; } .iot2.ro { cursor: default; align-content: center; }
@@ -1177,7 +1192,7 @@ html.pgbud .monthnav.mn2.stk { background: #eaf3fb !important; } html.pgact .mon
 .totwrap .rl { writing-mode: horizontal-tb; font-size: .75rem; }
 .totbar.t5 { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
 .totbar.t5 .tb b { font-size: 1rem; }
-.bar.act3 { grid-template-columns: minmax(0, 1fr) 76px 104px; gap: 6px; } .bar.act3 .n { white-space: normal; line-height: 1.3; }
+.bar.act3 { grid-template-columns: minmax(0, 1fr) 76px 104px; gap: 6px; } .bar.act3.act4 { grid-template-columns: minmax(0, 1fr) 62px 84px 66px; gap: 5px; } .bar.act4 .cdv { display: grid; justify-items: end; font-size: .8rem; line-height: 1.2; font-weight: 600; } .cy { color: #e0a000; } .cg { color: #34c759; } .cr { color: #ff3b30; } .cz { color: #c7c7cc; } .bar.act3 .n { white-space: normal; line-height: 1.3; }
 .bar.act3.hd, .bar.act3.ft { font-size: .72rem; color: var(--muted); font-weight: 700; } .bar.act3 .hb { text-align: right; } .bar.act3.ft b { text-align: right; font-size: .9rem; color: var(--ink); }
 .bbud { border: 0; background: color-mix(in srgb, var(--zc, var(--accent)) 10%, var(--surface)); border-radius: 8px; height: 32px; font: inherit; font-size: .85rem; text-align: right; padding: 0 8px; color: var(--muted); cursor: pointer; }
 .actask { position: fixed; inset: 0; z-index: 9999; background: rgba(30, 28, 40, .35); display: grid; place-items: center; padding: 24px; }
@@ -3185,10 +3200,11 @@ const ymAdd = (ym, n) => { let [y, m] = ym.split("-").map(Number); m += n; y += 
 /* 2026-11-15：ライフプランの分岐（もし〇〇としたら）。本線（S.life）に、分岐の差分（add＝足す予定、set＝変える設定）を重ねる。
    本線を直すと、すべての分岐に反映される。UI.lifeBr＝表示中の分岐のid（空なら本線） */
 /* 2026-11-15：案を重ねる。UI.lifeBr＝"id1,id2"（重ねた順）。組み合わせを保存した案は of:[id…] に元の案を持つ（元の案を直すと反映） */
-const lifeBrIds = () => { const all = S.life?.branches || [], out = [], add = id => { const b = all.find(x => x.id === id); if (!b || out.includes(id)) return; (b.of || []).forEach(add); out.push(id); }; String(UI.lifeBr || "").split(",").filter(Boolean).forEach(add); return out; };
+const lifeBrRep = b => !!b && b.set?.kozDown != null && b.set.kozDown !== "";   /* 2026-11-23：こづかいを下げる案は何回でも重ねられる（1回ごとに月1万） */
+const lifeBrIds = () => { const all = S.life?.branches || [], out = [], add = id => { const b = all.find(x => x.id === id); if (!b || (out.includes(id) && !lifeBrRep(b))) return; (b.of || []).forEach(add); out.push(id); }; String(UI.lifeBr || "").split(",").filter(Boolean).forEach(add); return out; };
 const lifeBrs = () => lifeBrIds().map(id => (S.life?.branches || []).find(b => b.id === id)).filter(Boolean);
 const lifeBr = () => { const ids = String(UI.lifeBr || "").split(",").filter(Boolean), id = ids[ids.length - 1]; return id ? (S.life?.branches || []).find(b => b.id === id) || null : null; };
-function lifeDoc(){ const l0 = S.life || {}, brs = lifeBrs(), setM = {}; brs.forEach(b => Object.entries(b.set || {}).forEach(([k, v]) => { if (v !== "" && v != null) setM[k] = v; }));
+function lifeDoc(){ const l0 = S.life || {}, brs = lifeBrs(), setM = {}; brs.forEach(b => Object.entries(b.set || {}).forEach(([k, v]) => { if (v !== "" && v != null) setM[k] = k === "kozDown" ? num0(setM.kozDown) + num0(v) : v; }));
   const l1 = brs.length ? {...l0, ...setM, events: [...(l0.events || []), ...brs.flatMap(b => (b.add || []).map(e => ({...e, _br: b.id})))]} : l0, l = l1.noCar ? {...l1, events: (l1.events || []).filter(e => e.type !== "car")} : l1,   // 2026-11-18：もし車を持たなかったら（set.noCar）
   T = typeof taxDoc === "function" ? taxDoc() : {people: {}};
   // 収入は額面で持つ。前の版の手取り（net）しかない時は、額面≒手取り÷0.78 に置き換える（1万円単位）
@@ -3443,7 +3459,7 @@ function lifeRootLines(){ const L0 = (() => { const k = UI.lifeBr; UI.lifeBr = "
 /* それぞれの案の結果（表の終わりの貯蓄＋NISA、途中で貯蓄がマイナスになるか） */
 function lifeBrSum(id){ const k = UI.lifeBr; UI.lifeBr = id; try { const M = lifeModel(), n = M.bal.length - 1, j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth;
   return {end: M.bal[n] + num0(M.nv[n]), neg: j >= 0, negAge: j >= 0 && kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) : null, solved: M.solved || null}; } finally { UI.lifeBr = k; } }
-function lifeTree(){ const all = S.life?.branches || [], stack = String(UI.lifeBr || "").split(",").filter(id => all.some(b => b.id === id)), cur = stack.join(","), L = lifeDoc(), xNow = lifeBrSum(cur), man = v => `${v < 0 ? "−" : ""}${Math.round(Math.abs(v) / 10000).toLocaleString("ja-JP")}万`;
+function lifeTree(full){ const all = S.life?.branches || [], stack = String(UI.lifeBr || "").split(",").filter(id => all.some(b => b.id === id)), cur = stack.join(","), L = lifeDoc(), xNow = lifeBrSum(cur), man = v => `${v < 0 ? "−" : ""}${Math.round(Math.abs(v) / 10000).toLocaleString("ja-JP")}万`;
   // 名前を「もし〇〇たら」と「（2035年）」に分けて、かっこの中は結果の行に出す
   const split = t => { const m = String(t).match(/^(.*?)\s*[（(]([^（()）]*)[)）]\s*$/); return m ? [m[1], m[2]] : [t, ""]; };
   const solvedTxt = x => { const s = x.solved; if (!s) return ""; const m = v => (v / 10000).toFixed(1).replace(/\.0$/, "") + "万"; return s.key === "incPlus" ? (s.v ? `手取り 月+${m(s.v)}で赤字なし` : "今のままで赤字なし") : s.fail ? `こづかいを全部（月${m(s.max)}）回しても赤字` : s.v ? `こづかい 月−${m(s.v)}をNISAへで赤字なし` : "今のままで赤字なし"; };
@@ -3453,15 +3469,17 @@ function lifeTree(){ const all = S.life?.branches || [], stack = String(UI.lifeB
   const keys = b => { const k = new Set(); if (!b) return k; if (/実家/.test(b.title || "")) k.add("jikka"); if (b.set?.rentEnd) k.add("home"); (b.of || []).forEach(id => keys(byId(id)).forEach(x => k.add(x))); return k; };
   const exp = id => { const o = [], f = i => { const b = byId(i); if (!b || o.includes(i)) return; (b.of || []).forEach(f); o.push(i); }; f(id); return o; };
   const used = new Set(lifeBrIds()), usedK = new Set(); used.forEach(id => keys(byId(id)).forEach(k => usedK.add(k)));
-  const cand = all.filter(b => !exp(b.id).some(id => used.has(id))), ok = cand.filter(b => ![...keys(b)].some(k => usedK.has(k))), hid = cand.length - ok.length;
-  const nameNow = stack.length ? stack.map(short).join("＋") : "今の計画";
-  if (!UI.lifeTreeOn) return `<button type="button" class="ltbar" data-act="lifeTree"><span class="ltbt"><b>${esc(nameNow)}</b>${res(xNow, stack.length === 1 ? split(byId(stack[0])?.title || "")[1] : "")}</span><em>案をくらべる ▾</em></button>`;
-  const crumb = stack.length ? `<div class="lcrumb"><button type="button" data-act="lifeBr" data-id="">今の計画</button>${stack.map((id, i) => `<i>›</i><button type="button" class="${i === stack.length - 1 ? "on" : ""}" data-act="lifeBr" data-id="${stack.slice(0, i + 1).join(",")}">${esc(short(id))}</button>`).join("")}${stack.length >= 2 ? `<button type="button" class="lsave" data-act="lifeBrCombo">💾 この組み合わせを保存</button>` : ""}</div>` : "";
-  return `<div class="ltop"><b>もしもの計画</b><button type="button" class="ltfold" data-act="lifeTree">▴ たたむ</button></div>${crumb}<div class="ltree"><button type="button" class="lnode root on" data-act="lifeBr" data-id="${cur}"><b>${stack.length ? "今の計画に重ねると" : "今の計画"}</b><ul>${lifeRootLines().map(([k, v]) => `<li><span>${k}</span>${esc(v)}</li>`).join("")}${stack.map(id => `<li class="lstk"><span>＋</span>${esc(short(id))}</li>`).join("")}</ul>${res(xNow)}</button>
+  const cand = all.filter(b => lifeBrRep(b) || !exp(b.id).some(id => used.has(id))), ok = cand.filter(b => ![...keys(b)].some(k => usedK.has(k))), hid = cand.length - ok.length;
+  const cnt = {}; stack.forEach(id => { cnt[id] = (cnt[id] || 0) + 1; });
+  const shortN = id => lifeBrRep(byId(id)) && cnt[id] > 1 ? `こづかい月−${cnt[id]}万` : short(id);
+  const nameNow = stack.length ? [...new Set(stack)].map(shortN).join("＋") : "今の計画";
+  if (!full) return `<button type="button" class="ltbar" data-act="lifeTree"><span class="ltbt"><b>${esc(nameNow)}</b>${res(xNow, stack.length === 1 ? split(byId(stack[0])?.title || "")[1] : "")}</span><em>案をくらべる ▾</em></button>`;
+  const crumb = stack.length ? `<div class="lcrumb"><button type="button" data-act="lifeBr" data-id="">今の計画</button>${stack.map((id, i) => `<i>›</i><button type="button" class="${i === stack.length - 1 ? "on" : ""}" data-act="lifeBr" data-id="${stack.slice(0, i + 1).join(",")}">${esc(lifeBrRep(byId(id)) ? `こづかい月−${stack.slice(0, i + 1).filter(x => x === id).length}万` : short(id))}</button>`).join("")}${stack.length >= 2 ? `<button type="button" class="lsave" data-act="lifeBrCombo">💾 この組み合わせを保存</button>` : ""}</div>` : "";
+  return `<div class="ltop"><b>もしもの計画</b><button type="button" class="ltfold" data-act="close">閉じる</button></div>${crumb}<div class="ltree"><button type="button" class="lnode root on" data-act="lifeBr" data-id="${cur}"><b>${stack.length ? "今の計画に重ねると" : "今の計画"}</b><ul>${lifeRootLines().map(([k, v]) => `<li><span>${k}</span>${esc(v)}</li>`).join("")}${stack.map(id => `<li class="lstk"><span>＋</span>${esc(short(id))}</li>`).join("")}</ul>${res(xNow)}</button>
     <div class="lbrs">${stack.length ? `<p class="lbrh">さらに重ねると</p>` : ""}${ok.map(b => { const nid = stack.length ? cur + "," + b.id : b.id; return `<div class="lbr"><button type="button" class="lnode" data-act="lifeBr" data-id="${nid}">${(([t, sub]) => `<b>${stack.length ? "＋ " : ""}${esc(t)}</b>${res(lifeBrSum(nid), sub)}`)(split(b.title))}</button></div>`; }).join("")}
     ${!ok.length && stack.length ? `<p class="note">重ねられる案はもうありません</p>` : ""}${hid ? `<p class="note lbrx">家の案は1つだけ選べるので、ほかの家の案は出していません</p>` : ""}
     ${stack.length ? "" : `<div class="lbr"><button type="button" class="lnode add" data-act="lifeBrNew">＋ もし〇〇としたら</button></div>`}</div></div>
-    <p class="note ltnote"><span>${stack.length ? `「${esc(nameNow)}」を重ねた表です。上の道をタップでそこまで戻れます。左をタップで、最後に重ねた案の中身を直せます` : "今の計画の表です。もう一度タップで設定、右の案をタップでその案を重ねた表になり、さらに重ねられます"}</span></p>`; }
+    <p class="note ltnote"><span>${stack.length ? `「${esc(nameNow)}」を重ねた表です。上の道をタップでそこまで戻れます。左をタップで、最後に重ねた案の中身を直せます` : "今の計画の表です。もう一度タップで設定、下の案をタップでその案を重ねた表になり、さらに重ねられます（小遣いの案は押すたびに月1万ずつ）"}</span></p>`; }
 function lifeBrSheet(id){ const br = (S.life?.branches || []).find(b => b.id === id); if (!br) return; if (lifeBr()?.id !== id) UI.lifeBr = id; const L = lifeDoc(), mine = L.events.map((e, i) => [e, i]).filter(([e]) => e._br === id), tt = x => ((S.life?.branches || []).find(b => b.id === x)?.title || "");
   openSheet(`<div class="lfhead"><h3>この案の中身</h3>${info("ここに入っている予定や設定だけが、今の計画との違いです。それ以外（収入・子ども・車・生活費など）は今の計画と同じで、今の計画を直すとこの案にも反映されます。")}</div>
   <form data-form="lifebr" data-id="${id}" style="display:grid;gap:10px"><div class="field"><label>名前</label><input id="lb_title" value="${esc(br.title)}" placeholder="もし〇〇としたら"></div>
@@ -3470,6 +3488,9 @@ function lifeBrSheet(id){ const br = (S.life?.branches || []).find(b => b.id ===
     <h4>この案で足す予定</h4>${mine.length ? mine.map(([e, i]) => `<button type="button" class="btn ghost lbitem" data-act="lifeEv" data-i="${i}">${esc((e.icon ? e.icon + " " : "") + (e.name || "予定"))}</button>`).join("") : `<p class="note">まだありません</p>`}
     <h4>予定を足す</h4>${lifeAddBtns()}
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="lifeBrDel" data-id="${id}">この案を消す</button><button type="submit" class="btn">保存</button></div></form>`); }
+/* 2026-11-23：「案をくらべる」は表の上に重ねて出す（iPhoneで後ろの画面がスクロールできないため）。押したら計算中の印を出してから計算する */
+function lifeTreeSheet(){ openSheet(`<div class="ltsheet">${lifeTree(true)}</div>`); }
+function lifeBusy(on, el){ const w = document.querySelector(".ltsheet"); if (w) w.classList.toggle("busy", on); if (el) el.classList.add("lbusy"); }
 const lifeYOpen = y => (UI.lifeYs || []).includes(y);
 /* 2026-11-21：NISAの毎月の積立額をくらべる（今の設定額から1万円ずつ下げて）。働いている間（パートになるまで）に積立を減らす・NISAを売る最初の年と、最後の貯蓄＋NISA */
 let NSAFE = {k: null, v: null};
@@ -3526,7 +3547,7 @@ function lifeView(){
   // 65歳からの取り崩し
   return `<div class="lifetop">${lifeTree()}</div><div class="lifehead"><button type="button" class="linkbtn lhelp" data-act="lifeHelp">📖 見方</button><span class="lt">${yms[0].slice(0, 4)}〜${L.endY}年<small>万円</small>${info(`${L.endAge}歳（${L.endY}年）までの見通しです。<br>・左の項目名をタップ → その項目の入力。▸をタップ → 内訳<br>・年をタップ → その年の1〜12月。月をタップ → 年に戻る<br>・🚗（車の購入）・👶（生まれる月）・💼（次の会社に入る月）・📌（1回だけの予定）・🏥（老人ホームに入る月）は長押しして横に動かすと、時期が変わり、費用や収入・税金も一緒にずれます<br>・項目はFPのキャッシュフロー表の分け方（基本生活費・住居関連費・車両費・教育費・保険料・税・社会保険料・一時的な支出・その他の支出）です<br>・収入は額面（税・社会保険料を引く前）。税・社会保険料は別の行で引きます。会社にいる間は健康保険・厚生年金・雇用保険（額面の約15%）・所得税・住民税、退職して次の会社に入るまでは国保・国民年金・住民税、65歳からは年金から国保（75歳から後期高齢者医療）・介護保険・所得税・住民税（どれも目安）<br>・貯蓄残高がマイナスの年は赤くなります<br>・NISAは退職するまで積み立て、そのあとも年${num0(L.nisaR)}%で運用。貯蓄が生活費の${L.bufM}か月分を下回る月だけ、足りない分を売って貯蓄に入れます（売る年は、その年の積立を止めます）${L.infl ? `<br>・支出は毎年${L.infl}%ずつ上がる計算` : ""}`)}</span><button class="sbtn ghost2" data-act="lifeSet">⚙ 設定</button></div>
   <div class="lifewrap"><table class="lifet"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
-  ${L.nisa || L.nisa0 ? `<p class="note nmkl"><span><i class="nmk-up"></i>余りをNISAへ</span><span><i class="nmk-down"></i>積立を減らす・止める（色は変わり目の年だけ）</span><span><i class="nmk-sell"></i>NISAを売る</span><span class="nmkh">「NISAへ積立」をタップ → 毎月の積立額をくらべる</span>${(k => k ? `<span class="nmkh">🛡️ 生活防衛資金の目安：生活費などの${k.m}か月分 ≈ ${Math.round(k.keep / 10000)}万（急な出費の時以外は使わない）</span>` : "")(M.kp?.[yms.indexOf(TODAY.slice(0, 7))])}</p>` : ""}
+  ${L.nisa || L.nisa0 ? `<p class="note nmkl"><span><i class="nmk-up"></i>余りをNISAへ</span><span><i class="nmk-down"></i>積立を減らす・止める（色は変わり目の年だけ）</span><span><i class="nmk-sell"></i>NISAを売る</span><span class="nmkh">「NISAへ積立」をタップ → 毎月の積立額をくらべる</span>${(k => k ? `<span class="nmkh">🛡️ 生活防衛資金：生活費${k.m}か月分 ≈ ${Math.round(k.keep / 10000)}万</span>` : "")(M.kp?.[yms.indexOf(TODAY.slice(0, 7))])}</p>` : ""}
 `;
 }
 /* 2026-11-20：NISAのタイミング（積立額が変わる年・止める年・売り始める年・赤字になる年）を表の上にまとめる */
@@ -3712,26 +3733,27 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
   const head = cols.map(c => `<span class="mjn"><i style="background:${colC(c)}"></i>${esc(c.n)}</span>`).join("");
   const spend = cols.map(c => { const sb = c.inv ? (invB == null ? null : num0(invB)) : c.bud == null ? null : num0(c.bud) - (isG(c) ? planSave(ym, c.k) : 0), ov = !c.inv && act && sb != null && num0(c.spent) > sb + 500;
     return `<button class="mjc" data-act="catact" data-id="${c.inv ? "invest" : c.k}"><b class="num${ov ? " neg" : ""}">${kY(c.spent)}</b><small>${sb == null || !act ? "" : `予算 ${kY(sb)}`}</small></button>`; }).join("");   /* 2026-11-23：予算の月は数字そのものが予算なので出さない */
-  // 2026-11-23：積立（予定）がある列は、実際に貯蓄に回った額を出し、予定より少なければ赤字にして下に「予定 +○」
-  const move = cols.map(c => { if (c.inv) return `<span class="mjm"></span>`; const m = Math.round(c.k === "living" ? c.move + emgMv : c.move), pl = isG(c) ? Math.round(planSave(ym, c.k)) : 0, {y, b, r} = mvParts(m, pl);
-    const t = pl > 0 ? (m < pl - 500 ? `<span class="neg">${m >= 0 ? "+" : "−"}${kY(Math.abs(m))}</span><small class="mpl">予定 +${kY(pl)}</small>` : `<span>+${kY(m)}</span>`)
-      : [y ? `<span>+${kY(y)}</span>` : "", b ? `<span>+${kY(b)}</span>` : "", r ? `<span class="neg">−${kY(r)}</span>` : ""].filter(Boolean).join("") || `<span class="z">0</span>`;
-    return `<button class="mjm" data-act="${isG(c) ? "goals" : "allocrule"}" data-id="${c.k}">${t}</button>`; }).join("");
+  // 2026-11-23：貯蓄の「増減」。黄＝予算どおりの積立、緑＝収入が多い・支出が少ないことで増えた分、赤＝予定の積立に届かなかった・貯蓄から使った。
+  // 積立の予定が先月より増えた列は、黄の下に「先月+○」。タップで分配（行き先の順番）の画面
+  const pym = prevYmOf(ym), move = cols.map(c => { const m = Math.round(c.k === "living" ? c.move + emgMv : c.move), pl = isG(c) ? Math.round(planSave(ym, c.k)) : 0, plp = isG(c) && planOf(pym).alloc ? Math.round(planSave(pym, c.k)) : 0, up = pl - plp;
+    let t = ""; if (pl > 0){ if (m < pl - 500) t = `<span class="neg">${m >= 0 ? "+" : "−"}${kY(Math.abs(m))}</span><small class="mpl">予定 +${kY(pl)}</small>`; else { t = `<span class="yl">+${kY(pl)}</span>${up >= 1000 ? `<small class="mpl">先月+${kY(up)}</small>` : ""}${m - pl >= 500 ? `<span class="gr">+${kY(m - pl)}</span>` : ""}`; } }
+    else t = m >= 500 ? `<span class="gr">+${kY(m)}</span>` : m <= -500 ? `<span class="neg">−${kY(-m)}</span>` : `<span class="z">0</span>`;
+    return `<button class="mjm" data-act="allocrule" data-id="${c.k}">${t}</button>`; }).join("");
   const save = cols.map(c => { const v = svBal(c), behind = isG(c) && goalBehind(ym, c.k, v);
     return `<button class="mjc" data-act="${c.inv ? "invlist" : c.k === "event" ? "goals" : c.k === "irregular" ? "goals" : "balset"}" data-id="${c.inv ? "" : c.k === "living" ? "__liv" : c.k === "irregular" ? "irregular" : c.k === "event" ? "event" : c.b}"><b class="num${v < 0 || behind ? " neg" : ""}">${kY(v)}</b><small>${c.k === "living" && keep ? `目標 ${kY(keep)}` : ""}</small></button>`; }).join("");
   const msg = GCACHE["__msg" + ym] || (setTimeout(() => fillTopMsg(ym), 60), ["", ""]), adv = advBox(ym, 1) ? advManOf(ym) : null;
   return [topNav(ym), `<section class="ios">
     <div class="icard imsg ${msg[0]}"${msg[1] ? "" : ' style="display:none"'}><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${msg[1] ? esc(msg[1]) : ""}</span></div>
     <div class="irow2"><div class="icol"><h3 class="ihd">収入<small>万円</small></h3>
-    <button class="icard iinc" data-act="incact"><span class="isub">${Number(prevYmOf(ym).slice(5))}月に入った分</span><b class="num">${kY(a.inc)}<small>万円</small></b>${!a.incDef && ib != null ? `<span class="isub">予算 ${kY(ib)}万 ・ <em class="${a.inc - ib < 0 ? "neg" : "pos"}">${kS(a.inc - ib)}</em></span>` : ""}</button></div>
-    <div class="icol"><h3 class="ihd">証券</h3><button class="icard iinc isec" data-act="invlist"><span class="isub">評価額</span><b class="num">${kY(num0(invC?.bal))}<small>万円</small></b><span class="isub">積立 ${kY(a.inv)}万</span></button></div></div>
+    <button class="icard iinc" data-act="incact"><span class="isub">${Number(prevYmOf(ym).slice(5))}月に入った分</span><b class="num">${kY(a.inc)}</b>${!a.incDef && ib != null ? `<span class="isub">予算 ${kY(ib)} ・ <em class="${a.inc - ib < 0 ? "neg" : "pos"}">${kS(a.inc - ib)}</em></span>` : ""}</button></div>
+    <div class="icol"><h3 class="ihd">証券<small>万円</small></h3><div class="icard iinc isec"><button class="isecv" data-act="invlist"><span class="isub">評価額</span><b class="num">${kY(num0(invC?.bal))}</b></button><button class="isecm" data-act="allocrule" data-id="invest"><span class="yl">+${kY(Math.max(num0(a.inv), num0(invB)))}</span><small>積立</small></button></div></div></div>
     <h3 class="ihd">支出<small>万円</small></h3>
-    <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${spend}</div><div class="isep"></div><div class="ilab">貯蓄へ</div><div class="ig imv">${move}</div></div>
+    <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${spend}</div></div>
     <h3 class="ihd">貯蓄<small>${Number(ym.slice(5))}月末・万円</small></h3>
-    <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div></div>
+    <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div><div class="isep"></div><div class="ilab">増減</div><div class="ig imv">${move}</div></div>
     <div class="irow2"><div class="icol"><h3 class="ihd">合計<small>万円</small></h3>
-    <div class="icard"><div class="ig itot"><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span></div></div></div>
-    ${adv ? `<div class="icol"><h3 class="ihd">建替中</h3><button class="icard iadv" data-act="advman"><b class="num">${kY(adv.tot)}</b><small>万円</small></button></div>` : ""}</div>
+    <div class="icard"><div class="ig itot"><span><small>支出</small>${kY(a.spend)}</span><span><small>増減</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span></div></div></div>
+    ${adv ? `<div class="icol"><h3 class="ihd">建替中<small>万円</small></h3><button class="icard iadv" data-act="advman"><b class="num">${kY(adv.tot)}</b></button></div>` : ""}</div>
   </section>`].join(""); }
 function topView(){ if (UI.muji !== false) return topViewMuji();   /* 2026-11-23：iPhoneの純正アプリ風のトップを使う（UI.muji = false で前の画面） */ const html = topView0(), ym = curYm();
   return html.replace(/<section class="fg f5 f4">([\s\S]*?)<\/section>/, (all, body) => {
@@ -3790,8 +3812,12 @@ function invListSheet(){ const ym = curYm(); let src = ym; for (let i = 0; i < 2
     <label>損益<input class="yenin3 num" data-iv="${k}" data-f="g" inputmode="text" value="${x.g == null ? "" : num0(x.g).toLocaleString("ja-JP")}" placeholder="−も入れられます"></label>
     <span class="ivp ${num0(x.g) < 0 ? "neg" : "pos"}">${x.v != null && c ? `${num0(x.g) >= 0 ? "+" : "−"}${Math.abs(num0(x.g) / c * 100).toFixed(2)}%` : ""}</span></div>`; };
   const g = invGain(src);
+  /* 2026-11-23：内訳の上に、支出と同じ「予算・積立（支出）」の入力。はじめの値は予算の額 */
+  const used = isAct(ym) ? (usedOf(ym) || {}) : {}, ics = zanCatsOf("invest"), hasU = v => v !== undefined && v !== null && v !== "";
+  const urows = ics.map(n => { const b = zanBud(ym, n); return `<div class="bar act3"><span class="n">${esc(n)}</span><button type="button" class="bbud num" data-act="budall" data-n="${esc(n)}" aria-label="${esc(n)}の予算（一覧を開く）">${b == null ? "－" : num0(b).toLocaleString("ja-JP")}</button><input class="yenin3 num" data-u="${esc(n)}" inputmode="numeric" value="${yen0(hasU(used[n]) ? used[n] : b)}" placeholder="0" aria-label="${esc(n)}の積立"></div>`; }).join("");
   openSheet(`<h3>証券（${ymLabel(ym)}末）</h3>
   <form data-form="invh" data-ym="${ym}" style="display:grid;gap:10px">
+    ${ics.length ? `<section class="bag" style="--zc:${GCOL.invest}"><div class="bar act3 hd"><span class="n">今月の積立</span><span class="hb">予算</span><span class="hb">積立した額</span></div>${urows}</section>` : ""}
     ${!own && invHOf(src) ? `<p class="note">${ymLabel(src)}の値を出しています。${ymLabel(ym)}末の値に直して保存してください。</p>` : ""}
     ${g ? `<div class="mf-preview"><div>評価額の合計 <b>${yen(g.v)}</b></div><div>損益 <b class="${g.g < 0 ? "neg" : "pos"}">${g.g >= 0 ? "+" : "−"}${yen(Math.abs(g.g))}（${g.g >= 0 ? "+" : "−"}${Math.abs(g.pct).toFixed(2)}%）</b></div><div class="note">元本 ${yen(g.v - g.g)}</div></div>` : ""}
     <section class="bag" style="--zc:${GCOL.invest}"><div class="bah"><span>🧑🏻 🧑🏻</span></div>${INV_FUNDS.filter(f => f[1] === "🧑🏻").map(row).join("")}</section>
@@ -4041,17 +4067,20 @@ document.addEventListener("input", e => { const t = e.target; if (!t.classList?.
 /* カテゴリの予算と支出：予算は見るだけ（タップで全部の予算の一覧）。支出のはじめの値は予算の額。g＝枠（invest は証券） */
 function catActSheet(g){
   const ym = curYm(), used = isAct(ym) ? (usedOf(ym) || {}) : {}, cs = zanCatsOf(g), yen0 = v => v == null || v === "" ? "" : num0(v).toLocaleString("ja-JP"), has = v => v !== undefined && v !== null && v !== "";
-  const rows = cs.map(n => { const b = zanBud(ym, n); return `<div class="bar act3"><button type="button" class="n cnb" data-act="catchart" data-g="${g}" data-n="${esc(n)}" aria-label="${esc(n)}の月別のグラフ">${esc(n)}</button><button type="button" class="bbud num" data-act="budall" data-n="${esc(n)}" aria-label="${esc(n)}の予算（一覧を開く）">${b == null ? "－" : num0(b).toLocaleString("ja-JP")}</button><input class="yenin3 cin num" data-n="${esc(n)}" data-b="${b ?? ""}" inputmode="numeric" value="${yen0(has(used[n]) ? used[n] : b)}" placeholder="0" aria-label="${esc(n)}の支出"></div>`; }).join("");
+  /* 2026-11-23：右に「貯蓄増減」（予算−支出）。積み立てる目標（例：子ども）は、支出のはじめの値をその月に使う予定の額（ふだんは0）にし、積立の分を黄、それより多く残った分を緑で出す */
+  const rows = cs.map(n => { const b = zanBud(ym, n), sd = isSaveGoal(n) ? num0(spendDef(ym, n)) : null, pl = sd == null || b == null ? 0 : Math.max(0, num0(b) - sd), dv = sd == null ? b : sd; return `<div class="bar act3 act4" data-p="${pl}"><button type="button" class="n cnb" data-act="catchart" data-g="${g}" data-n="${esc(n)}" aria-label="${esc(n)}の月別のグラフ">${esc(n)}</button><button type="button" class="bbud num" data-act="budall" data-n="${esc(n)}" aria-label="${esc(n)}の予算（一覧を開く）">${b == null ? "－" : num0(b).toLocaleString("ja-JP")}</button><input class="yenin3 cin num" data-n="${esc(n)}" data-b="${b ?? ""}" inputmode="numeric" value="${yen0(has(used[n]) ? used[n] : dv)}" placeholder="0" aria-label="${esc(n)}の支出"><span class="cdv num"></span></div>`; }).join("");
   openSheet(`<h3>${GN[g]}（${ymLabel(ym)}・${isAct(ym) ? "実績" : "予算"}）</h3>
   <form data-form="catact" data-ym="${ym}" data-g="${g}" style="display:grid;gap:8px">
     <button type="button" class="btn ghost gchart" data-act="catchart" data-g="${g}" data-n="">📊 ${GN[g]}の合計の月別グラフ</button>
-    <section class="bag" style="--zc:${GCOL[g]}"><div class="bar act3 hd"><span class="n">カテゴリ</span><span class="hb">予算</span><span class="hb">支出</span></div>${rows}<div class="bar act3 ft"><span class="n">合計</span><b class="num" id="ca-b"></b><b class="num" id="ca-t"></b></div></section>
-    <p class="note">カテゴリ名をタップすると月別のグラフ（予算の線つき）、予算をタップすると予算の一覧が出ます（変えるのはそこで）。支出のはじめの値は予算の額です。グラフを開くと、入れかけの支出は保存されません。</p>
+    <section class="bag" style="--zc:${GCOL[g]}"><div class="bar act3 act4 hd"><span class="n">カテゴリ</span><span class="hb">予算</span><span class="hb">支出</span><span class="hb">貯蓄増減</span></div>${rows}<div class="bar act3 act4 ft"><span class="n">合計</span><b class="num" id="ca-b"></b><b class="num" id="ca-t"></b><b class="num cdv" id="ca-d"></b></div></section>
+    <p class="note">貯蓄増減＝予算−支出。<span class="cy">黄</span>＝予定の積立、<span class="cg">緑</span>＝予算より少なく使って増えた分、<span class="cr">赤</span>＝予算より多く使った分。名前をタップで月別グラフ、予算をタップで予算の一覧。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
   </form>`); calcCatAct(); }
 function calcCatAct(){ const f = document.querySelector('form[data-form="catact"]'); if (!f) return; let t = 0, b = 0;
-  f.querySelectorAll("input[data-n]").forEach(i => { const v = num0(numOrNull(i.value)); t += v; b += num0(numOrNull(i.dataset.b)); i.classList.toggle("over", i.dataset.b !== "" && v > num0(i.dataset.b)); });
-  $("ca-t").textContent = t.toLocaleString("ja-JP"); $("ca-b").textContent = b.toLocaleString("ja-JP"); }
+  const fm = v => Math.abs(v).toLocaleString("ja-JP"), dvH = (d, pl) => pl > 0 ? (d >= pl ? `<span class="cy">+${fm(pl)}</span>${d - pl > 0 ? `<span class="cg">+${fm(d - pl)}</span>` : ""}` : `<span class="cr">${d < 0 ? "−" : "+"}${fm(d)}</span>`) : d > 0 ? `<span class="cg">+${fm(d)}</span>` : d < 0 ? `<span class="cr">−${fm(d)}</span>` : `<span class="cz">0</span>`;
+  let pt = 0;
+  f.querySelectorAll("input[data-n]").forEach(i => { const v = num0(numOrNull(i.value)), bb = num0(numOrNull(i.dataset.b)), row = i.closest(".bar"), pl = num0(row?.dataset.p); t += v; b += bb; pt += pl; i.classList.toggle("over", i.dataset.b !== "" && v > bb); const c = row?.querySelector(".cdv"); if (c) c.innerHTML = i.dataset.b === "" ? "" : dvH(bb - v, pl); });
+  $("ca-t").textContent = t.toLocaleString("ja-JP"); $("ca-b").textContent = b.toLocaleString("ja-JP"); const cd = $("ca-d"); if (cd) cd.innerHTML = dvH(b - t, pt); }
 /* 収入（🧑🏻・👩🏼）：予算は見るだけ。はじめの値は予算の額 */
 function incActSheet(){
   const ym = curYm(), py = prevYmOf(ym), yen0 = v => v == null || v === "" ? "" : num0(v).toLocaleString("ja-JP"), has = v => v !== undefined && v !== null && v !== "";
@@ -4745,8 +4774,9 @@ document.addEventListener("click", e => {
     case "lifeSet": lifeSetSheet(); break;
     case "advman": advManSheet(); break;
     case "lifeNisaSafe": { const v = Number(b.dataset.v); if (v >= 0) lifeSave({nisa: v}, `NISAの積立を月${(v / 10000).toFixed(1).replace(/\.0$/, "")}万にしました`); break; }
-    case "lifeBr": { const id = b.dataset.id || ""; if ((UI.lifeBr || "") === id){ if (id) lifeBrSheet(id); else lifeSetSheet(); break; } UI.lifeBr = id; render(); break; }
-    case "lifeTree": UI.lifeTreeOn = !UI.lifeTreeOn; render(); break;
+    case "lifeBr": { const id = b.dataset.id || "", inS = !!b.closest(".ltsheet"); if ((UI.lifeBr || "") === id){ if (id) lifeBrSheet(String(id).split(",").pop()); else lifeSetSheet(); break; }
+      if (inS){ lifeBusy(true, b); setTimeout(() => { UI.lifeBr = id; render(); lifeTreeSheet(); }, 40); break; } UI.lifeBr = id; render(); break; }
+    case "lifeTree": openSheet(`<div class="ltsheet busy"><div class="lspin"><i></i>計算中…</div></div>`); setTimeout(lifeTreeSheet, 40); break;
     case "lifeBrCombo": { const all = S.life?.branches || [], ids = String(UI.lifeBr || "").split(",").filter(id => all.some(b => b.id === id)); if (ids.length < 2) break;
       const nm = ids.map(id => (all.find(b => b.id === id)?.title || "").replace(/^もし/, "").replace(/\s*[（(][^（()）]*[)）]\s*$/, "")), t = (prompt("組み合わせの名前", "もし" + nm.join("、")) || "").trim(); if (!t) break; const id = "b" + Date.now().toString(36);
       lifeSave({branches: [...all, {id, title: t, of: ids, add: [], set: {}}]}, "組み合わせを保存しました").then(ok => { if (ok){ UI.lifeBr = id; render(); } }); break; }
@@ -5050,7 +5080,9 @@ async function submitBody(e, f){
     const ym = f.dataset.ym, h = {}; f.querySelectorAll("input[data-iv]").forEach(i => { const v = numOrNull(String(i.value).replace(/[−ー－]/g, "-")); if (v == null) return; (h[i.dataset.iv] = h[i.dataset.iv] || {})[i.dataset.f] = v; });
     Object.keys(h).forEach(k => { if (h[k].v == null) delete h[k]; });
     const tot = Object.values(h).reduce((t, x) => t + num0(x.v), 0);
-    ok = await save(() => db.doc("monthin/" + ym).update({invH: h, invBal: Object.keys(h).length ? tot : null, updatedAt: new Date().toISOString()}), "証券を保存しました");
+    const ui = [...f.querySelectorAll("input[data-u]")], up = {invH: h, invBal: Object.keys(h).length ? tot : null, updatedAt: new Date().toISOString()};
+    if (ui.length){ const used = {...(usedOf(ym) || {})}; ui.forEach(i => { const n = numOrNull(i.value); if (n == null) delete used[i.dataset.u]; else used[i.dataset.u] = n; }); up.used = Object.keys(used).length ? used : null; }
+    ok = await save(() => db.doc("monthin/" + ym).update(up), "証券を保存しました");
   } else if (kind === "item"){
     const data = {kind: "consumable", cat: val("ic"), name: val("in"), product: val("ip"), shop: val("is"), qty: val("iq"), price: numOrNull(val("iy")), days: numOrNull(val("im")), months: d2mo(numOrNull(val("im"))), essential: $("ie").checked, inUseAt: $("iu") ? (val("iu") || null) : undefined};
     if (!data.name){ toast("品目を入れてください"); return; }

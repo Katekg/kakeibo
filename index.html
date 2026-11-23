@@ -968,7 +968,9 @@ html.mjon .monthnav .navbtn, html.mjon .monthnav .ssbtn { width: 38px !important
 .ios .icl { position: relative; } .ios .icl .ig > * + *::before { display: none; }
 .ios .icl::after { content: ""; position: absolute; left: 11px; right: 11px; top: 16%; bottom: 16%; pointer-events: none; clip-path: inset(0 1px 0 0); background: repeating-linear-gradient(to right, transparent 0 calc(100% / var(--n, 1) - 1px), var(--sep) calc(100% / var(--n, 1) - 1px) calc(100% / var(--n, 1))); }
 .ios .icl[style*="--n:1;"]::after, .ios .icl[style$="--n:1"]::after { display: none; }
-section.ios > .icard.grow { flex: 1 0 auto; } .ios .mjm .mpl { white-space: nowrap; } .ios .mjm .mpl { font-size: .52rem; color: var(--mut2); font-weight: 400; letter-spacing: 0; }   /* iPhoneで数字が枠の端に近すぎたので内側の余白を広げる */
+section.ios > .icard.grow { flex: 1 1 auto; min-height: min-content; } section.ios { overflow-y: auto !important; } .ios .imv { margin-top: 8px; } .ios .mjc small:empty { display: none; }
+.ios.cmp .icard { margin-bottom: 6px; } .ios.cmp .ihd { margin: 2px 6px 3px; } .ios.cmp .ip, .ios.cmp .grow { padding-top: 6px; padding-bottom: 6px; } .ios.cmp .imv { margin-top: 2px; } .ios.cmp > .imsg { margin-bottom: 4px; }
+.ios.cmp2 .ipc b { font-size: 1.12rem; } .ios.cmp2 .mjc b { font-size: 1.05rem !important; } .ios.cmp2 .ihd { font-size: 1rem; } .ios.cmp2 .ihv { font-size: 1rem; } .ios.cmp2 .mjn { padding-bottom: 0; }   /* 2026-11-23：画面が低い時は、枠の余白から縮める（中身は切らない） */ .ios .mjm .mpl { white-space: nowrap; } .ios .mjm .mpl { font-size: .52rem; color: var(--mut2); font-weight: 400; letter-spacing: 0; }   /* iPhoneで数字が枠の端に近すぎたので内側の余白を広げる */
 
 /* 2026-11-23：もしもの計画のポップアップと計算中の印 */
 .ltsheet { position: relative; min-height: 120px; } .ltsheet .ltree { flex-direction: column; gap: 6px; } .ltsheet .ltree .root { flex: none; max-width: none; padding: 5px 8px; }
@@ -3597,7 +3599,7 @@ function taxSelfSheet(){ let M; { const k = UI.lifeBr; UI.lifeBr = ""; try { M =
 /* 2026-11-21：トップの貯蓄と計のあいだの一言。①ライフプランで赤字になる年齢 ②実績の月で予算オーバーの枠 ③生活費の貯蓄が目標に足りない */
 let TMSG = {k: null, v: null};
 /* 計算は少し重いので、画面を出したあとで入れる */
-function fillTopMsg(ym){ const el = document.querySelector(`.topmsg[data-ym="${ym}"]`); if (!el || S.ready < 2) return; const r = GCACHE["__msg" + ym] = topMsg(ym); el.className = "topmsg " + r[0]; el.textContent = r[1] || "\u00a0"; const card = el.closest(".imsg"); if (card){ card.style.display = r[1] ? "" : "none"; card.className = "icard imsg " + r[0]; } }
+function fillTopMsg(ym){ const el = document.querySelector(`.topmsg[data-ym="${ym}"]`); if (!el || S.ready < 2) return; const r = GCACHE["__msg" + ym] = topMsg(ym); el.className = "topmsg " + r[0]; el.textContent = r[1] || "\u00a0"; const card = el.closest(".imsg"); if (card){ card.style.display = r[1] ? "" : "none"; card.className = "icard imsg " + r[0]; } fitIOS(); }
 function topMsg(ym){ if (S.ready < 2) return ["", ""];
   // 2026-11-21：焦らせる一言（短く）。①このままで赤字になる年齢 ②実績の月で予算オーバー → その額を毎月使い続けたら何歳で赤字か
   // ③どちらもない時は、毎月いくら多く使うと何歳で赤字になるか（1〜5万円で探す）。計算はデータが変わるまで覚えておく（GCACHE）
@@ -3779,7 +3781,7 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
     <h3 class="ihd">${hv("支出", a.spend)}</h3>
     <div class="icard grow icl" style="--n:${cols.length}"><div class="ig ihead">${head}</div><div class="ig">${spend}</div></div>
     <h3 class="ihd">${hv("貯蓄", savTot)}<small>${Number(ym.slice(5))}月末</small></h3>
-    <div class="icard grow icl" style="--n:${cols.length}"><div class="ig ihead">${head}</div><div class="ig">${save}</div><div class="isep"></div><div class="ig imv">${move}</div></div>
+    <div class="icard grow icl" style="--n:${cols.length}"><div class="ig ihead">${head}</div><div class="ig">${save}</div><div class="ig imv">${move}</div></div>
     <div class="irow2 ir11"><div class="icol"><h3 class="ihd">${hv("証券", secTot)}<small>評価額</small></h3>
     <div class="icard ip isec2 icl" style="--n:${(secCells.match(/class="ipc"/g) || []).length}"><button class="ipw" data-act="invlist">${secCells}</button>${tj("🧑🏻") || tj("👩🏼") ? "" : `<button class="isecm" data-act="allocrule" data-id="invest"><span class="yl">+${kY(Math.max(num0(a.inv), num0(invB)))}</span><small>今月の積立（2人）</small></button>`}</div></div>
     ${adv ? `<div class="icol"><h3 class="ihd">${hv("建替中", adv.tot)}</h3><button class="icard ip" data-act="advman">${advCells}</button></div>` : ""}</div>
@@ -4646,7 +4648,8 @@ function placeTabs(){ const t = document.querySelector(".tabs"); if (!t || !matc
   // 右下の＋ボタンと、下から出るシートも、見えている範囲に合わせる
   const r = document.documentElement.style; r.setProperty("--fabTop", `${top - 70}px`); r.setProperty("--hidB", `${innerHeight - visH()}px`); r.setProperty("--visH", `${visH()}px`); } else { t.style.top = ""; t.style.bottom = ""; ["--fabTop", "--hidB", "--visH"].forEach(k => document.documentElement.style.removeProperty(k)); } }
 /* 2026-11-23：iPhone風のトップは、下のタブの上までの高さにして、支出と貯蓄のカードで余白を分け合う */
-function fitIOS(){ const el = document.querySelector("section.ios"); if (!el) return false; const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), h = Math.floor(tb - el.getBoundingClientRect().top - 10); if (h > 200) el.style.height = h + "px"; return true; }
+function fitIOS(){ const el = document.querySelector("section.ios"); if (!el) return false; const tb = document.querySelector(".tabs")?.getBoundingClientRect().top || visH(), h = Math.floor(tb - el.getBoundingClientRect().top - 10); if (h > 200) el.style.height = h + "px";
+  el.classList.remove("cmp", "cmp2"); if (!el.dataset.fx){ el.dataset.fx = 1; setTimeout(fitIOS, 350); } if (el.scrollHeight > el.clientHeight + 1){ el.classList.add("cmp"); if (el.scrollHeight > el.clientHeight + 1) el.classList.add("cmp2"); } return true; }   /* 2026-11-23：入りきらない時は、余白→文字の順に詰める */
 function fitTop(){ if (fitIOS()) return;
   const fg = document.querySelector(".fg.f5"); if (!fg) return;
   const H = visH();

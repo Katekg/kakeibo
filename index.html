@@ -1422,7 +1422,7 @@ html.lifewide .wrap { padding-bottom: calc(78px + max(6px, env(safe-area-inset-b
   const KEY = () => { try { return localStorage.getItem("kkKey") || ""; } catch (e) { return ""; } };
   const inGAS = typeof google !== "undefined" && google.script && google.script.run;
   const keyGate = msg => { if (document.getElementById("keygate")) return; const d = document.createElement("div"); d.id = "keygate";
-    d.innerHTML = `<form style="position:fixed;inset:0;z-index:9999;background:#eef6f1;display:grid;place-content:center;gap:12px;padding:24px;font:15px -apple-system,sans-serif;text-align:center"><b style="font-size:1.2rem">家計予算帳</b><span>${msg || "鍵（合言葉）を入れてください。最初の1回だけです。"}</span><input name="k" autocomplete="off" autocapitalize="off" spellcheck="false" style="font-size:16px;padding:10px 12px;border:1.5px solid #9bb;border-radius:12px;text-align:center" placeholder="xxxx-xxxx-xxxx-xxxx"><button style="font-size:16px;padding:10px;border:0;border-radius:12px;background:#2f8f5b;color:#fff">開く</button></form>`;
+    d.innerHTML = `<form style="position:fixed;inset:0;z-index:9999;background:#eef6f1;display:grid;place-content:start center;gap:12px;padding:18vh 24px 24px;font:15px -apple-system,sans-serif;text-align:center"><b style="font-size:1.2rem">家計予算帳</b><span>${msg || "鍵（合言葉）を入れてください。最初の1回だけです。"}</span><input name="k" autocomplete="off" autocapitalize="off" spellcheck="false" style="font-size:16px;padding:10px 12px;border:1.5px solid #9bb;border-radius:12px;text-align:center" placeholder="xxxx-xxxx-xxxx-xxxx"><button style="font-size:16px;padding:10px;border:0;border-radius:12px;background:#2f8f5b;color:#fff">開く</button></form>`;
     d.querySelector("form").addEventListener("submit", e => { e.preventDefault(); const v = d.querySelector("input").value.trim(); if (!v) return; try { localStorage.setItem("kkKey", v); } catch (x) {} location.reload(); });
     (document.body || document.documentElement).appendChild(d); };
   const keyErr = e => { const m = String(e?.message || e); if (m.includes("KEY")){ try { localStorage.removeItem("kkKey"); } catch (x) {} keyGate("鍵がちがいます。もう一度入れてください。"); } return e; };
@@ -5596,9 +5596,9 @@ const wigEnd = () => { clearTimeout(WIG.t); const li = WIG.li, on = WIG.on; WIG.
   if (!Object.keys(upd).length){ render(); return; } S.items[id] = {...it, ...upd}; save(() => db.doc("items/" + id).update({...upd, sh: false}), "並べ替えました").then(() => render()); };
 document.addEventListener("pointerup", wigEnd); document.addEventListener("pointercancel", wigEnd);
 /* 2026-11-21：開いた直後に画面の高さが変わったら（iPhoneのホーム画面アプリ）、トップとライフの高さを合わせ直す */
-{ const refit = () => { if (UI.nav.length) return; if (UI.tab === "top"){ if ($("sheetWrap").hidden) setSY(0); fitTop(); } if (UI.tab === "life") fitLife(); };   /* 2026-11-23：トップは画面ごと上にそろえる（横向きから戻した時に、上の年月が隠れたままにならないように） */
-  const later = () => { refit(); [150, 400, 800].forEach(t => setTimeout(refit, t)); };   /* iPhoneは向きを変えた後、少しして大きさが決まるので何回か合わせ直す */
-  try { visualViewport.addEventListener("resize", refit); } catch (e) {} addEventListener("resize", refit); addEventListener("pageshow", refit); addEventListener("orientationchange", later); try { screen.orientation?.addEventListener("change", later); } catch (e) {}
+{ const refit = (rot) => { if (UI.nav.length) return; if (UI.tab === "top"){ if (rot === true && $("sheetWrap").hidden && !document.activeElement?.matches?.("input,textarea,select")) setSY(0); fitTop(); } if (UI.tab === "life") fitLife(); };   /* 2026-11-24：上にそろえるのは向きを変えた時だけ（文字を入れる時のキーボードで入力欄が隠れないように） */   /* 2026-11-23：トップは画面ごと上にそろえる（横向きから戻した時に、上の年月が隠れたままにならないように） */
+  const later = () => { refit(true); [150, 400, 800].forEach(t => setTimeout(() => refit(true), t)); };   /* iPhoneは向きを変えた後、少しして大きさが決まるので何回か合わせ直す */
+  try { visualViewport.addEventListener("resize", () => refit()); } catch (e) {} addEventListener("resize", () => refit()); addEventListener("pageshow", () => refit()); addEventListener("orientationchange", later); try { screen.orientation?.addEventListener("change", later); } catch (e) {}
   [300, 900, 2000].forEach(ms => setTimeout(refit, ms)); }
 /* ---------- boot ---------- */
 // 相手のスマホからの更新で、入力中のフォームが消えないようにする

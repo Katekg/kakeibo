@@ -4530,28 +4530,36 @@ function catAddSheet(){
 function allocSheet3(k){
   const ym = curYm(), c = colsOf(ym).find(x => x.k === k), am0 = planOf(ym).allocMid?.[k] || {}, mids = zanCats().filter(n => zanGrp(n) === k), am = Object.fromEntries(mids.map(n => [n, zanBud(ym, n) ?? 0]));
   const given = mids.reduce((t, n) => t + num0(am[n]), 0), rest = 0;
-  openSheet(`<h3>${c.n}の予算配分（全部の月に共通）</h3>
+  openSheet(`<h3>${c.n}の予算配分（${ymLabel(ym)}から）</h3>
   <form data-form="alloc3" data-k="${k}" data-ym="${ym}" style="display:grid;gap:10px">
     <p class="note">カテゴリ（入力と同じ）ごとに入れると、合計が${c.n}の予算配分になります（万円）。</p>
     <div class="amid">${mids.map((n, i) => `<label class="amr"><span class="n">${esc(n)}</span>${kin("am" + i, am[n] ?? 0, `data-calc="al3" data-mid="${esc(n)}"`)}</label>`).join("")}</div>
     <div class="amsum"><span>合計</span><b class="num" id="al3sum">${kY(given + rest)}</b><small>万円</small></div>
-    <p class="note">予算は全部の月に共通です。変えると、過去の月も同じ予算で計算し直します。</p>
+    <p class="note">変えると、${ymLabel(ym)}から先の予算が変わります（前の月はそのまま）。次の月からも、この予算を引き継ぎます。</p>
     <p class="note">移行額は「予算配分−支出」で計算します（余りは${BK[c.b]}へ、足りない分は${BK[c.b]}から）。収入から配分を引いた余りは非常時用へ入れます。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
   </form>`);
 }
 /* 入力の画面：予算・予定をタップ → 全部のカテゴリの予算と収入の予定を一覧で変える（2026-11-10）。枠の予算配分＝枠のカテゴリの合計 */
 /* 2026-11-12：予算の一覧に「共通貯蓄への移行額」。収入の予算＝支出の予算（投資を含む）＋移行額 で±0のときだけ保存できる */
+/* 2026-11-23：予算は「その月から先」だけ変える（settings/plan.budChg に {from: その月, name, v}）。前の月はそのまま（全部の月に共通の base は、もう書かない）。
+   変わったカテゴリだけ記録する。目標から計算するカテゴリ（積立の目標）は対象外 */
+function budChgSave(ym, mids){ const P = S.plan || {}, now = new Date().toISOString(), add = [];
+  Object.values(mids).forEach(m => Object.entries(m || {}).forEach(([n, v]) => { if (n === "__rest") return; const go = goalOf(n); if (go && go.start && ym >= go.start) return;
+    const nv = Math.round(num0(v)); if (nv !== Math.round(num0(zanBud(ym, n)))) add.push({from: ym, name: n, v: nv, note: now.slice(0, 10) + " 予算の画面で変更"}); }));
+  if (!add.length){ toast("変わった予算はありません"); return Promise.resolve(false); }
+  const bc = (P.budChg || []).filter(c => !add.some(a => a.from === c.from && a.name === c.name));
+  return save(() => db.doc("settings/plan").set({...P, budChg: [...bc, ...add], fromYm: budFrom() || ym, updatedAt: now}), `${ymLabel(ym)}から先の予算を変えました（${add.length}件）`); }
 const saveBudOf = ym => 0;   // 2026-11-14（4回目）：「👬共通貯蓄へ」は廃止
 function budAllSheet(focus, only = ""){ if (only === "inc") only = ""; const ym = curYm(), cats = zanCats(), yen = v => v == null ? "" : num0(v).toLocaleString("ja-JP");
   const row = (attr, lab, v, key) => `<div class="bar${key === focus ? " bhl" : ""}"><span class="n">${esc(lab)}</span><input class="yenin2 num" ${attr} inputmode="numeric" value="${yen(v)}" placeholder="0" aria-label="${esc(lab)}"></div>`;
   const grp = g => { const cs = zanCatsOf(g); return cs.length ? `<section class="bag" style="--zc:${GCOL[g]}"><div class="bah"><span>${GN[g]}</span><span>合計 <b class="num" id="bat-${g}"></b></span></div>${cs.map(n => goalOf(n) && ym >= (goalOf(n).start || "") ? `<div class="bar"><span class="n">${esc(n)}<small class="bb">特別費の目標から計算</small></span><button type="button" class="bbud num gfix" data-act="goals" data-v="${num0(zanBud(ym, n))}">${yen(num0(zanBud(ym, n)))}</button></div>` : row(`data-bn="${esc(n)}" data-bg="${g}"`, n, zanBud(ym, n), "c:" + n)).join("")}</section>` : ""; };
-  openSheet(`<h3>${only && only !== "inc" ? `${GN[only]}の予算` : "予算の一覧"}（全部の月に共通）</h3>
+  openSheet(`<h3>${only && only !== "inc" ? `${GN[only]}の予算` : "予算の一覧"}（${ymLabel(ym)}から）</h3>
   <form data-form="zbudall" data-ym="${ym}" style="display:grid;gap:8px">
     
     ${GRP5.filter(g => !only || only === g).map(grp).join("")}
     <div class="basum"${only ? " hidden" : ""}><span>支出予算の合計（投資を含む） <b class="num" id="bat-all"></b></span><span>これに必要な収入 <b class="num" id="bat-need"></b></span><span>1人あたり <b class="num" id="bat-each"></b></span></div>
-    <p class="note">予算は全部の月に共通です。変えると、過去の月も同じ予算で計算し直します。</p>
+    <p class="note">変えると、${ymLabel(ym)}から先の予算が変わります（前の月はそのまま）。次の月からも、この予算を引き継ぎます。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
   </form>`);
   calcBudAll(); const h = document.querySelector(".bar.bhl"); if (h) setTimeout(() => h.scrollIntoView({block: "center"}), 60); }
@@ -5246,8 +5254,7 @@ async function submitBody(e, f){
     Object.entries(mids).forEach(([g, m]) => alloc[g] = Object.values(m).reduce((t, v) => t + num0(v), 0));
     { const tt = GRP5.reduce((t, k) => t + num0(alloc[k]), 0); inc.kazu = tt / 2; inc.miho = tt / 2; inc.adv = null; }
     const doc = {...d, alloc, allocMid: {...(d.allocMid || p.allocMid || {}), ...mids}, incBud: {...(d.incBud || {}), ...inc}, ...(saveBud !== undefined ? {saveBud} : {}), updatedAt: now}; if (!p.alloc) doc.move = {...(d.move || {}), emergency: cols.find(c => c.k === "emergency").move};
-    void doc; ok = await save(async () => { const P = S.plan || {}, base = {...(P.base || alloc)}; Object.keys(mids).forEach(g => base[g] = alloc[g]);   // 2026-11-16：全部の月に共通の予算だけを書く
-        await db.doc("settings/plan").set({...P, base, baseMid: {...(P.baseMid || {}), ...mids}, fromYm: budFrom() || ym, baseInc: {...(P.baseInc || {}), ...inc}, updatedAt: now}); }, "予算を保存しました（全部の月に共通）");
+    void doc; ok = await budChgSave(ym, mids);
   } else if (kind === "alloc3"){
     const ym = f.dataset.ym, k = f.dataset.k, mid = {}; let v = 0;
     f.querySelectorAll("input[data-mid]").forEach(i => { const n = kIn(i.value) || 0; if (n || i.dataset.mid !== "__rest") mid[i.dataset.mid] = n; v += n; });
@@ -5256,7 +5263,7 @@ async function submitBody(e, f){
     const alloc = p.alloc ? {...p.alloc} : Object.fromEntries([...cols.filter(c => MAIN4.includes(c.k)).map(c => [c.k, c.alloc]), ["invest", a.inv]]);
     alloc[k] = v;
     const doc = {...d, alloc, allocMid: {...(d.allocMid || p.allocMid || {}), [k]: mid}, updatedAt: now}; if (!p.alloc) doc.move = {...(d.move || {}), emergency: cols.find(c => c.k === "emergency").move};
-    void doc; ok = await save(async () => { const P = S.plan || {}; await db.doc("settings/plan").set({...P, base: {...(P.base || alloc), [k]: v}, baseMid: {...(P.baseMid || {}), [k]: mid}, fromYm: budFrom() || ym, updatedAt: now}); }, "予算配分を保存しました（全部の月に共通）");
+    void doc; ok = await budChgSave(ym, {[k]: mid});
   } else if (kind === "move3"){
     const ym = f.dataset.ym, k = f.dataset.k, v = kIn(val("mv3")); if (v == null){ toast("金額を入れてください"); return; }
     const d = S.plans[ym] || {};

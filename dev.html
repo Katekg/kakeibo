@@ -3456,9 +3456,9 @@ function lifeModel(ov){
     M_FUND = fundB; M_KP = KP;
     rows.forEach(r => add(r, r)); }
   // 2026-11-22：貯蓄＝自由に使える貯蓄＋使う予定の貯蓄（税保険等・車・子ども・イベントの積立の残り）。合計はトップの貯蓄の合計と同じ考え方
-  const net = netOf(), bal = [], free = [], plan = []; let b = sav0, pk = (b0 => num0(b0.miho) + num0(b0.kazu))(bucketBal(TODAY.slice(0, 7)));   /* 先の月の👩🏼・🧑🏻の貯蓄は、今の額のまま */ net.forEach((n, j) => { const ym = yms[j];
+  const net = netOf(), bal = [], free = [], plan = []; let b = sav0, carry = null; const bkNow = bucketBal(TODAY.slice(0, 7)), othNow = ["irregular", "event", "miho", "kazu"].reduce((t, k) => t + num0(bkNow[k]), 0); let pk = num0(bkNow.miho) + num0(bkNow.kazu);   /* 先の月の👩🏼・🧑🏻の貯蓄は、今の額のまま */ net.forEach((n, j) => { const ym = yms[j];
     if (isTop(ym)){ b = bTot(ym); const bk = bucketBal(ym), pl = num0(bk.irregular) + num0(bk.event) + num0(bk.miho) + num0(bk.kazu); pk = num0(bk.miho) + num0(bk.kazu); bal.push(b); plan.push(pl); free.push(b - pl); return; }   /* 2026-11-23：生活防衛資金＝トップの生活費の貯蓄。使う予定＝特別費・イベント・👩🏼・🧑🏻 */
-    b += n; const cc = fundCC[j] + evFundAt(ym), pl = num0(M_FUND?.[j]) + cc + pk; bal.push(b + cc); plan.push(pl); free.push(b + cc - pl); });
+    b += n; const cc = fundCC[j] + evFundAt(ym), pl0 = num0(M_FUND?.[j]) + cc + pk; if (carry == null) carry = othNow - pl0; const pl = Math.max(0, pl0 + carry);   /* 特別費・イベントの、積立の計算に入っていない分（今の額のまま持ち越す） */ bal.push(b + cc); plan.push(pl); free.push(b + cc - pl); });
   return {L, yms, rows, V, net, bal, living, nv: nisaVal, a65k, nisaBase: L.nisa + num0(L.kozCut), nisaBaseAt: nisaAtYm, isTop, free, plan, fund: M_FUND, kp: M_KP, taxLumps};
 }
 const lifeK = n => { const v = Math.round(n / 1000) / 10; return v === 0 ? "" : (Math.abs(v) >= 100 ? Math.round(v) : v).toLocaleString("ja-JP"); };

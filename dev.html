@@ -3761,7 +3761,7 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
   const secTot = invHOf(isrc) ? iw("🧑🏻").v + iw("👩🏼").v : num0(invC?.bal);
   const secCells = invHOf(isrc) ? ["🧑🏻", "👩🏼"].map(w => { const x = iw(w); return pc(w, x.v, sg(x.g, x.g < 0 ? "neg" : "gr")); }).join("") : pc("👬", secTot);
   const advP = adv ? advManOf(prevYmOf(ym)) : null, advD = (c, p) => c == null || p == null ? "" : `<em class="z">先月${Math.abs(c - p) < 500 ? "±0" : kS(c - p)}</em>`;
-  const advCells = !adv ? "" : adv.k == null && adv.m == null ? pc("👬", adv.tot, advD(adv.tot, advP.tot)) : pc("🧑🏻", num0(adv.k), advD(num0(adv.k), advP.k == null && advP.m == null ? (advP.tot ? null : 0) : num0(advP.k))) + pc("👩🏼", num0(adv.m), advD(num0(adv.m), advP.k == null && advP.m == null ? (advP.tot ? null : 0) : num0(advP.m)));
+  const advCells = !adv ? "" : adv.k == null && adv.m == null && adv.tot ? pc("👬", adv.tot, advD(adv.tot, advP.tot)) : pc("🧑🏻", num0(adv.k), advD(num0(adv.k), advP.k == null && advP.m == null ? (advP.tot ? null : 0) : num0(advP.k))) + pc("👩🏼", num0(adv.m), advD(num0(adv.m), advP.k == null && advP.m == null ? (advP.tot ? null : 0) : num0(advP.m)));
   return [topNav(ym), `<section class="ios">
     <div class="icard imsg ${msg[0]}"${msg[1] ? "" : ' style="display:none"'}><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${msg[1] ? esc(msg[1]) : ""}</span></div>
     <h3 class="ihd">${hv("収入", a.inc)}<small>${Number(prevYmOf(ym).slice(5))}月に入った分</small></h3>

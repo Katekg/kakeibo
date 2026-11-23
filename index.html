@@ -1602,10 +1602,10 @@ function render(){
   $("sysAlert").hidden = true;
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === UI.tab ? "page" : "false"));
   if (S.ready < 2) return;
-  const SUBS = [["avg", "月平均"], ["items", "品目"], ["howto", "使い道"]];   // 2026-11-21：見直しのタブはやめた   // 2026-11-16：お店のタブはやめて、使い道のタブに
+  const SUBS = [["items", "月平均と品目"], ["howto", "使い道"]];   /* 2026-11-23：月平均と品目を1つの画面に（上に月平均、下に品目の一覧） */ if (UI.sub === "avg") UI.sub = "items";   // 2026-11-21：見直しのタブはやめた   // 2026-11-16：お店のタブはやめて、使い道のタブに
   $("subnav").innerHTML = UI.tab === "cons" && !UI.nav.length ? `<nav class="subtabs" aria-label="消耗品の画面">${SUBS.map(([k, l]) => `<button data-act="sub" data-k="${k}" aria-current="${UI.sub === k ? "page" : "false"}">${l}</button>`).join("")}</nav>` : "";
   document.getElementById("app").classList.toggle("hassub", UI.tab === "cons");
-  $("view").innerHTML = UI.nav.length ? navView() : UI.tab === "cons" ? ({avg: avgView, items: itemsView, review: itemsView, howto: howtoView, shops: howtoView})[UI.sub]() : ({tx: txView, cf: cfView, bal: balView, top: topView, tax: taxView, life: lifeView})[UI.tab]();
+  $("view").innerHTML = UI.nav.length ? navView() : UI.tab === "cons" ? ({avg: consMainView, items: consMainView, review: itemsView, howto: howtoView, shops: howtoView})[UI.sub]() : ({tx: txView, cf: cfView, bal: balView, top: topView, tax: taxView, life: lifeView})[UI.tab]();
   { const alEl = $("sysAlert"), n = notices().length; alEl.hidden = !n || !!document.querySelector("#view .monthnav"); if (!alEl.hidden) alEl.innerHTML = `<button class="alicon" data-act="sysal" aria-label="お知らせ ${n}件">!</button>`; }
     document.documentElement.classList.toggle("toplock", UI.tab === "top" && !UI.nav.length); document.documentElement.classList.toggle("pgbud", UI.tab === "top" && !UI.nav.length && TPG() === "bud"); document.documentElement.classList.toggle("pgact", UI.tab === "top" && !UI.nav.length && TPG() === "act"); document.documentElement.classList.toggle("lifelock", UI.tab === "life" && !UI.nav.length); document.documentElement.classList.toggle("lifewide", UI.tab === "life" && !UI.nav.length && lifeWide());
   { const tc = document.querySelector('meta[name="theme-color"]'), op = c => c && !/^rgba\(.*,\s*0\)$/.test(c) && c !== "transparent", hex = c => { const m = String(c).match(/\d+(\.\d+)?/g); return m && m.length >= 3 ? "#" + m.slice(0, 3).map(x => Math.round(+x).toString(16).padStart(2, "0")).join("") : c; },
@@ -1618,15 +1618,17 @@ function render(){
 }
 
 /* 2026-11-21：消耗品は👩🏼・🧑🏻それぞれに予算（settings/main.budgets.consMiho・consKazu）。合計が消耗品の予算 */
-const consBud = w => num0(S.settings.budgets?.[w === "miho" ? "consMiho" : "consKazu"]);
+/* 2026-11-23：家計の予算（👩🏼消耗品・🧑🏻消耗品のカテゴリ）があればそちらを使う（今月の予算） */
+const CONS_CAT = {miho: "👩🏼消耗品", kazu: "🧑🏻消耗品"};
+const consBud = w => zanCats().includes(CONS_CAT[w]) ? num0(zanBud(TODAY.slice(0, 7), CONS_CAT[w])) : num0(S.settings.budgets?.[w === "miho" ? "consMiho" : "consKazu"]);
 function consPersonCard([w, l, col]){ const its = essentials("consumable").filter(it => cwhoOf(it) === w), known = its.filter(it => monthly(it) != null), miss = its.filter(it => monthly(it) == null);
   const avg = known.reduce((t, it) => t + monthly(it), 0), bud = consBud(w), rest = bud - avg, mx = Math.max(bud, avg) || 1, top = known.slice().sort((a, b) => monthly(b) - monthly(a)).slice(0, 3);
   return `<section class="card consp" style="--wc:${col}"><div class="cph"><span class="cpe">${l}</span><button class="linkbtn" data-act="budget">予算 <span class="num">${yen(bud)}</span></button></div>
     <div class="cpbig num">${yen(avg)}<small>／月</small></div>
     <div class="cpbar"><i style="width:${(Math.min(avg, bud) / mx * 100).toFixed(1)}%"></i>${avg > bud ? `<b style="width:${((avg - bud) / mx * 100).toFixed(1)}%"></b>` : ""}</div>
     <p class="cpst ${rest >= 0 ? "ok" : "ng"}">${bud ? (rest >= 0 ? `✓ あと <b class="num">${yen(rest)}</b>` : `⚠️ <b class="num">${yen(-rest)}</b> オーバー`) : "予算が未設定"}</p>
-    ${top.length ? `<ul class="cptop">${top.map(it => `<li><span>${esc(it.name)}</span><span class="num">${yen(monthly(it))}</span></li>`).join("")}</ul>` : ""}
     ${miss.length ? `<p class="cpmiss">未入力：${miss.map(it => esc(it.name)).join("、")}</p>` : ""}</section>`; }
+const consMainView = () => avgView() + itemsView();
 function avgView(){   // 2026-11-21：スクロールしなくても1画面で見られるように（合計・👩🏼と🧑🏻を横に並べる）
   const sAll = summary("consumable"), bAll = CWHO.reduce((t, [w]) => t + consBud(w), 0), food = Object.keys(KINDS).filter(k => k !== "consumable").map(k => [k, summary(k)]).filter(([, f]) => f.its.length);
   return `<section class="card cpsum"><div class="cprow"><span class="k">2人の合計</span><span class="num"><b>${yen(sAll.total)}</b> ／ 予算 ${yen(bAll)}</span></div><p class="cpst ${bAll - sAll.total >= 0 ? "ok" : "ng"}">${bAll - sAll.total >= 0 ? `✓ 予算内・あと ${yen(bAll - sAll.total)}` : `⚠️ ${yen(sAll.total - bAll)} オーバー`}</p></section>
@@ -2544,7 +2546,13 @@ function itemSheet(it){
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">${it ? "保存" : "追加"}</button></div>
   </form>`);
 }
-function budgetSheet(){
+function budgetSheet(){ const m = TODAY.slice(0, 7);
+  if (zanCats().includes(CONS_CAT.miho)) return openSheet(`<h3>消耗品の予算（${ymLabel(m)}から）</h3>
+  <form data-form="consbud" style="display:grid;gap:12px">
+    <div class="fgrid">${CWHO.map(([w, l]) => `<div class="field"><label for="cb_${w}">${l}の予算（月）</label><input id="cb_${w}" class="yenin3 num" inputmode="numeric" value="${num0(zanBud(m, CONS_CAT[w])).toLocaleString("ja-JP")}"></div>`).join("")}</div>
+    <p class="note">家計予算帳の「${CONS_CAT.miho}」「${CONS_CAT.kazu}」（生活費）の予算と同じものです。変えると${ymLabel(m)}から先の予算が変わります（前の月はそのまま）。</p>
+    <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
+  </form>`);
   openSheet(`<h3>消耗品の予算</h3>
   <form data-form="settings" style="display:grid;gap:12px">
     <div class="fgrid">
@@ -2740,7 +2748,7 @@ function catSpent(ym, n){ const m = S.monthin?.[ym] || {}, p = planOf(ym), u = p
 /* 2026-11-11：特別費のカテゴリは、頭の絵文字（👬🧑🏻👩🏼）でなくこの一覧で特別費に入れる */
 /* 2026-11-16：税保険等・医療は生活費へ。特別費は👬こづかい・建替と、目標のカテゴリ */
 /* 2026-11-20：医療・奨学金・歯列矯正は特別費へ。👬こづかいはイベントへ */
-const ZAN_GRP_OV = {"🧑🏻実家の固定資産・都市計画税": "living", "👬税保険等": "living", "🧑🏻医療": "irregular", "👩🏼医療": "irregular", "👬建替": "adv", "👬こづかい": "event", "👩🏼奨学金(2034年まで)": "irregular", "👩🏼歯列矯正(2029年5月まで)": "irregular"};
+const ZAN_GRP_OV = {"🧑🏻実家の固定資産・都市計画税": "living", "👬税保険等": "living", "🧑🏻医療": "irregular", "👩🏼医療": "irregular", "👬建替": "adv", "👬こづかい": "event", "👩🏼消耗品": "living", "🧑🏻消耗品": "living", "👩🏼奨学金(2034年まで)": "irregular", "👩🏼歯列矯正(2029年5月まで)": "irregular"};
 const goalGrp = g => g?.grp === "event" ? "event" : "irregular";
 const zanGrp = n => (g => g ? goalGrp(g) : null)(goalsAll().find(g => g.name === n && !g.off)) || ZAN_GRP_OV[n] || (String(n).includes("証券") ? "invest" : (ZAN_EMO.find(([e]) => String(n).startsWith(e)) || [])[1]);   // 2026-11-10：証券は投資の枠
 const GRP5 = ["living", "irregular", "event", "miho", "kazu", "adv", "invest"];   /* 2026-11-23：建替の枠（予算なし） */   // 入力の画面・予算の一覧に出す枠（振り分けは投資を除く4つ）
@@ -4129,7 +4137,7 @@ document.addEventListener("input", e => { const t = e.target; if (!t.classList?.
   askAct(ym, () => { f.dataset.ok = "1"; setTimeout(() => t.focus(), 50); }, () => { t.value = t.dataset.b ? num0(t.dataset.b).toLocaleString("ja-JP") : ""; calcCatAct(); calcIncAct(); t.blur(); }); });
 /* カテゴリの予算と支出：予算は見るだけ（タップで全部の予算の一覧）。支出のはじめの値は予算の額。g＝枠（invest は証券） */
 /* 2026-11-23：枠の分け方の考え方（支出の枠をタップした画面の上に1文） */
-const GDESC = {living: "毎月だいたい同じ額で、その月に使い切るお金。", irregular: "生活に必要だけど、いつ・いくら使うかは決まっていないお金。", event: "いつ・いくら使うかを決めて、前もって貯めるお金。"};
+const GDESC = {living: "毎月だいたい同じ額で、その月に使い切るお金。", irregular: "生活に必要だけど、いつ・いくら使うかは決まっていないお金。", event: "いつ・いくら使うかを決めているお金か、生活に必ずは要らないお金。"};
 function catActSheet(g){
   const ym = curYm(), used = isAct(ym) ? (usedOf(ym) || {}) : {}, cs = zanCatsOf(g), yen0 = v => v == null || v === "" ? "" : num0(v).toLocaleString("ja-JP"), has = v => v !== undefined && v !== null && v !== "";
   /* 2026-11-23：右に「貯蓄増減」（予算−支出）。積み立てる目標（例：子ども）は、支出のはじめの値をその月に使う予定の額（ふだんは0）にし、積立の分を黄、それより多く残った分を緑で出す */
@@ -5003,7 +5011,7 @@ document.addEventListener("click", e => {
   document.addEventListener("touchstart", e => { on = UI.tab === "cons" && !UI.nav.length && $("sheetWrap").hidden && e.touches.length === 1 && e.touches[0].clientX >= 30 && !e.target.closest("input,select,textarea,.tablewrap"); if (on){ sx = e.touches[0].clientX; sy = e.touches[0].clientY; } }, {passive: true});
   document.addEventListener("touchend", e => { if (!on) return; on = false; const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
     if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
-    const order = ["avg", "items", "review", "howto"], i = order.indexOf(UI.sub), j = i + (dx < 0 ? 1 : -1); if (j < 0 || j >= order.length) return;
+    const order = ["items", "howto"], i = order.indexOf(UI.sub), j = i + (dx < 0 ? 1 : -1); if (j < 0 || j >= order.length) return;
     UI.sub = order[j]; UI.sim = null; render(); toTop();
     const v = $("view"); v.classList.remove("swl", "swr"); void v.offsetWidth; v.classList.add(dx < 0 ? "swl" : "swr"); }, {passive: true});
 })();
@@ -5314,6 +5322,10 @@ async function submitBody(e, f){
     const rec = {d: TODAY, c: "不明金（残高の修正）", raw: "不明金（残高の修正）", rawD: TODAY, rawAcc: CASH_ACC[key], a: diff, acc: CASH_ACC[key], l: "未分類", m: "不明金", memo: `残高を${yen(n)}に修正`, t: true, src: "app", synced: false, createdAt: new Date().toISOString()};
     let ref = null; ok = await save(async () => { ref = await db.collection("txapp").add(rec); }, `不明金 ${sYen(diff)} を記録しました`);
     if (ok && ref?.id) syncTxSoon(["app-" + ref.id]);
+  } else if (kind === "consbud"){   // 2026-11-23：消耗品タブから家計の予算を変える（今月から先）
+    const m = TODAY.slice(0, 7), v = w => Math.round(num0(numOrNull(val("cb_" + w))) / 1000) * 1000; if (!confirm(`${ymLabel(m)}以降の消耗品の予算を変えますか？`)) return;
+    ok = await budChgSave(m, {living: {[CONS_CAT.miho]: v("miho"), [CONS_CAT.kazu]: v("kazu")}});
+    if (ok) await db.doc("settings/main").set({...S.settings, budgets: {...(S.settings.budgets || {}), consMiho: v("miho"), consKazu: v("kazu")}, updatedAt: new Date().toISOString()}).catch(() => {});
   } else if (kind === "catend"){   // 2026-11-23：カテゴリを終わりにする
     const n = $("ce_n")?.value, last = $("ce_l")?.value, note = ($("ce_m")?.value || "").trim(); if (!n || !/^\d{4}-\d{2}$/.test(last || "")){ toast("カテゴリーと月を選んでください"); return; }
     if (!confirm(`「${n}」を${ymLabel(last)}で終わりにしますか？（${ymLabel(nextYm(last))}から予算0）`)) return;

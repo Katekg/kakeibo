@@ -1399,7 +1399,7 @@ details.ht > summary::after { content: "▸"; position: absolute; right: 12px; c
 .lifehead { flex-wrap: nowrap !important; gap: 6px !important; margin: 2px 0 !important; } .lifehead .lhelp { font-size: .74rem; white-space: nowrap; padding: 2px 0; } .lifehead .lt { font-size: .86rem !important; white-space: nowrap; } .lifehead .lt small { font-size: .66rem; } .lifehead .sbtn { padding: 3px 9px !important; font-size: .74rem !important; white-space: nowrap; }
 html.lifewide .wrap { padding-bottom: calc(78px + max(6px, env(safe-area-inset-bottom, 0px))) !important; }
 .rlist { display: grid; gap: 0; } .spri .srow.rulerow { grid-template-columns: 1.4em minmax(0, 1fr) auto auto !important; align-items: center; position: relative; touch-action: pan-y; background: var(--surface); } .rulerow.dragging { z-index: 5; background: var(--surface); box-shadow: 0 6px 18px rgba(0,0,0,.15); border-radius: 12px; }
-.rdrag { flex: 0 0 auto; align-self: center; width: 34px; height: 34px; display: grid; place-content: center; font-size: 1.1rem; color: var(--muted); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.rdrag { flex: 0 0 auto; align-self: center; width: 34px; height: 34px; display: grid; place-content: center; font-size: 1.1rem; color: var(--muted); cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; } .rulerow.holding .rdrag { color: var(--accent); transform: scale(1.15); transition: transform .3s; }
 .schart { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; align-items: end; gap: 4px; height: 150px; padding: 6px 2px 0; } .schart .sb { display: grid; justify-items: center; align-content: end; gap: 2px; height: 100%; font-size: .56rem; color: var(--muted); }
 .schart .sb i { display: block; width: 100%; border-radius: 6px 6px 2px 2px; background: color-mix(in srgb, var(--accent) 55%, transparent); } .schart .sb i.neg { background: color-mix(in srgb, var(--alert, #c0392b) 55%, transparent); } .schart .sb b { font-size: .58rem; color: var(--ink); font-weight: 600; } .schart .sb.on i { background: var(--accent); }
 </style>
@@ -3233,7 +3233,7 @@ const ymDiff = (a, b) => { const [y1, m1] = a.split("-").map(Number), [y2, m2] =
 /* 生活費の初期値：トップの今月の予算配分（4つの枠）の合計 */
 const lifeLivingDef = () => { const p = planOf(TODAY.slice(0, 7)); return p.alloc ? MAIN4.reduce((t, k) => t + num0(p.alloc[k]), 0) : 0; };
 /* 貯蓄の初期値：トップの貯蓄計（今月末） */
-const lifeSavDef = () => { const b = bucketBal(TODAY.slice(0, 7)); return Object.keys(BK).reduce((t, k) => t + num0(b[k]), 0); };
+const lifeSavDef = () => { const b = bucketBal(TODAY.slice(0, 7)); return Object.keys(BK).filter(k => k !== "adv").reduce((t, k) => t + num0(b[k]), 0); };
 /* 車：1台ぶんの、月ごとの費用 {購入, 自動車税, 保険, 車検, ガソリン, 駐車場} */
 const CARPARTS = [["buy", "購入"], ["tax", "自動車税"], ["ins", "保険"], ["shaken", "車検・整備"], ["gas", "ガソリン"], ["park", "駐車場"]];
 /* 購入（買い替え）の月か。購入金額が0円（もう持っている車）でも印を付ける */
@@ -3272,7 +3272,7 @@ function lifeModel(ov){
     return lifeModel({}); }
   // 2026-11-22：表は2026年1月から。今月より前の月（と実績にした月）は、トップの実績（手取りの収入・枠ごとの支出・投資・貯蓄の残高）を使う
   const m0 = TODAY.slice(0, 7), L = {...lifeDoc(), ...ov}, start = LIFE_ACT0 < m0 && S.monthin ? LIFE_ACT0 : m0, end = `${L.endY}-12`, yms = []; for (let ym = start; ym <= end; ym = ymAdd(ym, 1)) yms.push(ym);
-  const i0 = Math.max(0, yms.indexOf(m0)), isTop = ym => ym < m0 || (ym === m0 && isAct(ym)), AGGL = {}, A = ym => AGGL[ym] ??= monthAgg(ym), bTot = ym => Object.keys(BK).reduce((t, k) => t + num0(bucketBal(ym)[k]), 0);
+  const i0 = Math.max(0, yms.indexOf(m0)), isTop = ym => ym < m0 || (ym === m0 && isAct(ym)), AGGL = {}, A = ym => AGGL[ym] ??= monthAgg(ym), bTot = ym => Object.keys(BK).filter(k => k !== "adv").reduce((t, k) => t + num0(bucketBal(ym)[k]), 0);   /* 2026-11-23：ライフに建替は入れない */
   const T = typeof taxDoc === "function" ? taxDoc() : null, R = T?.rates || {}, titems = T?.items || [];
   const itemCost = (it, ym) => { const ms = String(it.months || "").split(/[,、\s]+/).map(Number).filter(n => n >= 1 && n <= 12); return ms.includes(Number(ym.slice(5))) ? num0(it.annual) / ms.length : 0; };
   const nowYm0 = TODAY.slice(0, 7), lvCats = (typeof zanCats === "function" ? zanCats() : []).map(n => [n, num0(zanBud(nowYm0, n))]).filter(([n, v]) => v > 0 && !L.lvEx.includes(n) && zanGrp(n) !== "invest" && !(goalOf(n)?.due && goalGrp(goalOf(n)) === "event") && !goalOf(n)?.auto);   // 2026-11-21：車・子どもの積立は現金のまま（費用は車・子どもの行で数える）   // 2026-11-20：期限のあるイベントは「イベント」の行で、その月にまとめて出す   // 2026-11-14：投資（証券）はNISA積立で数えるので生活費に入れない
@@ -3414,7 +3414,7 @@ function lifeModel(ov){
 
   if (L.nisa || L.nisa0) rows.push({id: "nisa", label: "NISA積立", sign: -1, f: ym => nisaIn[yms.indexOf(ym)] || 0});
   // 月ごとの値
-  { const actMap = {inc: ym => A(ym).inc, living: ym => A(ym).g.living, "lvg-irregular": ym => A(ym).g.irregular, "lvg-event": ym => A(ym).g.event, "lvg-koz": ym => num0(A(ym).g.miho) + num0(A(ym).g.kazu), nisa: ym => A(ym).inv};
+  { const actMap = {inc: ym => A(ym).inc - num0(A(ym).ret), living: ym => A(ym).g.living, "lvg-irregular": ym => A(ym).g.irregular, "lvg-event": ym => A(ym).g.event, "lvg-koz": ym => num0(A(ym).g.miho) + num0(A(ym).g.kazu), nisa: ym => A(ym).inv};
     const wrap = r => { if (r.kids?.length){ r.kids.forEach(wrap); return; } const f0 = r.f; r.f = ym => isTop(ym) ? 0 : f0(ym); };
     rows.forEach(r => { wrap(r); const af = actMap[r.id]; if (!af) return; if (r.kids?.length) r.kids.push({id: r.id + "-act", label: "実績（トップ）", fixed: true, f: ym => isTop(ym) ? num0(af(ym)) : 0}); else { const f1 = r.f; r.f = ym => isTop(ym) ? num0(af(ym)) : f1(ym); } }); }
   const infl = ym => L.infl ? Math.pow(1 + L.infl / 100, Number(ym.slice(0, 4)) - y0) : 1, noInfl = new Set(["tax", "taxw", "nisa", "inc", "once-in", "aid", "nisaout"]);
@@ -3456,9 +3456,9 @@ function lifeModel(ov){
     M_FUND = fundB; M_KP = KP;
     rows.forEach(r => add(r, r)); }
   // 2026-11-22：貯蓄＝自由に使える貯蓄＋使う予定の貯蓄（税保険等・車・子ども・イベントの積立の残り）。合計はトップの貯蓄の合計と同じ考え方
-  const net = netOf(), bal = [], free = [], plan = []; let b = sav0; net.forEach((n, j) => { const ym = yms[j];
-    if (isTop(ym)){ b = bTot(ym); const bk = bucketBal(ym), pl = num0(bk.irregular) + num0(bk.event); bal.push(b); plan.push(pl); free.push(b - pl); return; }
-    b += n; const cc = fundCC[j] + evFundAt(ym), pl = num0(M_FUND?.[j]) + cc; bal.push(b + cc); plan.push(pl); free.push(b + cc - pl); });
+  const net = netOf(), bal = [], free = [], plan = []; let b = sav0, carry = null; const bkNow = bucketBal(TODAY.slice(0, 7)), othNow = ["irregular", "event", "miho", "kazu"].reduce((t, k) => t + num0(bkNow[k]), 0); let pk = num0(bkNow.miho) + num0(bkNow.kazu);   /* 先の月の👩🏼・🧑🏻の貯蓄は、今の額のまま */ net.forEach((n, j) => { const ym = yms[j];
+    if (isTop(ym)){ b = bTot(ym); const bk = bucketBal(ym), pl = num0(bk.irregular) + num0(bk.event) + num0(bk.miho) + num0(bk.kazu); pk = num0(bk.miho) + num0(bk.kazu); bal.push(b); plan.push(pl); free.push(b - pl); return; }   /* 2026-11-23：生活防衛資金＝トップの生活費の貯蓄。使う予定＝特別費・イベント・👩🏼・🧑🏻 */
+    b += n; const cc = fundCC[j] + evFundAt(ym), pl0 = num0(M_FUND?.[j]) + cc + pk; if (carry == null) carry = othNow - pl0; const pl = Math.max(0, pl0 + carry);   /* 特別費・イベントの、積立の計算に入っていない分（今の額のまま持ち越す） */ bal.push(b + cc); plan.push(pl); free.push(b + cc - pl); });
   return {L, yms, rows, V, net, bal, living, nv: nisaVal, a65k, nisaBase: L.nisa + num0(L.kozCut), nisaBaseAt: nisaAtYm, isTop, free, plan, fund: M_FUND, kp: M_KP, taxLumps};
 }
 const lifeK = n => { const v = Math.round(n / 1000) / 10; return v === 0 ? "" : (Math.abs(v) >= 100 ? Math.round(v) : v).toLocaleString("ja-JP"); };
@@ -3867,16 +3867,22 @@ function invChartSheet(k){ const ym = curYm(), yms = [ym]; for (let i = 0; i < 1
   <div class="sheet-actions"><button type="button" class="btn ghost" data-act="invlist">戻る</button><button type="button" class="btn" data-act="close">閉じる</button></div>`); }
 /* 2026-11-14：分配をタップ → この月の分配の内訳と、分配の決まり（予算を変えるのは支出をタップした先） */
 /* 2026-11-21：☰ を押したまま動かして並べ替える（余った収入の行き先・足りないとき） */
-document.addEventListener("pointerdown", e => { const h = e.target.closest?.(".rdrag"); if (!h) return; e.preventDefault(); const row = h.closest(".rulerow"), list = row.parentElement, l = row.dataset.l; let y0 = e.clientY;
-  row.classList.add("dragging"); try { h.setPointerCapture(e.pointerId); } catch (x) {}
+/* 2026-11-23：☰ は0.35秒押したままにすると動かせる（すぐ動かすと画面のスクロール） */
+document.addEventListener("pointerdown", e => { const h = e.target.closest?.(".rdrag"); if (!h) return; const row = h.closest(".rulerow"), list = row.parentElement, l = row.dataset.l, sx = e.clientX, sy = e.clientY; let y0 = e.clientY, live = false;
+  const noScroll = ev => { if (ev.cancelable) ev.preventDefault(); };
+  const pre = ev => { if (Math.abs(ev.clientX - sx) > 8 || Math.abs(ev.clientY - sy) > 8) quit(); };
+  const quit = () => { clearTimeout(tm); h.removeEventListener("pointermove", pre); h.removeEventListener("pointerup", quit); h.removeEventListener("pointercancel", quit); row.classList.remove("holding"); };
+  row.classList.add("holding");
+  const tm = setTimeout(() => { quit(); live = true; row.classList.add("dragging"); try { navigator.vibrate?.(15); } catch (x) {} try { h.setPointerCapture(e.pointerId); } catch (x) {}
+    document.addEventListener("touchmove", noScroll, {passive: false}); h.addEventListener("pointermove", move); h.addEventListener("pointerup", up); h.addEventListener("pointercancel", up); }, 350);
+  h.addEventListener("pointermove", pre); h.addEventListener("pointerup", quit); h.addEventListener("pointercancel", quit);
   const sib = () => [...list.querySelectorAll(`.rulerow[data-l="${l}"]`)];
   const move = ev => { const dy = ev.clientY - y0, a = sib(), i = a.indexOf(row), nx = a[i + 1], pv = a[i - 1];
     if (nx && dy > nx.offsetHeight / 2){ list.insertBefore(nx, row); y0 += nx.offsetHeight; } else if (pv && dy < -pv.offsetHeight / 2){ list.insertBefore(row, pv); y0 -= pv.offsetHeight; }
     row.style.transform = `translateY(${ev.clientY - y0}px)`; };
-  const up = () => { h.removeEventListener("pointermove", move); h.removeEventListener("pointerup", up); h.removeEventListener("pointercancel", up); row.style.transform = ""; row.classList.remove("dragging");
+  const up = () => { document.removeEventListener("touchmove", noScroll); h.removeEventListener("pointermove", move); h.removeEventListener("pointerup", up); h.removeEventListener("pointercancel", up); row.style.transform = ""; row.classList.remove("dragging");
     const L = sib().map(r => r.dataset.rk), cur = l === "plus" ? rulePlus() : ruleMinus(); if (L.join() === cur.join()) return;
-    save(() => db.doc("settings/plan").set({...(S.plan || {}), [l === "plus" ? "rulePlus" : "ruleMinus"]: L, updatedAt: new Date().toISOString()}), "順番を変えました").then(ok => ok && setTimeout(allocRuleSheet, 250)); };
-  h.addEventListener("pointermove", move); h.addEventListener("pointerup", up); h.addEventListener("pointercancel", up); });
+    save(() => db.doc("settings/plan").set({...(S.plan || {}), [l === "plus" ? "rulePlus" : "ruleMinus"]: L, updatedAt: new Date().toISOString()}), "順番を変えました").then(ok => ok && setTimeout(allocRuleSheet, 250)); }; });
 const ruleMv = (l, i, n) => `<span class="rmv"><button type="button" class="sbtn ghost2" data-act="rulemv" data-l="${l}" data-i="${i}" data-d="-1" ${i ? "" : "disabled"} aria-label="上へ">↑</button><button type="button" class="sbtn ghost2" data-act="rulemv" data-l="${l}" data-i="${i}" data-d="1" ${i < n - 1 ? "" : "disabled"} aria-label="下へ">↓</button></span>`;
 /* 2026-11-22：特別費・イベントの貯蓄が、目標の積立の予定（前の月の残高＋今月の積立−今月払う予定）より少ないか */
 function goalBehind(ym, grp, actual){ const gb = goalBase(ym); const need = goalsOn().filter(g => goalGrp(g) === grp && g.start && ym >= g.start).reduce((t, g) => t + Math.max(0, num0(gb.bal[g.id]) + num0(gb.m[g.id]) - num0(spendDef(ym, g.name))), 0); return need > 0 && actual < need - 500; }
@@ -4031,7 +4037,7 @@ function savTotalSheet(){ const ym = curYm(), bal = bucketBal(ym), cur = Object.
   openSheet(`<h3>貯蓄の合計を合わせる（${ymLabel(ym)}末）</h3><form data-form="savtotal" style="display:grid;gap:10px">
     <div class="field"><label for="st_v">本当の貯蓄の合計</label><input id="st_v" class="yenin3 num" inputmode="numeric" value="${Math.round(cur).toLocaleString("ja-JP")}"></div>
     <div class="field"><label for="st_a">そのうち建替の残高（まだ返ってきていない額はマイナス）</label><input id="st_a" class="yenin3 num" inputmode="text" value="${Math.round(num0(bal.adv)).toLocaleString("ja-JP")}"></div>
-    <p class="note">建替を0にすると、建替の誤差をリセットできます。合計は上の額になるように、建替を動かした差はほかの貯蓄で合わせます。今のアプリの合計は ${yen(cur)} です。👩🏼・🧑🏻の貯蓄は変えません。増えた分は「余った収入の行き先」の順に、減った分は「足りないとき」の順に入れて、残りは生活費で合わせます。</p>
+    <p class="note">建替を0にすると、建替の誤差をリセットできます。合計は上の額になるように、建替を動かした差も生活費で合わせます。今のアプリの合計は ${yen(cur)} です。差は全部、生活費の貯蓄で合わせます（特別費・イベント・👩🏼・🧑🏻の貯蓄は変えません）。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">合わせる</button></div></form>`); }
 function savEditSheet(k){ const ym = curYm(), bal = bucketBal(ym), cur = k === "__liv" ? num0(bal.common) + num0(bal.emergency) : num0(bal[k]), nm = k === "__liv" ? "生活費" : GN[k];
   openSheet(`<h3>${nm}の貯蓄（${ymLabel(ym)}末）</h3><form data-form="savedit" data-k="${k}" style="display:grid;gap:10px">
@@ -5278,7 +5284,7 @@ async function submitBody(e, f){
   } else if (kind === "savtotal"){   // 2026-11-21：貯蓄の合計だけで合わせる
     const ym = curYm(), bal = bucketBal(ym), cur = Object.keys(BK).reduce((t, b) => t + num0(bal[b]), 0), nv = numOrNull(val("st_v")); if (nv == null){ toast("金額を入れてください"); return; }
     const na = (t => t === "" || !isFinite(Number(t)) ? null : Number(t))(String(val("st_a") || "").replace(/[¥,，\s円]/g, "").replace(/^[−ー－]/, "-")), ad = na == null ? 0 : Math.round(na - num0(bal.adv)), dl = Math.round(nv - cur) - ad; if (!dl && !ad){ toast("差はありません"); return; }
-    const plan = [...(dl ? savTotalPlan(ym, dl) : []), ...(ad ? [{b: "adv", amount: ad, what: "建替"}] : [])], d = S.plans[ym] || {}, at = new Date().toISOString();   /* 2026-11-23：建替の残高も合わせる */
+    const plan = [...(dl ? [{b: "common", amount: dl, what: "生活費"}] : []), ...(ad ? [{b: "adv", amount: ad, what: "建替"}] : [])], d = S.plans[ym] || {}, at = new Date().toISOString();   /* 2026-11-23：建替の残高も合わせる */
     ok = await save(() => planDoc(ym).set({...d, balAdj: [...(d.balAdj || []), ...plan.map(x => ({...x, at, note: `合計を${yen(nv)}に合わせた`}))], updatedAt: at}), plan.map(x => `${x.what} ${x.amount > 0 ? "+" : "−"}${kY(Math.abs(x.amount))}万`).join("・"));
   } else if (kind === "savedit"){   // 貯蓄の金額だけを直す
     const k = f.dataset.k, ym = curYm(), bal = bucketBal(ym), cur = k === "__liv" ? num0(bal.common) + num0(bal.emergency) : num0(bal[k]), nv = numOrNull(val("se_v")); if (nv == null){ toast("金額を入れてください"); return; }

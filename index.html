@@ -964,6 +964,7 @@ html.mjon .monthnav .navbtn, html.mjon .monthnav .ssbtn { width: 38px !important
 .ios .ipc { display: grid; justify-items: center; gap: 1px; min-width: 0; } .ios .ipc > small { font-size: .7rem; color: var(--mut2); } .ios .ipc b { font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; } .ios .ipc em { font-style: normal; font-size: .68rem; font-weight: 600; } .ios .ipc em.z { color: var(--mut2); font-weight: 400; }
 .ios .isec2 { grid-auto-flow: row; gap: 6px; } .ios .isec2 .isecm { justify-self: center; } .ios .ir11 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .ios .icard { padding-left: 11px; padding-right: 11px; }
+.bscope { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--surface2, #f2f2f7); font-size: .86rem; } .bscope label { display: inline-flex; gap: 4px; align-items: center; }
 /* 2026-11-23：列の区切り線は、枠ごとに1本ずつ（名前と数字をまとめて、枠の高さの真ん中に）。行ごとの線はやめる */
 .ios .icl { position: relative; } .ios .icl .ig > * + *::before { display: none; }
 .ios .icl::after { content: ""; position: absolute; left: 11px; right: 11px; top: 16%; bottom: 16%; pointer-events: none; clip-path: inset(0 1px 0 0); background: repeating-linear-gradient(to right, transparent 0 calc(100% / var(--n, 1) - 1px), var(--sep) calc(100% / var(--n, 1) - 1px) calc(100% / var(--n, 1))); }
@@ -4531,11 +4532,11 @@ function allocSheet3(k){
   const ym = curYm(), c = colsOf(ym).find(x => x.k === k), am0 = planOf(ym).allocMid?.[k] || {}, mids = zanCats().filter(n => zanGrp(n) === k), am = Object.fromEntries(mids.map(n => [n, zanBud(ym, n) ?? 0]));
   const given = mids.reduce((t, n) => t + num0(am[n]), 0), rest = 0;
   openSheet(`<h3>${c.n}の予算配分（${ymLabel(ym)}から）</h3>
-  <form data-form="alloc3" data-k="${k}" data-ym="${ym}" style="display:grid;gap:10px">
+  <form data-form="alloc3" data-k="${k}" data-ym="${ym}" style="display:grid;gap:10px">${budScopeUI(ym)}
     <p class="note">カテゴリ（入力と同じ）ごとに入れると、合計が${c.n}の予算配分になります（万円）。</p>
     <div class="amid">${mids.map((n, i) => `<label class="amr"><span class="n">${esc(n)}</span>${kin("am" + i, am[n] ?? 0, `data-calc="al3" data-mid="${esc(n)}"`)}</label>`).join("")}</div>
     <div class="amsum"><span>合計</span><b class="num" id="al3sum">${kY(given + rest)}</b><small>万円</small></div>
-    <p class="note">変えると、${ymLabel(ym)}から先の予算が変わります（前の月はそのまま）。次の月からも、この予算を引き継ぎます。</p>
+    <p class="note">${ym < TODAY.slice(0, 7) ? "上で「だけ」を選ぶと、次の月からは元の予算に戻ります。" : `変えると、${ymLabel(ym)}から先の予算が変わります（前の月はそのまま）。次の月からも、この予算を引き継ぎます。`}</p>
     <p class="note">移行額は「予算配分−支出」で計算します（余りは${BK[c.b]}へ、足りない分は${BK[c.b]}から）。収入から配分を引いた余りは非常時用へ入れます。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
   </form>`);
@@ -4544,22 +4545,26 @@ function allocSheet3(k){
 /* 2026-11-12：予算の一覧に「共通貯蓄への移行額」。収入の予算＝支出の予算（投資を含む）＋移行額 で±0のときだけ保存できる */
 /* 2026-11-23：予算は「その月から先」だけ変える（settings/plan.budChg に {from: その月, name, v}）。前の月はそのまま（全部の月に共通の base は、もう書かない）。
    変わったカテゴリだけ記録する。目標から計算するカテゴリ（積立の目標）は対象外 */
-function budChgSave(ym, mids){ const P = S.plan || {}, now = new Date().toISOString(), add = [];
+/* 2026-11-23：前の月の予算を変える時は「この月だけ」（はじめから選ばれている）か「この月から先も」を選ぶ。この月だけ＝次の月から元の額に戻す記録も入れる */
+const budScopeUI = ym => ym < TODAY.slice(0, 7) ? `<div class="bscope"><span>この変更は</span><label><input type="radio" name="bscope" value="only" checked>${Number(ym.slice(5))}月だけ</label><label><input type="radio" name="bscope" value="fwd">${Number(ym.slice(5))}月から先も</label></div>` : "";
+const budOnly = f => f.querySelector('input[name="bscope"]:checked')?.value === "only";
+function budChgSave(ym, mids, only = false){ const P = S.plan || {}, now = new Date().toISOString(), add = [], nx = nextYm(ym);
   Object.values(mids).forEach(m => Object.entries(m || {}).forEach(([n, v]) => { if (n === "__rest") return; const go = goalOf(n); if (go && go.start && ym >= go.start) return;
-    const nv = Math.round(num0(v)); if (nv !== Math.round(num0(zanBud(ym, n)))) add.push({from: ym, name: n, v: nv, note: now.slice(0, 10) + " 予算の画面で変更"}); }));
-  if (!add.length){ toast("変わった予算はありません"); return Promise.resolve(false); }
+    const nv = Math.round(num0(v)); if (nv === Math.round(num0(zanBud(ym, n)))) return; add.push({from: ym, name: n, v: nv, note: now.slice(0, 10) + " 予算の画面で変更" + (only ? "（この月だけ）" : "")});
+    if (only && !(P.budChg || []).some(c => c && c.name === n && c.from === nx)) add.push({from: nx, name: n, v: Math.round(num0(zanBud(nx, n))), note: now.slice(0, 10) + ` ${ymLabel(ym)}だけ変えたので、元の額に戻す`}); }));
+  if (!add.length){ toast("変わった予算はありません"); return Promise.resolve(false); } const nCh = add.filter(a => a.from === ym).length;
   const bc = (P.budChg || []).filter(c => !add.some(a => a.from === c.from && a.name === c.name));
-  return save(() => db.doc("settings/plan").set({...P, budChg: [...bc, ...add], fromYm: budFrom() || ym, updatedAt: now}), `${ymLabel(ym)}から先の予算を変えました（${add.length}件）`); }
+  return save(() => db.doc("settings/plan").set({...P, budChg: [...bc, ...add], fromYm: budFrom() || ym, updatedAt: now}), `${ymLabel(ym)}${only ? "だけ" : "から先"}の予算を変えました（${nCh}件）`); }
 const saveBudOf = ym => 0;   // 2026-11-14（4回目）：「👬共通貯蓄へ」は廃止
 function budAllSheet(focus, only = ""){ if (only === "inc") only = ""; const ym = curYm(), cats = zanCats(), yen = v => v == null ? "" : num0(v).toLocaleString("ja-JP");
   const row = (attr, lab, v, key) => `<div class="bar${key === focus ? " bhl" : ""}"><span class="n">${esc(lab)}</span><input class="yenin2 num" ${attr} inputmode="numeric" value="${yen(v)}" placeholder="0" aria-label="${esc(lab)}"></div>`;
   const grp = g => { const cs = zanCatsOf(g); return cs.length ? `<section class="bag" style="--zc:${GCOL[g]}"><div class="bah"><span>${GN[g]}</span><span>合計 <b class="num" id="bat-${g}"></b></span></div>${cs.map(n => goalOf(n) && ym >= (goalOf(n).start || "") ? `<div class="bar"><span class="n">${esc(n)}<small class="bb">特別費の目標から計算</small></span><button type="button" class="bbud num gfix" data-act="goals" data-v="${num0(zanBud(ym, n))}">${yen(num0(zanBud(ym, n)))}</button></div>` : row(`data-bn="${esc(n)}" data-bg="${g}"`, n, zanBud(ym, n), "c:" + n)).join("")}</section>` : ""; };
   openSheet(`<h3>${only && only !== "inc" ? `${GN[only]}の予算` : "予算の一覧"}（${ymLabel(ym)}から）</h3>
-  <form data-form="zbudall" data-ym="${ym}" style="display:grid;gap:8px">
+  <form data-form="zbudall" data-ym="${ym}" style="display:grid;gap:8px">${budScopeUI(ym)}
     
     ${GRP5.filter(g => !only || only === g).map(grp).join("")}
     <div class="basum"${only ? " hidden" : ""}><span>支出予算の合計（投資を含む） <b class="num" id="bat-all"></b></span><span>これに必要な収入 <b class="num" id="bat-need"></b></span><span>1人あたり <b class="num" id="bat-each"></b></span></div>
-    <p class="note">変えると、${ymLabel(ym)}から先の予算が変わります（前の月はそのまま）。次の月からも、この予算を引き継ぎます。</p>
+    <p class="note">${ym < TODAY.slice(0, 7) ? "上で「だけ」を選ぶと、次の月からは元の予算に戻ります。" : `変えると、${ymLabel(ym)}から先の予算が変わります（前の月はそのまま）。次の月からも、この予算を引き継ぎます。`}</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
   </form>`);
   calcBudAll(); const h = document.querySelector(".bar.bhl"); if (h) setTimeout(() => h.scrollIntoView({block: "center"}), 60); }
@@ -5254,7 +5259,7 @@ async function submitBody(e, f){
     Object.entries(mids).forEach(([g, m]) => alloc[g] = Object.values(m).reduce((t, v) => t + num0(v), 0));
     { const tt = GRP5.reduce((t, k) => t + num0(alloc[k]), 0); inc.kazu = tt / 2; inc.miho = tt / 2; inc.adv = null; }
     const doc = {...d, alloc, allocMid: {...(d.allocMid || p.allocMid || {}), ...mids}, incBud: {...(d.incBud || {}), ...inc}, ...(saveBud !== undefined ? {saveBud} : {}), updatedAt: now}; if (!p.alloc) doc.move = {...(d.move || {}), emergency: cols.find(c => c.k === "emergency").move};
-    void doc; ok = await budChgSave(ym, mids);
+    void doc; ok = await budChgSave(ym, mids, budOnly(f));
   } else if (kind === "alloc3"){
     const ym = f.dataset.ym, k = f.dataset.k, mid = {}; let v = 0;
     f.querySelectorAll("input[data-mid]").forEach(i => { const n = kIn(i.value) || 0; if (n || i.dataset.mid !== "__rest") mid[i.dataset.mid] = n; v += n; });
@@ -5263,7 +5268,7 @@ async function submitBody(e, f){
     const alloc = p.alloc ? {...p.alloc} : Object.fromEntries([...cols.filter(c => MAIN4.includes(c.k)).map(c => [c.k, c.alloc]), ["invest", a.inv]]);
     alloc[k] = v;
     const doc = {...d, alloc, allocMid: {...(d.allocMid || p.allocMid || {}), [k]: mid}, updatedAt: now}; if (!p.alloc) doc.move = {...(d.move || {}), emergency: cols.find(c => c.k === "emergency").move};
-    void doc; ok = await budChgSave(ym, {[k]: mid});
+    void doc; ok = await budChgSave(ym, {[k]: mid}, budOnly(f));
   } else if (kind === "move3"){
     const ym = f.dataset.ym, k = f.dataset.k, v = kIn(val("mv3")); if (v == null){ toast("金額を入れてください"); return; }
     const d = S.plans[ym] || {};

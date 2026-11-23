@@ -948,6 +948,13 @@ html.mjon .monthnav .navbtn, html.mjon .monthnav .tbtn, html.mjon .monthnav > bu
 html.mjon .monthnav strong { font-weight: 700; }
 html.mjon .monthnav .navbtn, html.mjon .monthnav .ssbtn { width: 38px !important; height: 38px !important; border-radius: 50% !important; background: rgba(255,255,255,.9) !important; box-shadow: 0 1px 8px rgba(0,0,0,.08) !important; border: 0 !important; display: grid !important; place-items: center; corner-shape: round !important; }
 .ios .itot > * { padding: 2px 0; font-size: .98rem; font-weight: 600; } .ios .itot small { font-size: .58rem; color: var(--mut2); font-weight: 400; } .ios .itot em { font-style: normal; }
+
+/* 2026-11-23：収入の右に証券、合計の右に建替中（どちらも別のカード）。貯蓄への数字がはみ出さないように */
+.ios .irow2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .5fr); gap: 10px; } .ios .irow2 > .icol:only-child { grid-column: 1 / -1; } .ios .icol { min-width: 0; display: flex; flex-direction: column; } .ios .icol > .icard { flex: 1; }
+.ios .isec { padding: 12px 12px !important; } .ios .isec b { font-size: 1.6rem !important; }
+.ios .ig.itot { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.ios .iadv { display: grid; place-items: center; align-content: center; gap: 0; width: 100%; } .ios .iadv b { font-size: 1.3rem; font-weight: 600; } .ios .iadv small { font-size: .6rem; color: var(--mut2); }
+.ios .mjm { font-size: clamp(.66rem, 3.4vw, .8rem) !important; letter-spacing: -.03em; white-space: nowrap; overflow: hidden; } .ios .mjc b { font-size: clamp(1rem, 5.4vw, 1.22rem) !important; }
 html.toplock, html.toplock body { overflow: hidden !important; overscroll-behavior: none; }
 .iot2 { flex: 1; display: grid; text-align: left; border: 0; border-radius: var(--r-md); padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; line-height: 1.25; }
 .iot2 small { font-size: .66rem; font-weight: 400; opacity: .8; } .iot2.o { background: #ffe1e1; color: #b3261e; } .iot2.i { background: #fff3c4; color: #7a5a00; } .iot2.ro { cursor: default; align-content: center; }
@@ -3564,10 +3571,10 @@ function topMsg(ym){ if (S.ready < 2) return ["", ""];
   const negAge = add => { const k = "__neg" + add; if (GCACHE[k] !== undefined) return GCACHE[k]; let v = null;
     try { const k0 = UI.lifeBr; UI.lifeBr = ""; try { const M0 = add ? lifeModel({}) : null, M = add ? lifeModel({living: M0.living + add}) : lifeModel(), j = M.bal.findIndex(b => b < -1), kb = M.L.people.kazu.birth; v = j >= 0 ? (kb ? Math.floor(ymDiff(kb, M.yms[j]) / 12) + "歳" : M.yms[j].slice(0, 4) + "年") : null; } finally { UI.lifeBr = k0; } } catch (e) { v = null; }
     return GCACHE[k] = v; };
-  const now = negAge(0); if (now) return ["neg", `このままだと${now}で貯金が尽きます`];
+  const now = negAge(0); if (now) return ["neg", `このままだと${now}で全財産ゼロ`];
   if (isAct(ym)){ const a = monthAgg(ym), al = allocEff(ym); if (al){ const ov = ["living", "miho", "kazu"].reduce((t, k) => t + Math.max(0, num0(a.g[k]) - num0(al[k])), 0);   /* 2026-11-23：特別費・イベントは貯蓄から払う予定のお金なので、オーバーに数えない */
-    if (ov > 500){ const m = Math.max(10000, Math.round(ov / 10000) * 10000), ag = negAge(m); return ["neg", ag ? `この使い方が続くと${ag}で貯金ゼロ` : `今月は予算を${kY(ov)}万オーバー`]; } } }
-  for (const m of [10000, 20000, 30000, 50000]){ const ag = negAge(m); if (ag) return ["warn", `毎月${m / 10000}万オーバーすると${ag}で貯金ゼロ`]; }
+    if (ov > 500){ const m = Math.max(10000, Math.round(ov / 10000) * 10000), ag = negAge(m); return ["neg", ag ? `この使い方が続くと${ag}で全財産ゼロ` : `今月は予算を${kY(ov)}万オーバー`]; } } }
+  for (const m of [10000, 20000, 30000, 50000]){ const ag = negAge(m); if (ag) return ["warn", `毎月${m / 10000}万オーバーすると${ag}で全財産ゼロ`]; }
   return ["", ""]; }
 /* 2026-11-21：こづかいの行。金額はトップの予算と同じ（ここでは直さない） */
 function lifeKozSheet(){ const ym = TODAY.slice(0, 7), ks = (typeof zanCats === "function" ? zanCats() : []).filter(n => n.includes("こづかい")).map(n => [n, num0(zanBud(ym, n))]), L = lifeDoc();
@@ -3715,14 +3722,16 @@ function topViewMuji(){ const L = ymList(); if (!L.length) return noTx();
   const msg = GCACHE["__msg" + ym] || (setTimeout(() => fillTopMsg(ym), 60), ["", ""]), adv = advBox(ym, 1) ? advManOf(ym) : null;
   return [topNav(ym), `<section class="ios">
     <div class="icard imsg ${msg[0]}"${msg[1] ? "" : ' style="display:none"'}><i>!</i><span class="topmsg ${msg[0]}" data-ym="${ym}">${msg[1] ? esc(msg[1]) : ""}</span></div>
-    <h3 class="ihd">収入<small>万円</small></h3>
-    <button class="icard iinc" data-act="incact"><span class="isub">${Number(prevYmOf(ym).slice(5))}月に入った分</span><b class="num">${kY(a.inc)}<small>万円</small></b>${!a.incDef && ib != null ? `<span class="isub">予算 ${kY(ib)}万 ・ <em class="${a.inc - ib < 0 ? "neg" : "pos"}">${kS(a.inc - ib)}</em></span>` : ""}</button>
+    <div class="irow2"><div class="icol"><h3 class="ihd">収入<small>万円</small></h3>
+    <button class="icard iinc" data-act="incact"><span class="isub">${Number(prevYmOf(ym).slice(5))}月に入った分</span><b class="num">${kY(a.inc)}<small>万円</small></b>${!a.incDef && ib != null ? `<span class="isub">予算 ${kY(ib)}万 ・ <em class="${a.inc - ib < 0 ? "neg" : "pos"}">${kS(a.inc - ib)}</em></span>` : ""}</button></div>
+    <div class="icol"><h3 class="ihd">証券</h3><button class="icard iinc isec" data-act="invlist"><span class="isub">評価額</span><b class="num">${kY(num0(invC?.bal))}<small>万円</small></b><span class="isub">積立 ${kY(a.inv)}万</span></button></div></div>
     <h3 class="ihd">支出<small>万円</small></h3>
     <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${spend}</div><div class="isep"></div><div class="ilab">貯蓄へ</div><div class="ig imv">${move}</div></div>
     <h3 class="ihd">貯蓄<small>${Number(ym.slice(5))}月末・万円</small></h3>
     <div class="icard grow"><div class="ig ihead">${head}</div><div class="ig">${save}</div></div>
-    <h3 class="ihd">合計<small>万円</small></h3>
-    <div class="icard"><div class="ig itot"><span><small>収入</small>${kY(a.inc)}</span><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span><button data-act="invlist"><small>証券</small>${kY(num0(invC?.bal))}<small class="isv">積立 ${kY(a.inv)}</small></button>${adv ? `<button data-act="advman"><small>建替中</small>${kY(adv.tot)}</button>` : "<span></span>"}</div></div>
+    <div class="irow2"><div class="icol"><h3 class="ihd">合計<small>万円</small></h3>
+    <div class="icard"><div class="ig itot"><span><small>支出</small>${kY(a.spend)}</span><span><small>貯蓄へ</small><em class="${mvTot < 0 ? "neg" : "pos"}">${kS(mvTot)}</em></span><span><small>貯蓄</small>${kY(savTot)}</span></div></div></div>
+    ${adv ? `<div class="icol"><h3 class="ihd">建替中</h3><button class="icard iadv" data-act="advman"><b class="num">${kY(adv.tot)}</b><small>万円</small></button></div>` : ""}</div>
   </section>`].join(""); }
 function topView(){ if (UI.muji !== false) return topViewMuji();   /* 2026-11-23：iPhoneの純正アプリ風のトップを使う（UI.muji = false で前の画面） */ const html = topView0(), ym = curYm();
   return html.replace(/<section class="fg f5 f4">([\s\S]*?)<\/section>/, (all, body) => {

@@ -964,6 +964,7 @@ html.mjon .monthnav .navbtn, html.mjon .monthnav .ssbtn { width: 38px !important
 .ios .ipc { display: grid; justify-items: center; gap: 1px; min-width: 0; } .ios .ipc > small { font-size: .7rem; color: var(--mut2); } .ios .ipc b { font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; } .ios .ipc em { font-style: normal; font-size: .68rem; font-weight: 600; } .ios .ipc em.z { color: var(--mut2); font-weight: 400; }
 .ios .isec2 { grid-auto-flow: row; gap: 6px; } .ios .isec2 .isecm { justify-self: center; } .ios .ir11 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .ios .icard { padding-left: 11px; padding-right: 11px; }
+.gdesc { margin: -4px 2px 2px; font-size: .84rem; color: var(--mut2, #8e8e93); }
 .bscope { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 8px 12px; border-radius: 12px; background: var(--surface2, #f2f2f7); font-size: .86rem; } .bscope label { display: inline-flex; gap: 4px; align-items: center; }
 /* 2026-11-23：列の区切り線は、枠ごとに1本ずつ（名前と数字をまとめて、枠の高さの真ん中に）。行ごとの線はやめる */
 .ios .icl { position: relative; } .ios .icl .ig > * + *::before { display: none; }
@@ -4127,11 +4128,13 @@ document.addEventListener("input", e => { const t = e.target; if (!t.classList?.
   if (num0(numOrNull(t.value)) === num0(numOrNull(t.dataset.b))) return;
   askAct(ym, () => { f.dataset.ok = "1"; setTimeout(() => t.focus(), 50); }, () => { t.value = t.dataset.b ? num0(t.dataset.b).toLocaleString("ja-JP") : ""; calcCatAct(); calcIncAct(); t.blur(); }); });
 /* カテゴリの予算と支出：予算は見るだけ（タップで全部の予算の一覧）。支出のはじめの値は予算の額。g＝枠（invest は証券） */
+/* 2026-11-23：枠の分け方の考え方（支出の枠をタップした画面の上に1文） */
+const GDESC = {living: "毎月だいたい同じ額で、その月に使い切るお金。", irregular: "生活に必要だけど、いつ・いくら使うかは決まっていないお金。", event: "いつ・いくら使うかを決めて、前もって貯めるお金。"};
 function catActSheet(g){
   const ym = curYm(), used = isAct(ym) ? (usedOf(ym) || {}) : {}, cs = zanCatsOf(g), yen0 = v => v == null || v === "" ? "" : num0(v).toLocaleString("ja-JP"), has = v => v !== undefined && v !== null && v !== "";
   /* 2026-11-23：右に「貯蓄増減」（予算−支出）。積み立てる目標（例：子ども）は、支出のはじめの値をその月に使う予定の額（ふだんは0）にし、積立の分を黄、それより多く残った分を緑で出す */
   const rows = cs.map(n => { const b = zanBud(ym, n), sd = isSaveGoal(n) ? num0(spendDef(ym, n)) : null, pl = sd == null || b == null ? 0 : Math.max(0, num0(b) - sd), dv = sd == null ? b : sd; return `<div class="bar act3 act4" data-p="${pl}"><button type="button" class="n cnb" data-act="catchart" data-g="${g}" data-n="${esc(n)}" aria-label="${esc(n)}の月別のグラフ">${esc(n)}</button><button type="button" class="bbud num" data-act="budall" data-n="${esc(n)}" aria-label="${esc(n)}の予算（一覧を開く）">${b == null ? "－" : num0(b).toLocaleString("ja-JP")}</button><input class="yenin3 cin num" data-n="${esc(n)}" data-b="${b ?? ""}" inputmode="numeric" value="${yen0(has(used[n]) ? used[n] : dv)}" placeholder="0" aria-label="${esc(n)}の支出"><span class="cdv num"></span></div>`; }).join("");
-  openSheet(`<h3>${GN[g]}（${ymLabel(ym)}・${isAct(ym) ? "実績" : "予算"}）</h3>
+  openSheet(`<h3>${GN[g]}（${ymLabel(ym)}・${isAct(ym) ? "実績" : "予算"}）</h3>${GDESC[g] ? `<p class="gdesc">${GDESC[g]}</p>` : ""}
   <form data-form="catact" data-ym="${ym}" data-g="${g}" style="display:grid;gap:8px">
     <button type="button" class="btn ghost gchart" data-act="catchart" data-g="${g}" data-n="">📊 ${GN[g]}の合計の月別グラフ</button>
     <section class="bag" style="--zc:${GCOL[g]}"><div class="bar act3 act4 hd"><span class="n">カテゴリ</span><span class="hb">予算</span><span class="hb">支出</span><span class="hb">貯蓄増減</span></div>${rows}<div class="bar act3 act4 ft"><span class="n">合計</span><b class="num" id="ca-b"></b><b class="num" id="ca-t"></b><b class="num cdv" id="ca-d"></b></div></section>

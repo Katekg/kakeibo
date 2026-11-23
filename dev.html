@@ -2718,12 +2718,17 @@ function goalBase(ym){ const k = "b" + ym; if (GCACHE[k]) return GCACHE[k]; cons
     else if (g.due && tg > 0){ const left = ymDiff(ym, g.due) + 1; m = left >= 1 && tg > b ? Math.ceil((tg - b) / left / 1000) * 1000 : 0; }
     else { m = num0(g.monthly); if (tg > 0){ m = Math.max(m, 5000); m = Math.max(0, Math.min(m, tg - b)); } }   // 2026-11-17：目標額だけのときは最低5千円
     r.m[g.id] = m; });
-  /* 2026-11-23：イベントの、使う月が決まっている積立（ライフの子ども・車、期限のあるイベント）は、全部合わせて月1万円になるまで積み立てない（何年も先の分をちまちま積み立てない）。
-     1万円を超えた月から、どれもそれぞれの額で積み立てる（遅れた分は、残りの月で割って取り戻す） */
-  const D = gs.filter(g => goalGrp(g) === "event" && g.start && ym >= g.start && (g.auto || (g.due && num0(g.target) > 0)));
-  if (D.reduce((t, g) => t + num0(r.m[g.id]), 0) < EV_MIN) D.forEach(g => { r.m[g.id] = 0; });
+  /* 2026-11-23：イベントの、使う月が決まっている積立（ライフの子ども・車、期限のあるイベント）は、使う年が同じものを合わせて月1万円になるまで積み立てない
+     （何年も先の分をちまちま積み立てない。小さく分けたイベントも、同じ年のものは合わせて考える）。1万円以上になった月から、どれもそれぞれの額で積み立てる。
+     遅れた分は、残りの月で割って取り戻す。ガソリン・駐車場のような、その月にかかるお金はそのまま */
+  const D = gs.filter(g => goalGrp(g) === "event" && g.start && ym >= g.start && (g.auto || (g.due && num0(g.target) > 0))), grp = {};
+  D.forEach(g => { const ls = g.auto ? (autoInfo().lumps[g.auto] || []) : [], run = ls.filter(x => x.run && x.ym === ym).reduce((t, x) => t + x.amt, 0), key = useYm(g, ym, r.bal[g.id]).slice(0, 4);
+    (grp[key] = grp[key] || []).push([g, run]); });
+  Object.values(grp).forEach(a => { if (a.reduce((t, [g, run]) => t + Math.max(0, num0(r.m[g.id]) - run), 0) < EV_MIN) a.forEach(([g, run]) => { r.m[g.id] = Math.min(num0(r.m[g.id]), run); }); });
   return GCACHE[k] = r; }
 const EV_MIN = 10000;
+/* 積立の額を決めている「使う月」（ライフの予定は、いちばん厳しい支払いの月。イベントは期限の月） */
+const useYm = (g, ym, b) => { if (!g.auto) return g.due || ""; let cum = 0, best = -Infinity, at = ""; for (const x of (autoInfo().lumps[g.auto] || [])){ if (x.ym < ym || x.run) continue; cum += x.amt; const v = (cum - num0(b)) / (ymDiff(ym, x.ym) + 1); if (v > best){ best = v; at = x.ym; } if (x.stop) break; } return at; };
 function goalEnd(ym){ const k = "e" + ym; if (GCACHE[k]) return GCACHE[k]; const gb = goalBase(ym), j = adjOf(ym), r = {};
   const gm = (S.plans[ym]?.goalMoves || []), ba = (S.plans[ym]?.balAdj || []), mvOf = id => gm.reduce((t, x) => t + (x.to === id ? num0(x.amount) : 0) - (x.from === id ? num0(x.amount) : 0), 0) + ba.reduce((t, x) => t + (x.goal === id ? num0(x.amount) : 0), 0);   // 2026-11-21：目標どうしの移動
   goalsOn().forEach(g => { r[g.id] = !g.start || ym < g.start ? 0 : gb.bal[g.id] + gb.m[g.id] + num0(j.gadd?.[g.id]) - catSpent(ym, g.name) + mvOf(g.id); });

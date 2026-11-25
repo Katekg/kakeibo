@@ -3046,6 +3046,13 @@ const ZBANK = [["楽天銀行🧑🏻", "🧑🏻楽天銀行"], ["楽天銀行�
 /* 2026-11-01：収入と予算の合計の差（はじめから余っている分）は4つの枠に均等に振り分ける。予算の合計が空の月は前の月の値を使う */
 /* 2026-11-01：カテゴリには使った額を入れる（monthin/<YYYY-MM>.used）。残＝トップの予算配分の中項目の予算−使った額 */
 const usedOf = ym => S.monthin?.[ym]?.used || null;
+/* 2026-11-25：前の月のカテゴリを今のカテゴリに読みかえる（読み込む時に置きかえる。シートの元の記録は、その月を保存し直すまでそのまま）。
+   10月以前に「👬消耗品」（2人分）で入れていた額は「🧑🏻消耗品」の額にする（使った額 used・残 zan のどちらも。同じ月に両方あれば足す） */
+const CAT_MOVES = [{from: "👬消耗品", to: "🧑🏻消耗品", until: "2026-10"}];
+function catMoveMonth(ym, m){ if (!m) return m; const has = v => v !== undefined && v !== null && v !== ""; let out = m;
+  CAT_MOVES.forEach(c => { if (ym > c.until) return; ["used", "zan"].forEach(k => { const o = out[k]; if (!o || !has(o[c.from])) return;
+    const n = {...o}; n[c.to] = has(n[c.to]) ? num0(n[c.to]) + num0(n[c.from]) : n[c.from]; delete n[c.from]; out = {...out, [k]: n}; }); });
+  return out; }
 const ZAN_ALIAS = {"👬水道光熱": ["👬水道光熱費"], "👬税保険等": ["🧰税保険等", "👬税保険年金"], "🧑🏻医療": ["🧰\u548c\u5f25医療", "👬医療"], "👩🏼医療": ["🧰\u7f8e\u7a42医療"], "👩🏼奨学金(2034年まで)": ["🧰👩🏼ローン", "👩🏼ローン"]};
 /* カテゴリの予算：その枠の中項目の予算。枠がまだ前の中項目のままなら、名前の近い前の中項目（ほかの枠も含む）の予算を使う */
 /* 2026-11-21：支出を入れていないカテゴリは予算どおり使ったとみなす。ただし前もって貯めるイベント（車・子ども・期限のある旅行など）は、使った時に入れるので、入れていなければ0（積み立てたまま） */
@@ -5643,7 +5650,7 @@ render();
   db.doc("settings/shops").onSnapshot(s => { S.shops = s.exists ? s.data() : null; softRender(); }, err);
   db.doc("settings/tax").onSnapshot(s => { S.tax = s.exists ? s.data() : null; softRender(); }, err);
   db.doc("settings/life").onSnapshot(s => { S.life = s.exists ? s.data() : null; softRender(); }, err);
-  db.collection("monthin").onSnapshot(s => { S.monthin = {}; s.docs.forEach(d => S.monthin[d.id] = d.data()); txDirty(); softRender(); }, err);
+  db.collection("monthin").onSnapshot(s => { S.monthin = {}; s.docs.forEach(d => S.monthin[d.id] = catMoveMonth(d.id, d.data())); txDirty(); softRender(); }, err);
   db.doc("settings/cats").onSnapshot(s => { S.cats = s.exists ? s.data() : null; softRender(); }, err);
   db.doc("settings/catmap").onSnapshot(s => { S.catmap = s.exists ? s.data() : null; txDirty(); softRender(); }, err);
   db.doc("settings/trfix").onSnapshot(s => { S.trfix = s.exists ? s.data() : null; txDirty(); softRender(); }, err);

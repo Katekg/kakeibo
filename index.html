@@ -2565,7 +2565,7 @@ function budgetSheet(){ const m = TODAY.slice(0, 7);
   if (zanCats().includes(CONS_CAT.miho)) return openSheet(`<h3>消耗品の予算（${ymLabel(m)}から）</h3>
   <form data-form="consbud" style="display:grid;gap:12px">
     <div class="fgrid">${CWHO.map(([w, l]) => `<div class="field"><label for="cb_${w}">${l}の予算（月）</label><input id="cb_${w}" class="yenin3 num" inputmode="numeric" value="${num0(zanBud(m, CONS_CAT[w])).toLocaleString("ja-JP")}"></div>`).join("")}</div>
-    <p class="note">家計予算帳の「${CONS_CAT.miho}」「${CONS_CAT.kazu}」（生活費）の予算と同じものです。変えると${ymLabel(m)}から先の予算が変わります（前の月はそのまま）。</p>
+    <p class="note">家計予算帳の「${CONS_CAT.miho}」「${CONS_CAT.kazu}」（特別費）の予算と同じものです。余った分は特別費の「👬消耗品」（2人合算）に貯まります。変えると${ymLabel(m)}から先の予算が変わります（前の月はそのまま）。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">保存</button></div>
   </form>`);
   openSheet(`<h3>消耗品の予算</h3>
@@ -2700,7 +2700,7 @@ const MAIN4 = ["living", "irregular", "event", "miho", "kazu"];   // 2026-11-20�
 const ZAN_CATS0 = ["👬家賃", "👬水道光熱", "👬自炊食材", "👬消耗品", "👬サブスク", "👩🏼奨学金(2034年まで)", "👩🏼歯列矯正(2029年5月まで)", "👬証券", "👬こづかい", "👬税保険等", "🧑🏻医療", "👩🏼医療", "👬建替", "👩🏼こづかい", "🧑🏻こづかい"];
 const ZAN_EMO = [["👬", "living"], ["🧰", "irregular"], ["👩🏼", "miho"], ["🧑🏻", "kazu"]];
 const zanCats0 = () => S.zancats?.list?.length ? S.zancats.list : ZAN_CATS0;
-const zanCats = () => { const b = zanCats0(); return [...b, ...goalsOn().map(g => g.name).filter(n => !b.includes(n))]; };   // 2026-11-16：特別費の目標の名前もカテゴリ
+const zanCats = () => { const b = zanCats0(); return [...b, ...goalsOn().filter(g => !isPool(g)).map(g => g.name).filter(n => !b.includes(n))]; };   // 2026-11-25：2人合算の積立（消耗品）はカテゴリにしない   // 2026-11-16：特別費の目標の名前もカテゴリ
 /* 2026-11-16：特別費は「目標ごとの積立」。settings/plan.goals = [{id, name, target, due, monthly, start, off}]
    name＝カテゴリ名（支出はこのカテゴリで入れる）。目標額＋期限 → 毎月の積立＝（目標額−月初の残高）÷残りの月数（千円単位で切り上げ）。期限なし → monthly（固定）。
    start より前の月は、ふつうのカテゴリとして基本の予算（baseMid）を使う */
@@ -2729,16 +2729,22 @@ function autoInfo(){ if (AUTOC.l === S.life && AUTOC.t === S.tax && AUTOC.d === 
     { let tl = {}; try { tl = lifeModel({}).taxLumps || {}; } catch (e) {} [["miho", "g_zeiho", "👩🏼税保険等"], ["kazu", "g_zeiho_k", "🧑🏻税保険等"]].forEach(([k, id, nm]) => { lp["tax-" + k] = tl[k] || []; v.goals.push({id, name: nm, grp: "irregular", auto: "tax-" + k, start: AUTO_START, target: null}); }); }
     v.lumps = lp; } catch (e) { v = {goals: [], lumps: {}}; } finally { AUTOC.busy = false; }
   AUTOC = {l: S.life, t: S.tax, d: TODAY, v}; GCACHE = {}; return v; }
-const goalsAll = () => { const st = Array.isArray(S.plan?.goals) ? S.plan.goals : GOAL0, au = autoInfo().goals;
+/* 2026-11-25：消耗品は特別費へ。👩🏼消耗品・🧑🏻消耗品の余りは、2人合算の「👬消耗品」の積立に貯める（医療と同じ特別費の貯蓄。中身は2人で1つ）
+   毎月の積立＝👩🏼消耗品・🧑🏻消耗品の予算の合計、使った分＝2つのカテゴリの支出の合計。この積立はカテゴリではない（支出は今までどおり👩🏼消耗品・🧑🏻消耗品で入れる） */
+const POOL_GOALS = [{id: "g_cons", name: "👬消耗品", grp: "irregular", cats: [CONS_CAT.miho, CONS_CAT.kazu], start: "2026-11"}];
+const isPool = g => Array.isArray(g?.cats) && g.cats.length > 0;
+const goalCats = g => isPool(g) ? g.cats : [g.name], goalSpent = (ym, g) => goalCats(g).reduce((t, n) => t + num0(catSpent(ym, n)), 0), goalSpendDef = (ym, g) => goalCats(g).reduce((t, n) => t + num0(spendDef(ym, n)), 0);
+const goalsAll = () => { const st = Array.isArray(S.plan?.goals) ? S.plan.goals : GOAL0, au = [...autoInfo().goals, ...POOL_GOALS];
   return [...st.filter(g => !g.auto || au.some(a => a.id === g.id)).map(g => (a => a ? {...a, ...(g.auto ? {} : {monthly: g.monthly}), off: !!g.off, start: g.auto ? g.start || AUTO_START : a.start} : g)(au.find(a => a.id === g.id))), ...au.filter(a => !st.some(g => g.id === a.id))]; };   // 2026-11-21：税保険等は、保存してある目標を自動の積立に置きかえる
 const goalsOn = () => goalsAll().filter(g => !g.off && g.name);
-const goalOf = n => goalsOn().find(g => g.name === n) || null;
+const goalOf = n => goalsOn().find(g => g.name === n && !isPool(g)) || null;   // 2026-11-25：2人合算の積立（消耗品）はカテゴリではないので除く
 let GCACHE = {};
 function goalBase(ym){ const k = "b" + ym; if (GCACHE[k]) return GCACHE[k]; const r = {bal: {}, m: {}}, gs = goalsOn();
   const prev = gs.some(g => g.start && g.start < ym) ? goalEnd(prevYmOf(ym)) : null;
   gs.forEach(g => { if (!g.start || ym < g.start){ r.bal[g.id] = 0; r.m[g.id] = 0; return; }
     const b = ym === g.start ? 0 : num0(prev?.[g.id]), tg = num0(g.target); r.bal[g.id] = b; let m;
     if (g.auto) m = fundNeed(autoInfo().lumps[g.auto] || [], ym, b);
+    else if (isPool(g)) m = budOn(ym) ? g.cats.reduce((t, n) => t + (zHide(n, ym) ? 0 : catBud0(ym, n)), 0) : 0;   // 2026-11-25：2つのカテゴリの予算の合計
     else if (g.due && tg > 0){ const left = ymDiff(ym, g.due) + 1; m = left >= 1 && tg > b ? Math.ceil((tg - b) / left / 1000) * 1000 : 0; }
     else { m = num0(g.monthly); if (tg > 0){ m = Math.max(m, 5000); m = Math.max(0, Math.min(m, tg - b)); } }   // 2026-11-17：目標額だけのときは最低5千円
     r.m[g.id] = m; });
@@ -2755,7 +2761,7 @@ const EV_MIN = 10000;
 const useYm = (g, ym, b) => { if (!g.auto) return g.due || ""; let cum = 0, best = -Infinity, at = ""; for (const x of (autoInfo().lumps[g.auto] || [])){ if (x.ym < ym || x.run) continue; cum += x.amt; const v = (cum - num0(b)) / (ymDiff(ym, x.ym) + 1); if (v > best){ best = v; at = x.ym; } if (x.stop) break; } return at; };
 function goalEnd(ym){ const k = "e" + ym; if (GCACHE[k]) return GCACHE[k]; const gb = goalBase(ym), j = adjOf(ym), r = {};
   const gm = (S.plans[ym]?.goalMoves || []), ba = (S.plans[ym]?.balAdj || []), mvOf = id => gm.reduce((t, x) => t + (x.to === id ? num0(x.amount) : 0) - (x.from === id ? num0(x.amount) : 0), 0) + ba.reduce((t, x) => t + (x.goal === id ? num0(x.amount) : 0), 0);   // 2026-11-21：目標どうしの移動
-  goalsOn().forEach(g => { r[g.id] = !g.start || ym < g.start ? 0 : gb.bal[g.id] + gb.m[g.id] + num0(j.gadd?.[g.id]) - catSpent(ym, g.name) + mvOf(g.id); });
+  goalsOn().forEach(g => { r[g.id] = !g.start || ym < g.start ? 0 : gb.bal[g.id] + gb.m[g.id] + num0(j.gadd?.[g.id]) - goalSpent(ym, g) + mvOf(g.id); });
   return GCACHE[k] = r; }
 /* その月のカテゴリの支出（monthAgg と同じ決まり：予算の月は予算の額、実績の月は入れた額。入れていなければ予算の額） */
 function catSpent(ym, n){ const m = S.monthin?.[ym] || {}, p = planOf(ym), u = p.alloc && m.mode !== "act" ? null : m.used, v = u?.[n], has = v !== undefined && v !== null && v !== "";
@@ -2763,9 +2769,10 @@ function catSpent(ym, n){ const m = S.monthin?.[ym] || {}, p = planOf(ym), u = p
 /* 2026-11-11：特別費のカテゴリは、頭の絵文字（👬🧑🏻👩🏼）でなくこの一覧で特別費に入れる */
 /* 2026-11-16：税保険等・医療は生活費へ。特別費は👬こづかい・建替と、目標のカテゴリ */
 /* 2026-11-20：医療・奨学金・歯列矯正は特別費へ。👬こづかいはイベントへ */
-const ZAN_GRP_OV = {"🧑🏻実家の固定資産・都市計画税": "living", "👬税保険等": "living", "🧑🏻医療": "irregular", "👩🏼医療": "irregular", "👬建替": "adv", "👬こづかい": "event", "👩🏼消耗品": "living", "🧑🏻消耗品": "living", "👩🏼奨学金(2034年まで)": "irregular", "👩🏼歯列矯正(2029年5月まで)": "irregular"};
+/* 2026-11-25：👩🏼消耗品・🧑🏻消耗品は生活費から特別費へ（余りは2人合算の「👬消耗品」の積立に貯める） */
+const ZAN_GRP_OV = {"🧑🏻実家の固定資産・都市計画税": "living", "👬税保険等": "living", "🧑🏻医療": "irregular", "👩🏼医療": "irregular", "👬建替": "adv", "👬こづかい": "event", "👩🏼消耗品": "irregular", "🧑🏻消耗品": "irregular", "👩🏼奨学金(2034年まで)": "irregular", "👩🏼歯列矯正(2029年5月まで)": "irregular"};
 const goalGrp = g => g?.grp === "event" ? "event" : "irregular";
-const zanGrp = n => (g => g ? goalGrp(g) : null)(goalsAll().find(g => g.name === n && !g.off)) || ZAN_GRP_OV[n] || (String(n).includes("証券") ? "invest" : (ZAN_EMO.find(([e]) => String(n).startsWith(e)) || [])[1]);   // 2026-11-10：証券は投資の枠
+const zanGrp = n => (g => g ? goalGrp(g) : null)(goalsAll().find(g => g.name === n && !g.off && !isPool(g))) || ZAN_GRP_OV[n] || (String(n).includes("証券") ? "invest" : (ZAN_EMO.find(([e]) => String(n).startsWith(e)) || [])[1]);   // 2026-11-10：証券は投資の枠
 const GRP5 = ["living", "irregular", "event", "miho", "kazu", "adv", "invest"];   /* 2026-11-23：建替の枠（予算なし） */   // 入力の画面・予算の一覧に出す枠（振り分けは投資を除く4つ）
 /* 移行額に入れるときは万円単位の整数に四捨五入（−1.5万 → −2万） */
 const man10k = v => Math.sign(v) * Math.round(Math.abs(v) / 10000) * 10000;
@@ -2775,16 +2782,19 @@ function zanSum(zan){ const r = {}; if (!zan) return r; Object.entries(zan).forE
 /* 2026-11-16：予算は全部の月に共通のひとつ（settings/plan.base）。予算を使い始めた月（月別の予算が最初にある月か fromYm の早い方）から、どの月も同じ予算。
    月別（plans/<月>.alloc）の予算は使わない（残っていても見ない） */
 const budFrom = () => { const P = S.plan || {}, ks = Object.keys(S.plans || {}).filter(k => S.plans[k]?.alloc).sort(); return [P.fromYm, ks[0]].filter(Boolean).sort()[0] || ""; };
+const budOn = ym => { const f = budFrom(); return !!S.plan?.base && !!f && ym >= f; };
+/* 2026-11-25：目標でないカテゴリの予算（基本の予算＋月を決めた予算の変更）。planOf と、2人合算の積立（消耗品）の毎月の額で使う */
+function catBud0(ym, n, g = zanGrp(n)){ const P = S.plan || {}, BM = P.baseMid || {}; let v = BM[g]?.[n];
+  if (v == null){ const flat = {}; Object.values(BM).forEach(o => Object.entries(o || {}).forEach(([x, y]) => { if (x !== "__rest" && y != null) flat[x] = y; })); v = [n, ...(ZAN_ALIAS[n] || [])].map(x => flat[x]).find(x => x != null); }
+  // 2026-11-21：月を決めた予算の変更（settings/plan.budChg = [{from, name, v}]）。その月から先だけ変わる（前の月は今までの額）
+  const ch = (P.budChg || []).filter(c => c && c.name === n && c.from && c.from <= ym).sort((x, y) => x.from < y.from ? -1 : 1).pop(); if (ch) v = ch.v; return num0(v); }
 function planOf(ym){ const k = "p" + ym; if (GCACHE[k]) return GCACHE[k];
   const P = S.plan || {}, m = S.plans[ym] || {}, f = budFrom(), on = !!P.base && !!f && ym >= f, base = {move: m.move || {}, savMoves: m.savMoves || [], goalMoves: m.goalMoves || [], balAdj: m.balAdj || [], draw: m.draw || {}};
   if (!on) return GCACHE[k] = {...base, alloc: null, allocMid: {}};
   // 2026-11-16：枠の予算＝その枠のカテゴリの予算の合計（カテゴリの枠が変わっても合うように、毎回カテゴリから足し直す）。目標のカテゴリは目標から計算
-  const BM = P.baseMid || {}, flat = {}; Object.values(BM).forEach(o => Object.entries(o || {}).forEach(([n, v]) => { if (n !== "__rest" && v != null) flat[n] = v; }));
   const gb = goalBase(ym), mid = {}, alloc = {}; GRP5.forEach(g => { mid[g] = {}; alloc[g] = 0; });
   zanCats().forEach(n => { const g = zanGrp(n); if (!mid[g]) return; const go = goalOf(n); let v;
-    if (go && go.start && ym >= go.start) v = gb.m[go.id]; else { const names = [n, ...(ZAN_ALIAS[n] || [])]; v = BM[g]?.[n]; if (v == null) v = names.map(x => flat[x]).find(x => x != null);
-      // 2026-11-21：月を決めた予算の変更（settings/plan.budChg = [{from, name, v}]）。その月から先だけ変わる（前の月は今までの額）
-      const ch = (P.budChg || []).filter(c => c && c.name === n && c.from && c.from <= ym).sort((x, y) => x.from < y.from ? -1 : 1).pop(); if (ch) v = ch.v; }
+    if (go && go.start && ym >= go.start) v = gb.m[go.id]; else v = catBud0(ym, n, g);
     v = num0(v); mid[g][n] = v; alloc[g] += v; });
   return GCACHE[k] = {...base, alloc, allocMid: mid};
 }
@@ -2809,7 +2819,7 @@ function adjOf(ym){ const ck = "a" + ym; if (GCACHE[ck]) return GCACHE[ck]; cons
     const gb = goalBase(ym), amt = k => { const c = ruleCap("plus", k); return c.m === "amt" ? Math.max(0, num0(c.v)) : null; }, st = {
       living: () => { const a1 = amt("living"), g1 = Math.max(0, Math.min(rest, a1 != null ? a1 : Math.round(keep - pre))); if (g1){ r.add.living = num0(r.add.living) + g1; rest -= g1; } },
       goal: g => { if (rest <= 0 || !g || !g.start || ym < g.start) return; const a1 = amt("g:" + g.id);
-        const need = a1 != null ? a1 : num0(g.target) > 0 ? Math.round(num0(g.target) - (gb.bal[g.id] + gb.m[g.id] - catSpent(ym, g.name))) : 0;
+        const need = a1 != null ? a1 : num0(g.target) > 0 ? Math.round(num0(g.target) - (gb.bal[g.id] + gb.m[g.id] - goalSpent(ym, g))) : 0;
         const x = Math.max(0, Math.min(rest, need)); if (x){ const k = goalGrp(g); r.gadd[g.id] = x; r.add[k] = num0(r.add[k]) + x; rest -= x; } },
       pocket: () => { const each = Math.min(amt("pocket") ?? 50000, Math.floor(rest / 2)); if (each > 0){ r.add.miho = num0(r.add.miho) + each; r.add.kazu = num0(r.add.kazu) + each; rest -= each * 2; } },
       invest: () => { const a1 = amt("invest"), x = a1 != null ? Math.min(rest, a1) : rest; if (x > 0){ r.add.invest = num0(r.add.invest) + x; rest -= x; } } };
@@ -2824,7 +2834,7 @@ function adjOf(ym){ const ck = "a" + ym; if (GCACHE[ck]) return GCACHE[ck]; cons
     if (k === "d:pocket") return draw(k, 2 * Math.max(0, Math.min(num0(pb.miho), num0(pb.kazu))), x => { r.add.miho = num0(r.add.miho) - x / 2; r.add.kazu = num0(r.add.kazu) - x / 2; });
     if (k === "d:invest") return draw(k, Math.max(0, num0(p.alloc.invest)), x => { r.add.invest = num0(r.add.invest) - x; });
     if (k.startsWith("d:g:")){ const g = goalsOn().find(x => x.id === k.slice(4)); if (!g || !g.start || ym < g.start) return; const gk = goalGrp(g);
-      return draw(k, Math.max(0, gb2.bal[g.id] + gb2.m[g.id] - catSpent(ym, g.name)), x => { r.gadd[g.id] = num0(r.gadd[g.id]) - x; r.add[gk] = num0(r.add[gk]) - x; }); } });
+      return draw(k, Math.max(0, gb2.bal[g.id] + gb2.m[g.id] - goalSpent(ym, g)), x => { r.gadd[g.id] = num0(r.gadd[g.id]) - x; r.add[gk] = num0(r.add[gk]) - x; }); } });
   return GCACHE[ck] = r; }
 /* 2026-11-20：分配の順番（並べ替えられる）。settings/plan.rulePlus / ruleMinus */
 const RULE_P = {living: ["生活費の貯蓄", "生活費の予算6か月分になるまで"], goals: ["特別費・イベントの目標", "目標額のあるものに、一覧の上から"], pocket: ["👩🏼・🧑🏻の貯蓄", "1人 月5万まで、同じ額ずつ"], invest: ["NISA積立", "残りぜんぶ"]};
@@ -3073,7 +3083,7 @@ function zanNet(ym, used){ const r = {}; if (!used || !Object.keys(used).length)
 /* 2026-11-10：収入は🧑🏻・👩🏼に分けて入れる（monthin.zan の「収入🧑🏻」「収入👩🏼」。合計は「収入」にも入れてトップで使う）。
    収入の予定：plans/<月>.incBud = {kazu, miho}。「来月からも」なら settings/plan.baseInc（incFrom の月から） */
 /* 枠の中のカテゴリの並び：こづかい → 貯金から → ローン の順（ほかはその前に今の順で）。入力の画面と予算の一覧で同じ */
-const zanCatsOf0 = g => { if (g === "irregular" || g === "event"){ const gn = goalsOn().filter(x => goalGrp(x) === g).map(x => x.name); return [...gn, ...zanCats().filter(n => zanGrp(n) === g && !gn.includes(n))]; }   // 2026-11-21：目標は自分の枠にだけ出す   // 2026-11-11：特別費は一覧の順（こづかい・税保険等・医療・建替）
+const zanCatsOf0 = g => { if (g === "irregular" || g === "event"){ const gn = goalsOn().filter(x => goalGrp(x) === g && !isPool(x)).map(x => x.name); return [...gn, ...zanCats().filter(n => zanGrp(n) === g && !gn.includes(n))]; }   // 2026-11-21：目標は自分の枠にだけ出す   // 2026-11-11：特別費は一覧の順（こづかい・税保険等・医療・建替）
   const ord = n => ["こづかい", "貯金から", "ローン", "奨学金", "矯正"].findIndex(w => n.includes(w)); return zanCats().filter(n => zanGrp(n) === g).map((n, i) => [n, i]).sort((a, b) => ord(a[0]) - ord(b[0]) || a[1] - b[1]).map(([n]) => n); };
 /* 2026-11-23：終わったカテゴリ（settings/zancats.ended = {名前: {first, last, note, at}}）。最後に払った月より後の月の一覧には出さない（その月に支出が入っていれば出す）。前の月の記録・予算はそのまま */
 const zEnded = () => S.zancats?.ended || {};
@@ -3417,7 +3427,7 @@ function lifeModel(ov){
   rows.push(grp("taxw", "税・社保 天引き", -1, TXK0.map(([c, l]) => ({id: "taxw-" + c, label: l, f: ym => TAXP.reduce((t, [k]) => t + withOf(k, ym, c), 0)}))));
   rows.push(grp("living", "生活費", -1, lvKids, {icon: "🏥"}));
   let evRowL = null, evFundAt = () => 0;
-  // 2026-11-21：特別費＝税保険等（手払いの税・社会保険料。目標の月に向けて積み立てる）＋医療など（毎月）。👩🏼・🧑🏻の同じ名前のカテゴリは1行にまとめる
+  // 2026-11-21：特別費＝税保険等（手払いの税・社会保険料。目標の月に向けて積み立てる）＋医療など（毎月）。2026-11-25：消耗品（👩🏼・🧑🏻）も特別費の1行「消耗品」に。👩🏼・🧑🏻の同じ名前のカテゴリは1行にまとめる
   { const noEmo = n => String(n).replace(/^(👬|👩🏼|🧑🏻|🧰)\s*/u, ""), isKoz = n => String(n).includes("こづかい"), merge = arr => { const m = new Map(); arr.forEach(([n, v]) => { const k = noEmo(n); m.set(k, num0(m.get(k)) + v); }); return [...m].map(([n, v]) => catKid([n, v])); };
     const irr = [{id: "irr-tax", label: "税保険等（手払い）", fixed: true, f: ym => TAXP.reduce((t, [k]) => t + handBy(k, ym), 0)}, ...merge(lvCats.filter(([n]) => zanGrp(n) === "irregular" && !isKoz(n)))];
     rows.push(grp("lvg-irregular", GN.irregular, -1, irr));
@@ -3928,7 +3938,7 @@ document.addEventListener("pointerdown", e => { const h = e.target.closest?.(".r
     save(() => db.doc("settings/plan").set({...(S.plan || {}), [l === "plus" ? "rulePlus" : "ruleMinus"]: L, updatedAt: new Date().toISOString()}), "順番を変えました").then(ok => ok && setTimeout(allocRuleSheet, 250)); }; });
 const ruleMv = (l, i, n) => `<span class="rmv"><button type="button" class="sbtn ghost2" data-act="rulemv" data-l="${l}" data-i="${i}" data-d="-1" ${i ? "" : "disabled"} aria-label="上へ">↑</button><button type="button" class="sbtn ghost2" data-act="rulemv" data-l="${l}" data-i="${i}" data-d="1" ${i < n - 1 ? "" : "disabled"} aria-label="下へ">↓</button></span>`;
 /* 2026-11-22：特別費・イベントの貯蓄が、目標の積立の予定（前の月の残高＋今月の積立−今月払う予定）より少ないか */
-function goalBehind(ym, grp, actual){ const gb = goalBase(ym); const need = goalsOn().filter(g => goalGrp(g) === grp && g.start && ym >= g.start).reduce((t, g) => t + Math.max(0, num0(gb.bal[g.id]) + num0(gb.m[g.id]) - num0(spendDef(ym, g.name))), 0); return need > 0 && actual < need - 500; }
+function goalBehind(ym, grp, actual){ const gb = goalBase(ym); const need = goalsOn().filter(g => goalGrp(g) === grp && g.start && ym >= g.start).reduce((t, g) => t + Math.max(0, num0(gb.bal[g.id]) + num0(gb.m[g.id]) - goalSpendDef(ym, g)), 0); return need > 0 && actual < need - 500; }
 /* 2026-11-22：行き先ごとの上限の入力（月○円まで）と、もう1つの選び方（目標額まで／残りぜんぶ／残高ぜんぶ）。どちらか1つが必ず選ばれている */
 function capCtl(l, k){ const c = ruleCap(l, k), g = k.replace(/^d:/, "").startsWith("g:") ? goalsAll().find(x => x.id === k.replace(/^d:/, "").slice(2)) : null;
   const alt = l === "plus" ? (k === "invest" ? ["rest", "残りぜんぶ"] : k === "living" || (g && num0(g.target) > 0) ? ["goal", "目標額まで"] : null) : ["all", k === "d:invest" ? "積立ぜんぶ" : "残高ぜんぶ"];
@@ -4027,7 +4037,7 @@ function grpGoalsSheet(grp){ const ym = curYm(), gb0 = goalBase(ym), gb = {...gb
   const base = n => String(n).replace(/^(🧑🏻|👩🏼)/, ""), grpd = grp === "irregular" ? Object.values(gs0.reduce((o, g) => { (o[base(g.name)] ||= []).push(g); return o; }, {})) : gs0.map(g => [g]);
   const gs = grpd.map(a => a.length === 1 ? a[0] : {id: "grp:" + a.map(g => g.id).join(","), name: base(a[0].name) + "（2人）", target: a.reduce((t, g) => t + num0(g.target), 0) || null, due: "", members: a});
   if (grpd.some(a => a.length > 1)){ gs.forEach(g => { if (g.members){ gb.m[g.id] = g.members.reduce((t, x) => t + num0(gb.m[x.id]), 0); ge[g.id] = g.members.reduce((t, x) => t + num0(ge[x.id]), 0); } }); }
-  const nxt = g => (autoInfo().lumps[g.auto] || []).find(x => x.ym >= ym && x.what !== "ガソリン" && x.what !== "駐車場"), sub = g => g.auto ? (x => [x ? `次：${x.what} ${ymLabel(x.ym)}までに ${yen(x.amt)}` : "", `毎月 ${yen(num0(gb.m[g.id]))}`, "ライフプランから"].filter(Boolean).join("・"))(nxt(g)) : [num0(g.target) > 0 ? `目標 ${yen(num0(g.target))}${g.due ? `（${ymLabel(g.due)}まで）` : ""}` : "", `毎月 ${yen(num0(gb.m[g.id]))}`].filter(Boolean).join("・");
+  const nxt = g => (autoInfo().lumps[g.auto] || []).find(x => x.ym >= ym && x.what !== "ガソリン" && x.what !== "駐車場"), sub = g => isPool(g) ? `2人の予算の合計 毎月 ${yen(num0(gb.m[g.id]))}・余りを貯める` : g.auto ? (x => [x ? `次：${x.what} ${ymLabel(x.ym)}までに ${yen(x.amt)}` : "", `毎月 ${yen(num0(gb.m[g.id]))}`, "ライフプランから"].filter(Boolean).join("・"))(nxt(g)) : [num0(g.target) > 0 ? `目標 ${yen(num0(g.target))}${g.due ? `（${ymLabel(g.due)}まで）` : ""}` : "", `毎月 ${yen(num0(gb.m[g.id]))}`].filter(Boolean).join("・");
   openSheet(`<h3>${GN[grp]}の貯蓄（${ymLabel(ym)}末）</h3>
   <section class="cgrp" style="--zc:${GCOL[grp]}">${gs.map(g => `<button type="button" class="cmid" data-act="goalEdit" data-id="${esc(g.id)}" data-g="${grp}"><span class="n"><span class="dot" style="background:${GCOL[grp]}"></span> ${esc(g.name)}<small class="gsub">${sub(g)}</small></span><span class="num${num0(ge[g.id]) < 0 ? " neg" : ""}">${yen(num0(ge[g.id]))}</span><span class="chev">›</span></button>`).join("") || `<p class="note" style="padding:8px">まだありません</p>`}
     <div class="cmid tot"><span class="n"><b>合計</b>${Math.round(bb - sumG) ? `<small class="gsub">どれにも入っていない分 ${yen(bb - sumG)}</small>` : ""}</span><span class="num"><b>${yen(bb)}</b></span><span></span></div></section>
@@ -4038,6 +4048,11 @@ function goalEditSheet(id, grp){ if (String(id).startsWith("grp:")){ const ids =
     openSheet(`<h3>${esc(String(ms[0]?.name || "").replace(/^(🧑🏻|👩🏼)/, ""))}（2人）</h3><p class="note">貯蓄は2人分をまとめて見せています。直すときは、それぞれをタップしてください。</p>
     <section class="cgrp" style="--zc:${GCOL.irregular}">${ms.map(g => `<button type="button" class="cmid" data-act="goalEdit" data-id="${esc(g.id)}" data-g="irregular"><span class="n">${esc(g.name)}<small class="gsub">${num0(g.target) > 0 ? `目標 ${yen(num0(g.target))}・` : ""}毎月 ${yen(num0(gb.m[g.id]))}</small></span><span class="num">${yen(num0(ge[g.id]))}</span><span class="chev">›</span></button>`).join("")}</section>
     <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); return; }
+  { const gp = goalsAll().find(x => x.id === id); if (isPool(gp)){ const ym = curYm(), gb = goalBase(ym), ge = goalEnd(ym);   // 2026-11-25：2人合算の積立（消耗品）
+    openSheet(`<h3>${esc(gp.name)}（2人合算）</h3><p class="note">${gp.cats.map(esc).join("・")}の予算の合計を毎月積み立てて、2つのカテゴリで使った分をここから出します。余った分はここに貯まり、足りない月はここから出します。毎月の額を変えるときは、それぞれのカテゴリの予算（消耗品タブの「予算」でも変えられます）を直してください。</p>
+    <section class="cgrp" style="--zc:${GCOL.irregular}">${gp.cats.map(n => `<div class="cmid tot"><span class="n">${esc(n)}<small class="gsub">予算 ${yen(num0(zanBud(ym, n)))}</small></span><span class="num">使った ${yen(num0(catSpent(ym, n)))}</span><span></span></div>`).join("")}
+      <div class="cmid tot"><span class="n"><b>${ymLabel(ym)}末の貯蓄</b><small class="gsub">先月末 ${yen(num0(gb.bal[gp.id]))}・今月の積立 ${yen(num0(gb.m[gp.id]))}</small></span><span class="num${num0(ge[gp.id]) < 0 ? " neg" : ""}"><b>${yen(num0(ge[gp.id]))}</b></span><span></span></div></section>
+    <div class="sheet-actions"><button type="button" class="btn" data-act="close">閉じる</button></div>`); return; } }
   { const ga = goalsAll().find(x => x.id === id); if (ga?.auto){ const all = (autoInfo().lumps[ga.auto] || []).filter(x => x.ym >= curYm()), mo = all.filter(x => x.what === "ガソリン" || x.what === "駐車場"), ls = all.filter(x => !mo.includes(x)).slice(0, 6), mo1 = mo.length ? mo.filter(x => x.ym === mo[0].ym).reduce((t, x) => t + x.amt, 0) : 0;
     openSheet(`<h3>${esc(ga.name)}</h3><p class="note">ライフプランの予定から自動で作っている積立です。この先の予定のどれにも間に合うよう、毎月の額を決めています。金額や時期を変えるときは、ライフプランの予定を直してください。使ったときは「${esc(ga.name)}」のカテゴリで支出を入れます。</p>
     <section class="cgrp" style="--zc:${GCOL.event}">${ls.map(x => `<div class="cmid tot"><span class="n">${esc(x.what)}<small class="gsub">${ymLabel(x.ym)}</small></span><span class="num">${yen(x.amt)}</span><span></span></div>`).join("")}${mo1 ? `<div class="cmid tot"><span class="n">ガソリン・駐車場<small class="gsub">${ymLabel(mo[0].ym)}から毎月</small></span><span class="num">${yen(mo1)}</span><span></span></div>` : ""}</section>
@@ -4102,7 +4117,8 @@ function goalsSheet(){ const ym = curYm(), gb = goalBase(ym), ge = goalEnd(ym), 
   openSheet(`<h3>特別費・イベントの貯蓄（${ymLabel(ym)}末）</h3>
   <form data-form="goals" style="display:grid;gap:10px">
     <ul class="kv"><li><span>特別費の貯蓄</span><span class="num">${yen(num0(bb.irregular))}</span></li><li><span>イベントの貯蓄</span><span class="num">${yen(num0(bb.event))}</span></li><li><span>目標に入っている分</span><span class="num">${yen(sumG)}</span></li><li><span>どの目標にも入っていない分</span><span class="num">${yen(irr - sumG)}</span></li></ul>
-    <div id="glist" style="display:grid;gap:8px">${gs.filter(g => !g.auto).map(g => goalCard(g, gb, ge)).join("")}</div>
+    <div id="glist" style="display:grid;gap:8px">${gs.filter(g => !g.auto && !isPool(g)).map(g => goalCard(g, gb, ge)).join("")}</div>
+    ${gs.filter(isPool).map(g => `<section class="bag" style="--zc:${GCOL.irregular}"><div class="bah"><b>${esc(g.name)}</b><small class="note">特別費・2人合算</small></div><p class="note gst">${g.cats.map(esc).join("・")}の予算の合計を積み立てて、余りを貯めます。今 <b>${yen(num0(ge[g.id]))}</b>・今月の積立 <b>${yen(num0(gb.m[g.id]))}</b></p></section>`).join("")}
     ${gs.some(g => g.auto) ? `<h4 style="margin:6px 0 0">自動で積み立てるもの（ライフプランの予定から）</h4>${gs.filter(g => g.auto).map(g => autoGoalCard(g, gb, ge, ym)).join("")}` : ""}
     <div class="btnrow"><button type="button" class="btn ghost" data-act="goaladd">＋ 特別費の目標</button><button type="button" class="btn ghost" data-act="goaladd" data-g="event">＋ イベント</button></div>
     <p class="note">目標額と「いつまで」を入れると、毎月の積立＝（目標額−今の残高）÷残りの月数 を自動で出し、毎月の特別費の予算にします。期限のないもの（👬こづかいなど）は「毎月」の額を積み立てます。目標額だけ入れて期限がないものは、毎月最低5,000円を積み立てます（目標額に着いたら止まります）。収入が予算より多い月は、余りが目標額まで上乗せされます（上の目標から）。名前はカテゴリになり、使ったときはそのカテゴリで支出を入れます（使ったことのある名前は変えられません）。</p>
@@ -5294,7 +5310,7 @@ async function submitBody(e, f){
       if (due && !(tg > 0)){ toast(`「${name}」の目標額を入れてください`); return; }
       out.push({...o, id: gid || "g" + Date.now().toString(36) + out.length, name, target: tg, due: due || "", monthly: mo, grp: c.querySelector(".ggrp")?.value === "event" ? "event" : "irregular", start: o.start || TODAY.slice(0, 7), off: false}); }
     old.filter(g => g.off && !out.some(x => x.id === g.id)).forEach(g => out.push(g));
-    (S.plan?.goals || []).filter(g => old.find(o => o.id === g.id)?.auto && !out.some(x => x.id === g.id)).forEach(g => out.push(g));   // 2026-11-22：自動の積立（画面では直さない）はそのまま残す
+    (S.plan?.goals || []).filter(g => (o => o?.auto || isPool(o))(old.find(o => o.id === g.id)) && !out.some(x => x.id === g.id)).forEach(g => out.push(g));   /* 2026-11-25：2人合算の積立（消耗品）も */   // 2026-11-22：自動の積立（画面では直さない）はそのまま残す
     ok = await save(() => db.doc("settings/plan").set({...(S.plan || {}), goals: out, updatedAt: new Date().toISOString()}), "特別費の目標を保存しました");
     if (ok){ closeSheet(); return; }
   } else if (kind === "amari"){
@@ -5339,7 +5355,7 @@ async function submitBody(e, f){
     if (ok && ref?.id) syncTxSoon(["app-" + ref.id]);
   } else if (kind === "consbud"){   // 2026-11-23：消耗品タブから家計の予算を変える（今月から先）
     const m = TODAY.slice(0, 7), v = w => Math.round(num0(numOrNull(val("cb_" + w))) / 1000) * 1000; if (!confirm(`${ymLabel(m)}以降の消耗品の予算を変えますか？`)) return;
-    ok = await budChgSave(m, {living: {[CONS_CAT.miho]: v("miho"), [CONS_CAT.kazu]: v("kazu")}});
+    ok = await budChgSave(m, {irregular: {[CONS_CAT.miho]: v("miho"), [CONS_CAT.kazu]: v("kazu")}});
     if (ok) await db.doc("settings/main").set({...S.settings, budgets: {...(S.settings.budgets || {}), consMiho: v("miho"), consKazu: v("kazu")}, updatedAt: new Date().toISOString()}).catch(() => {});
   } else if (kind === "catend"){   // 2026-11-23：カテゴリを終わりにする
     const n = $("ce_n")?.value, last = $("ce_l")?.value, note = ($("ce_m")?.value || "").trim(); if (!n || !/^\d{4}-\d{2}$/.test(last || "")){ toast("カテゴリーと月を選んでください"); return; }

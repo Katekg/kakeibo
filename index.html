@@ -237,6 +237,8 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: no-preference) { .sheet { animation: sheetUp .2s ease-out; } @keyframes sheetUp { from { transform: translateY(40px); } } .bar i, .mbar i { transition: width .3s ease; } }
 
 .toast { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 60; background: var(--accent); color: var(--accent-ink); font-weight: 700; padding: 10px 18px; border-radius: 999px; box-shadow: var(--shadow); max-width: calc(100% - 32px); text-align: center; }
+.savefail { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 61; width: min(440px, calc(100% - 32px)); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--alert, #c0392b); border-radius: 14px; box-shadow: var(--shadow); padding: 10px 12px; font-size: .84rem; font-weight: 600; }
+.savefail[hidden] { display: none; } .savefail span { flex: 1 1 100%; } .savefail button { font: inherit; font-size: .8rem; border-radius: 999px; padding: 6px 14px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; } .savefail button[data-sf="r"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .empty { color: var(--muted); text-align: center; padding: 24px 8px; }
 
 /* 残高・家計簿 */
@@ -1432,7 +1434,7 @@ html.lifewide .wrap { padding-bottom: calc(78px + max(6px, env(safe-area-inset-b
   const snapC = c => ({docs: Object.entries(CACHE[c] || {}).map(([id, v]) => ({id, data: () => v}))});
   const snapD = (c, id) => { const v = (CACHE[c] || {})[id]; return {exists: !!v, data: () => v}; };
   const fire = cs => subs.slice().forEach(s => { if (!cs || cs.includes(s.c)) try { s.cb(s.id == null ? snapC(s.c) : snapD(s.c, s.id)); } catch (e) { console.error(e); } });
-  const load = () => loaded = (KEY() || inGAS ? run("getAll") : new Promise(() => { const g = () => keyGate(); document.body ? g() : document.addEventListener("DOMContentLoaded", g); })).then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; saveLocal(); });
+  const load = () => loaded = (KEY() || inGAS ? run("getAll") : new Promise(() => { const g = () => keyGate(); document.body ? g() : document.addEventListener("DOMContentLoaded", g); })).then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); replay(); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; saveLocal(); });
   /* 2026-11-21：ホーム画面アプリは、前回のデータ（この端末の中だけに保存）ですぐ画面を出し、裏で最新を取りに行く。
      最新が届くまでは「更新中」を出し、保存（書き込み）は最新が届いてからにする */
   const LKEY = "kkCache1", saveLocal = () => { if (inGAS) return; clearTimeout(saveLocal.t); saveLocal.t = setTimeout(() => { try { localStorage.setItem(LKEY, JSON.stringify({data: CACHE, stamp: STAMP, me: window.KAKEI_ME || "", url: window.KAKEI_SS || "", at: Date.now()})); } catch (e) {} }, 300); };
@@ -1440,22 +1442,67 @@ html.lifewide .wrap { padding-bottom: calc(78px + max(6px, env(safe-area-inset-b
   let fresh = null;
   const cached = (() => { if (inGAS || !KEY()) return null; try { const c = JSON.parse(localStorage.getItem(LKEY) || "null"); return c && c.data ? c : null; } catch (e) { return null; } })();
   if (cached){ Object.assign(CACHE, cached.data); STAMP = cached.stamp; window.KAKEI_ME = cached.me; window.KAKEI_SS = cached.url; loaded = Promise.resolve(); stale(true);
-    fresh = run("getAll").then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; saveLocal(); stale(false); fire(); }, e => { stale(false); throw e; });
+    fresh = run("getAll").then(r => { Object.keys(CACHE).forEach(k => delete CACHE[k]); Object.assign(CACHE, r.data); replay(); STAMP = r.stamp; window.KAKEI_ME = r.me || ""; window.KAKEI_SS = r.url || ""; saveLocal(); stale(false); fire(); }, e => { stale(false); throw e; });
   } else load();
-  const ready = () => fresh ? fresh.catch(() => {}) : Promise.resolve();
-  // 相手のスマホで記録した分：1分ごと（と、画面に戻ったとき）に変わったかを見て、変わっていれば読み直す
-  const check = async () => { if (document.hidden || window.KAKEI_STALE) return; try { const st = await run("getStamp"); if (st !== STAMP){ await load(); fire(); } } catch (e) {} };
+  // 相手のスマホで記録した分：1分ごと（と、画面に戻ったとき）に変わったかを見て、変わっていれば読み直す（保存待ちがある間は待つ）
+  const check = async () => { if (document.hidden || window.KAKEI_STALE || Q.length) return; try { const st = await run("getStamp"); if (st !== STAMP && !Q.length){ await load(); fire(); } } catch (e) {} };
   setInterval(check, 60000); document.addEventListener("visibilitychange", check);
   const local = (c, id, v, st) => { if (st) STAMP = st; CACHE[c] = CACHE[c] || {}; if (v === null) delete CACHE[c][id]; else CACHE[c][id] = v; fire([c]); saveLocal(); };
   const clean = o => JSON.parse(JSON.stringify(o));
   const listen = (c, id) => (cb, err) => { const s = {c, id, cb}; subs.push(s); loaded.then(() => cb(id == null ? snapC(c) : snapD(c, id))).catch(e => err && err(e)); return () => subs.splice(subs.indexOf(s), 1); };
+  /* 2026-11-27：保存は「先に画面へ反映 → 裏で保存」にする。
+     書き込みは順番待ちの列（Q）に入れて1件ずつ送り、画面（CACHE）にはすぐ反映する。送れなかったら、その操作をまとめて元に戻し、
+     「もう一度保存」を出す（kakei-savefail）。列はこの端末にも控えるので、保存中にアプリを閉じても次に開いた時に送り直す。 */
+  const plain = v => v && typeof v === "object" && !Array.isArray(v);
+  const merge = (a, b) => { const o = plain(a) ? {...a} : {}; Object.keys(b).forEach(k => { o[k] = plain(b[k]) && plain(o[k]) ? merge(o[k], b[k]) : b[k]; }); return o; };
+  const QKEY = "kkQueue1", BASE = {}; let Q = [], seq = 0, busy = false, CUR = null;
+  const K = (c, id) => c + "/" + id, same = (o, c, id) => o.c === c && o.id === id;
+  const qSave = () => { if (inGAS) return; try { Q.length ? localStorage.setItem(QKEY, JSON.stringify(Q)) : localStorage.removeItem(QKEY); } catch (e) {} };
+  const put = (o, c = CACHE) => { c[o.c] = c[o.c] || {}; const cur = c[o.c][o.id];
+    if (o.k === "del") delete c[o.c][o.id]; else c[o.c][o.id] = o.k === "set" ? clean(o.doc) : merge(cur, o.doc); };
+  const rebuild = (c, id) => { const k = K(c, id); CACHE[c] = CACHE[c] || {}; if (k in BASE){ if (BASE[k] == null) delete CACHE[c][id]; else CACHE[c][id] = clean(BASE[k]); }
+    Q.filter(o => same(o, c, id)).forEach(o => put(o)); if (!Q.some(o => same(o, c, id))) delete BASE[k]; };
+  const badge = () => { const on = busy || Q.length > 0; window.KAKEI_SAVING = on; const f = () => { let b = document.getElementById("saveBadge");
+    if (on && !b){ b = document.createElement("div"); b.id = "saveBadge"; b.textContent = "保存中…"; b.style.cssText = "position:fixed;top:calc(6px + env(safe-area-inset-top,0px));left:8px;z-index:50;font:600 11px -apple-system,sans-serif;color:#5b6;background:rgba(255,255,255,.92);border:1px solid #cde;border-radius:999px;padding:2px 9px;pointer-events:none"; document.body.appendChild(b); }
+    if (!on && b) b.remove(); }; document.body ? f() : document.addEventListener("DOMContentLoaded", f); };
+  // 読み直した時：保存待ちの分は、届いた最新の上にもう一度のせる
+  const replay = () => { Object.keys(BASE).forEach(k => delete BASE[k]); Q.forEach(o => { const k = K(o.c, o.id); if (!(k in BASE)){ const v = (CACHE[o.c] || {})[o.id]; BASE[k] = v == null ? null : clean(v); } put(o); }); };
+  const enqueue = o => { const k = K(o.c, o.id); if (!(k in BASE)){ const v = (CACHE[o.c] || {})[o.id]; BASE[k] = v == null ? null : clean(v); }
+    Q.push(o); qSave(); put(o); fire([o.c]); saveLocal(); badge(); pump(); };
+  const op = (k, c, id, doc) => { const g = CUR || {g: "g" + Date.now().toString(36) + "-" + (++seq), label: ""}; enqueue({n: ++seq, k, c, id, doc: doc == null ? null : clean(doc), g: g.g, label: g.label}); return Promise.resolve(); };
+  const send = async o => { const k = K(o.c, o.id), base = BASE[k]; let r;
+    if (o.k === "set") r = await run("setDoc", o.c, o.id, o.doc, false, base?.updatedAt ?? null);
+    else if (o.k === "upd") r = await run("setDoc", o.c, o.id, o.doc, true);
+    else r = await run("delDoc", o.c, o.id);
+    if (r?.stamp) STAMP = r.stamp; const v = o.k === "del" ? null : (r?.doc ?? null);
+    Q = Q.filter(x => x !== o); qSave();
+    if (Q.some(x => same(x, o.c, o.id))) BASE[k] = v == null ? null : clean(v);   // まだ後ろに同じものの保存が残っている時は、画面はそのまま
+    else { delete BASE[k]; if (o.k === "del" || v) local(o.c, o.id, v ? v : null); } };
+  const fail = async (o, e) => { const stale = String(e?.message || e).includes("STALE"), gone = Q.filter(x => x.g === o.g);
+    Q = Q.filter(x => x.g !== o.g); qSave();
+    if (stale){ try { await load(); } catch (x) {} } else { const ks = new Map(gone.map(x => [K(x.c, x.id), x])); ks.forEach(x => rebuild(x.c, x.id)); saveLocal(); }
+    fire(); badge();
+    try { window.dispatchEvent(new CustomEvent("kakei-savefail", {detail: {label: o.label, stale, retry: stale ? null : () => gone.forEach(x => enqueue({...x, n: ++seq}))}})); } catch (x) {} };
+  const pump = async () => { if (busy) return; busy = true; badge();
+    try { while (Q.length){ await (fresh || loaded || Promise.resolve()).catch(() => {}); const o = Q[0]; if (!o) break; try { await send(o); } catch (e){ if (leaving) break; await fail(o, e); } } }
+    finally { busy = false; badge(); if (Q.length) pump(); } };
+  // 前に送りきれなかった分（アプリを閉じた等）：画面に反映して、送り直す
+  if (!inGAS) try { const p = JSON.parse(localStorage.getItem(QKEY) || "null"); if (Array.isArray(p) && p.length){ p.forEach(o => { const k = K(o.c, o.id); if (!(k in BASE)){ const v = (CACHE[o.c] || {})[o.id]; BASE[k] = v == null ? null : clean(v); } Q.push(o); put(o); }); seq = Math.max(0, ...p.map(o => Number(o.n) || 0)); badge(); setTimeout(pump, 0); } } catch (e) {}
+  // 閉じる・読み直す途中で通信が切れた分は失敗にしない（控えから次に開いた時に送り直す）
+  let leaving = false; window.addEventListener("pagehide", () => { leaving = true; }); window.addEventListener("pageshow", () => { leaving = false; if (Q.length) pump(); });
+  window.addEventListener("beforeunload", e => { if (Q.length){ e.preventDefault(); e.returnValue = ""; } });
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
   const DB = {
-    collection: c => ({onSnapshot: listen(c, null), add: async doc => { await ready(); const r = await run("addDoc", c, clean(doc)); local(c, r.id, r.doc, r.stamp); return {id: r.id}; }}),
+    // add も、その場で番号を決めて画面に出す（保存は裏で）
+    collection: c => ({onSnapshot: listen(c, null), add: async doc => { const id = newId(); await op("set", c, id, doc); return {id}; }}),
     doc: p => { const [c, id] = p.split("/"); return {
       onSnapshot: listen(c, id),
-      set: async doc => { await ready(); let r; try { r = await run("setDoc", c, id, clean(doc), false, (CACHE[c] || {})[id]?.updatedAt ?? null); } catch (e){ if (String(e?.message || e).includes("STALE")){ await load(); fire(); const x = new Error("stale"); x.code = "stale"; throw x; } throw e; } local(c, id, r.doc, r.stamp); },   // 2026-11-17：古い画面からの上書きを止める
-      update: async part => { await ready(); const r = await run("setDoc", c, id, clean(part), true); local(c, id, r.doc, r.stamp); },
-      delete: async () => { await ready(); const r = await run("delDoc", c, id); local(c, id, null, r.stamp); }}; }
+      set: doc => op("set", c, id, doc),   // 2026-11-17：古い画面からの上書きは、送る時に前の版（BASE）と比べて止める
+      update: part => op("upd", c, id, part),
+      delete: () => op("del", c, id, null)}; },
+    // ひとつの操作（保存ボタン1回）の書き込みをまとめる：途中で失敗したら、まとめて元に戻す
+    group: async (label, fn) => { const prev = CUR; CUR = {g: "g" + Date.now().toString(36) + "-" + (++seq), label: label || ""}; try { return await fn(); } finally { CUR = prev; } },
+    pending: () => Q.length + (busy ? 1 : 0)
   };
   window.claude = {use: async n => n === "db" ? DB : null};
   window.GAS = run;   // Apps Script のほかの関数（Gemini で調べる aiSales・aiPrice）
@@ -1476,6 +1523,7 @@ html.lifewide .wrap { padding-bottom: calc(78px + max(6px, env(safe-area-inset-b
 </div>
 <div class="sheet-wrap" id="sheetWrap" hidden lang="ja"><div class="sheet-bg" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true" id="sheet"></div></div>
 <div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+<div class="savefail" id="savefail" hidden role="alert"></div>
 <div class="tip" id="tip" hidden></div>
 
 <script>
@@ -4756,9 +4804,17 @@ function fitTop(){ if (fitIOS()) return;
 
 /* ---------- actions ---------- */
 function toast(msg){ const t = $("toast"); t.textContent = msg; t.hidden = false; t.classList.remove("show"); void t.offsetWidth; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
+/* 2026-11-27：裏の保存が失敗した時：元に戻したことを知らせて、「もう一度保存」を出す */
+function saveFail(d){ const t = $("savefail"); if (!t) return; const what = d?.label && !/^(保存しました|追加しました|消しました)$/.test(d.label) ? `「${d.label}」` : "さっきの変更";
+  t.innerHTML = d?.stale ? `<span>ほかの画面で先に変更されていたので、${esc(what)}は保存せず元に戻しました。もう一度入れてください</span><button type="button" data-sf="x">閉じる</button>`
+    : `<span>${esc(what)}が保存できなかったので、元に戻しました（電波を確かめて、もう一度どうぞ）</span><button type="button" data-sf="r">もう一度保存</button><button type="button" data-sf="x">閉じる</button>`;
+  t.hidden = false; saveFail.retry = d?.retry || null; clearTimeout(saveFail.t); saveFail.t = setTimeout(() => t.hidden = true, 15000); }
+window.addEventListener("kakei-savefail", e => saveFail(e.detail));
+document.addEventListener("click", e => { const b = e.target.closest("[data-sf]"); if (!b) return; const t = $("savefail"); if (t) t.hidden = true;
+  if (b.dataset.sf === "r" && saveFail.retry){ const r = saveFail.retry; saveFail.retry = null; r(); toast("もう一度保存しています"); } });
 async function save(fn, ok){
   if (!db){ toast("claude.ai で開くと保存できます"); return false; }
-  try { await fn(); toast(ok); return true; }
+  try { await (db.group ? db.group(ok, fn) : fn()); toast(ok); return true; }   // 2026-11-27：画面にはすぐ反映。保存は裏で（失敗したら saveFail）
   catch (e){ toast(e?.code === "stale" ? "ほかの画面で先に変更されていたので、保存をやめて読み込み直しました。もう一度入れてください" : e?.code === "invalid_argument" ? "保存する権限がありません。共有の設定を確認してください" : "保存できませんでした。もう一度お試しください"); return false; }
 }
 document.addEventListener("click", e => {

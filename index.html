@@ -650,6 +650,9 @@ div.down { text-align: center; font-weight: 700; color: var(--muted); font-size:
 .subtabs button { border: 0; background: none; border-radius: 999px; padding: 6px 4px; font-weight: 700; font-size: .88rem; color: var(--muted); cursor: pointer; }
 .subtabs button[aria-current="page"] { background: var(--lav); color: var(--accent); }
 .group.soon > h3 { color: var(--alert); }
+.group.unused > h3 { color: var(--accent); }
+.group.unused .irow { padding: 5px 8px 5px 14px; gap: 8px; } .group.unused .ibtn .nm { font-size: .84rem; } .group.unused .ibtn .sub { font-size: .68rem; }
+.group.unused .ibtns { padding: 0 8px 6px 14px !important; gap: 6px !important; } .group.unused .ibtns .sbtn { padding: 4px 10px !important; font-size: .76rem !important; min-height: 0 !important; }
 .group.soon .list { border-color: color-mix(in srgb, var(--alert) 35%, var(--line)); }
 .pietxt { font-size: 15px; font-weight: 700; fill: var(--ink); font-family: var(--font); }
 
@@ -1548,18 +1551,20 @@ const dTo = d => dBetween(TODAY, d);
    ・前の分の予定の日より前に買った → 今回の分は前の分の予定の日から使い始める
    ・予定の日より後に買った → 前の分はその購入日まで持ったとみなす
    ・購入のときに「前の分はもう使い切った」（fresh）→ 前の分はその購入日で終わり
-   done＝次の分に替わって日数が決まった期間。平均はこの日数から出す */
+   done＝次の分に替わって日数が決まった期間。平均はこの日数から出す
+   2026-11-28：「使い始めた」（startAt）を押した分は、その日から使い始め、前の分はその日で使い切ったとみなす。
+   押していない分は今までどおり、前の分の予定の日が来たら自動で使い始める（未使用＝始まりの日がまだ来ていない分） */
 function chainOf(it){
   const ps = histOf(it.id).filter(p => p.date).slice().reverse(), n = ps.length, segs = [];
   if (!n){ const st = inUseOf(it), k = 1 + stockOf(it), d = Number(it.days) || Math.round(unitMo(it) * 30 * k);
     if (!st || !d) return []; const pl = addD(st, d); return [{p: null, start: st, plan: pl, end: pl, days: d, packs: k, done: false}]; }
   ps.forEach((p, i) => {
-    const pv = segs[segs.length - 1]; let start = p.date;
-    if (pv){ if (!pv.plan || p.fresh || p.date >= pv.plan){ pv.end = p.date > pv.start ? p.date : pv.start; } else start = pv.plan;
+    const pv = segs[segs.length - 1], st = p.startAt && p.startAt >= p.date ? p.startAt : null; let start = st || p.date;
+    if (pv){ if (st){ pv.end = st > pv.start ? st : pv.start; } else if (!pv.plan || p.fresh || p.date >= pv.plan){ pv.end = p.date > pv.start ? p.date : pv.start; } else start = pv.plan;
       pv.days = dBetween(pv.start, pv.end); pv.done = true; }
     const d = Number(p.days) || (i === n - 1 && (Number(it.days) || mo2d(it.months, start))) || mo2d(p.months, start) || Number(it.days) || mo2d(it.months, start) || 0;
     const pl = d ? addD(start, d) : null;
-    segs.push({p, start, plan: pl, end: pl, days: d, planDays: d, packs: unitsOf(p), done: false});
+    segs.push({p, start, plan: pl, end: pl, days: d, planDays: d, packs: unitsOf(p), done: false, started: !!st});
   });
   return segs;
 }
@@ -1574,6 +1579,8 @@ function lifeOf(it){ const segs = chainOf(it); if (!segs.length) return null; co
   const stock = (k - 1 - used) + segs.slice(segs.indexOf(cur) + 1).reduce((t, x) => t + x.packs, 0) - (used < 0 ? 1 : 0);
   return {segs, cur, start: cur.start, swap, out: last.plan, dSwap: swap ? dTo(swap) : null, dOut: dTo(last.plan), stock: Math.max(0, stock)}; }
 function nextDate(it){ const l = lifeOf(it); return l ? l.out : null; }
+/* 2026-11-28：買ったけれど、まだ使い始めていない分（始まりの日がまだ来ていない購入）。前の分の予定の日が来たら自動で使い始める */
+const unusedOf = it => chainOf(it).filter(x => x.p && !x.started && x.start > TODAY);
 const itemsArr = () => Object.values(S.items).sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 const essentials = kind => itemsArr().filter(it => it.kind === kind && it.essential !== false);
 function summary(kind){
@@ -1659,6 +1666,18 @@ function itemRow(it, soon = false, mode = ""){
     <button class="ival" data-act="hist" data-id="${it.id}" data-s="${soon ? 1 : ""}" tabindex="-1" aria-hidden="true">${m != null ? `${yen(m)}<small>／月</small>` : `<span class="badge warn">未入力</span>`}</button>${UI.wig && !soon ? `<span class="whand" aria-label="つかんで動かす">☰</span>` : ""}
   </div>${opn ? `<div class="iexp">${histBody(it, true)}</div>` : ""}${soon && !opn ? `<div class="ibtns">${mode === "sale" ? "" : gone ? `<button class="sbtn ghost2" data-act="ungone" data-id="${it.id}">まだあった</button>` : `<button class="sbtn ghost2" data-act="later" data-id="${it.id}">まだ少し持ちそう</button>`}${btns}</div>` : ""}</li>`;
 }
+/* 2026-11-28：未使用の行。いちばん早く使う分に「使い始めた」。押さなくても、前の分の予定の日（この行の日付）が来たら自動で使い始める */
+function unusedRow(it, u){ const x = u[0], p = x.p;
+  const sub = [`${md(p.date)}に購入`, `${md(x.start)}から使う予定`, u.length > 1 ? `ほかに未使用${u.length - 1}回分` : ""].filter(Boolean).join("・");
+  return `<li class="wbar" data-id="${it.id}" style="--wc:${whoCol(cwhoOf(it))}"><div class="irow"><button class="ibtn" data-act="hist" data-id="${it.id}" data-s="1"><span class="nm">${esc(it.name)}</span><span class="sub">${esc(sub)}</span></button></div>
+    <div class="ibtns"><button class="sbtn" data-act="startuse" data-id="${p._id}" aria-label="${esc(it.name)}を使い始めた">使い始めた</button></div></li>`; }
+function startUseSheet(p){ const it = p && S.items[p.itemId]; if (!it) return; const segs = chainOf(it), x = segs.find(y => y.p === p), pv = x && segs[segs.indexOf(x) - 1], mn = p.date || "", sl = d => d.replace(/-/g, "/");
+  openSheet(`<h3>${esc(it.name)}を使い始めた</h3>
+  <form data-form="startuse" data-id="${p._id}" style="display:grid;gap:12px">
+    <div class="field"><label for="su">使い始めた日</label><input id="su" type="date" value="${TODAY}" min="${esc(mn)}" max="${TODAY}"></div>
+    <p class="note">${sl(p.date)}に買った分です。${pv ? `前の分は ${sl(pv.start)}から使っていて、${pv.plan ? `${md(pv.plan)}に使い切る予定でした。` : ""}この日で使い切ったことにして、もった日数をこれまでの平均に入れます。` : ""}押さなくても、${md(x?.start || "")}になると自動で使い始めたことになります。</p>
+    <div class="sheet-actions"><button type="button" class="btn ghost" data-act="close">やめる</button><button class="btn" type="submit">✓ この日から使う</button></div>
+  </form>`); }
 const daysLeft = it => { const n = nextDate(it); return n ? Math.round((parse(n) - parse(TODAY)) / 864e5) : null; };
 const SOON_DAYS = 14, SALE_DAYS = 60;   // セールのときは、60日以内になくなる品目を買いだめ候補にする
 const SHOPS0 = [{name: "楽天市場", rate: 1, url: "https:\/\/search.rakuten.co.jp/search/mall/{q}/", saleUrl: "https:\/\/event.rakuten.co.jp/campaign/"}, {name: "Qoo10", rate: 1, url: "https:\/\/www.qoo10.jp/gmkt.inc/Search/Search.aspx?keyword={q}", saleUrl: "https:\/\/www.qoo10.jp/"}, {name: "Amazon", rate: 1, url: "https:\/\/www.amazon.co.jp/s?k={q}", saleUrl: "https:\/\/www.amazon.co.jp/"}, {name: "ヨドバシ.com", rate: 10, url: "https:\/\/www.yodobashi.com/?word={q}", saleUrl: "https:\/\/www.yodobashi.com/"}];
@@ -1752,7 +1771,10 @@ function itemsView(){
   if (sales.length) out.push(`<div class="group sale"><h3><span>セール中・買いだめ候補</span><span class="num">${stockUp.length}品</span></h3>
     <div class="salechips">${sales.map(x => `<span class="schip${x.from > TODAY ? " soon" : ""}"><b>${esc(x.shop)}</b> ${esc(x.name)}<small>${x.from > TODAY ? `${md(x.from)}から` : `${md(x.to)}まで`}</small></span>`).join("")}</div>
     ${stockUp.length ? `<ul class="list">${stockUp.map(it => itemRow(it, true, "sale")).join("")}</ul>` : `<p class="note" style="padding:0 6px">${SALE_DAYS}日以内になくなる品目はありません。</p>`}</div>`);
+  const unused = all.map(it => [it, unusedOf(it)]).filter(([, u]) => u.length).sort((a, b) => a[1][0].start < b[1][0].start ? -1 : 1);   // 2026-11-28：買ったけれどまだ使い始めていないもの
+  const unusedBlk = unused.length ? `<div class="group unused"><h3><span>買ったけれど、まだ使っていないもの</span><span class="num">${unused.length}品</span></h3><ul class="list">${unused.map(([it, u]) => unusedRow(it, u)).join("")}</ul></div>` : "";
   if (soon.length) out.push(`<div class="group soon"><h3><span>買うもの（在庫もなくなる・あと${SOON_DAYS}日以内）</span><span class="num">${soon.length}品</span></h3><ul class="list">${soon.map(it => itemRow(it, true)).join("")}</ul></div>`);
+  if (unusedBlk) out.push(unusedBlk);
   // カテゴリーごとに折りたたみ（タップで開く）
   const its = essentials("consumable");   // 2026-11-21：買うものに出ている品目も、いつもの一覧に残す（黄色で印）
   const off = itemsArr().filter(it => it.essential === false && KINDS[it.kind]);
@@ -1768,7 +1790,7 @@ function itemsView(){
   if (off.length) out.push(acc("__off", "決まって買うものから外したもの", off, `${off.length}品`));
   out.push(`<div class="btnrow"><button class="btn" data-act="add">＋ 品目を追加</button><button class="btn ghost" data-act="catadd">＋ カテゴリーを追加</button></div>`);
   out.push(`<p class="note wighint">品目を長押しすると、並べ替えやカテゴリーの移動ができます。</p>`);
-  out.push(`<section class="card rechelp"><h2>記録のしかた</h2><ul class="note"><li>買ったら「買った」で記録すると、なくなる日と月平均が出ます。</li><li>思ったより持つときは「まだ少し持ちそう」。</li><li>品目をタップすると、これまでの購入が見られます。</li></ul></section>`);
+  out.push(`<section class="card rechelp"><h2>記録のしかた</h2><ul class="note"><li>買ったら「買った」で記録すると、なくなる日と月平均が出ます。</li><li>思ったより持つときは「まだ少し持ちそう」。</li><li>買い置きを開けたら「使い始めた」。押さなくても、前の分のなくなる予定の日に自動で使い始めたことになります。</li><li>品目をタップすると、これまでの購入が見られます。</li></ul></section>`);
   return out.join("");
 }
 
@@ -2488,6 +2510,7 @@ function purchaseSheet(p){
       <div class="field"><label for="pk">個数</label><input id="pk" inputmode="numeric" value="${p.packs ?? 1}"></div>
       <div class="field"><label for="pm">もつ日数（買った分ぜんぶで）</label><input id="pm" inputmode="numeric" value="${p.days ?? ((S.items[p.itemId] && chainOf(S.items[p.itemId]).find(x => x.p === p)?.planDays) || "")}"></div>
     </div>
+    <div class="field"><label for="pst">使い始めた日（空なら、前の分の予定の日から自動）</label><input id="pst" type="date" value="${esc(p.startAt || "")}" max="${TODAY}"></div>
     <label class="check"><input id="pf" type="checkbox" ${p.fresh ? "checked" : ""}> 買ったとき、前の分はもう使い切っていた</label>
     <p class="note">いちばん新しい記録を直したときは、品目の金額・もつ期間なども一緒に更新します。シートとの同期のときに、この直しも反映されます。</p>
     <div class="sheet-actions"><button type="button" class="btn ghost" data-act="back-item" data-id="${p.itemId}">戻る</button><button class="btn" type="submit">保存</button></div>
@@ -4883,6 +4906,7 @@ document.addEventListener("click", e => {
     case "compare": compareSheet(S.items[id]); break;
     case "aibuy": { const it = S.items[id], x = aiCands(it)[Number(b.dataset.i)]; if (!x) break; buySheet(it, {price: num0(x.price) || undefined, qty: x.qty || undefined, packs: num0(x.packs) || undefined}); setTimeout(() => { if ($("bs")) $("bs").value = x.shop || ""; if ($("bn") && x.title) $("bn").value = x.title; }, 50); break; }
     case "editp": purchaseSheet(S.purchases[id]); break;
+    case "startuse": startUseSheet(S.purchases[id]); break;
     case "back-item": if (S.items[id]) histSheet(S.items[id]); else closeSheet(); break;
     case "edit": itemSheet(S.items[id]); break;
     case "add": itemSheet(null); break;
@@ -5195,12 +5219,16 @@ async function submitBody(e, f){
       await db.doc("items/" + id).update(upd);
     }, `${it.name}を記録しました`);
     if (ok) consSyncSoon([id], pref?.id ? [pref.id] : []);
+  } else if (kind === "startuse"){   // 2026-11-28：使い始めた日を記録（前の分はこの日で使い切り）
+    const p = S.purchases[id]; if (!p) return; const d = val("su") || TODAY;
+    if (p.date && d < p.date){ toast("購入日より前の日は選べません"); return; } if (d > TODAY){ toast("今日より後の日は選べません"); return; }
+    ok = await save(() => db.doc("purchases/" + id).update({startAt: d, updatedAt: new Date().toISOString()}), `${p.name || "この分"}を${md(d)}から使い始めました`);
   } else if (kind === "swap"){
     const it = S.items[id], d = val("sw") || TODAY;
     ok = await save(() => db.doc("items/" + id).update({stock: Math.max(0, stockOf(it) - 1), inUseAt: d, sh: false}), `${it.name}を交換しました`);
   } else if (kind === "purchase"){
     const p = S.purchases[id]; if (!p) return;
-    const upd = {date: val("pd") || p.date, price: numOrNull(val("pp")), product: val("pn"), shop: val("ps"), qty: val("pq"), packs: numOrNull(val("pk")) || 1, days: numOrNull(val("pm")), months: d2mo(numOrNull(val("pm"))), fresh: $("pf").checked ? true : null, synced: false, updatedAt: new Date().toISOString()};
+    const upd = {date: val("pd") || p.date, price: numOrNull(val("pp")), product: val("pn"), shop: val("ps"), qty: val("pq"), packs: numOrNull(val("pk")) || 1, days: numOrNull(val("pm")), months: d2mo(numOrNull(val("pm"))), fresh: $("pf").checked ? true : null, startAt: val("pst") || null, synced: false, updatedAt: new Date().toISOString()};
     const it = S.items[p.itemId], others = histOf(p.itemId).filter(x => x._id !== id), isLatest = !others.some(x => (x.date || "") > (upd.date || ""));
     ok = await save(async () => {
       await db.doc("purchases/" + id).update({...upd, sh: false});
